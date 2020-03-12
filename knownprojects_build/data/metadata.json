@@ -1,0 +1,46 @@
+{
+    "esd": [
+        "Empire State Development/State Developments for Housing Pipeline.xlsx"
+    ], 
+    "edc": [
+        "EDC/190213_EDC inputs for DCP housing projections_v1.xlsx"
+    ], 
+    "n_study": [
+        "N. Study Rezoning Commitments/Neighborhood Study Rezoning Commitments.xlsx"
+    ], 
+    "n_study_future": [
+        "Future neighborhood studies/20190609_Future_Rezoning_Inputs_MS.xlsx"
+    ],
+    "n_study_projected": [
+        "Neighborhood study projected development sites/List of BBLs by Development Site -- 2019.01.16.xlsx"
+    ], 
+    "hpd_rfp": [
+        "HPD RFPs/RFP BBLs list DCP Capital February 2019_JS.XLSX"
+    ],
+    "hpd_pc": [
+        "HPD Projected Closings/2019_4_2 DCP NC Pipeline_no MIH or VIH_shared by Meghan Smith.xlsx"
+    ], 
+    "dob": [
+        "DOB/devdb_housing_pts -- 2019_02_08.csv"
+    ], 
+    "future_city": [
+        "Future City Hall-Sponsored RFPs and RFEIs/190510_Public_Sites_MS_v3.xlsx"
+    ], 
+    "dcp_application": [
+        "DCP Applications/v2_20190510_DCP_ZAP_QN_MS.xlsx", 
+        "DCP Applications/V2_20190510_DCP_ZAP_BX_MS.xlsx", 
+        "DCP Applications/v2_20190510_DCP_ZAP_SI_MS.xlsx", 
+        "DCP Applications/v2_20190510_DCP_ZAP_MN_MS.xlsx", 
+        "DCP Applications/V2_20190510_DCP_ZAP_BK_MS.xlsx"
+    ], 
+    "planner_inputs": [
+        "Planner Inputs/20190516_Queens Planner Inputs -- Housing Pipeline.xlsx", 
+        "Planner Inputs/20190516_Bronx Planner Inputs -- Housing Pipeline.xlsx", 
+        "Planner Inputs/20190516_Staten Island Planner Inputs -- Housing Pipeline.xlsx", 
+        "Planner Inputs/20190516_Brooklyn Planner Inputs -- Housing Pipeline.xlsx", 
+        "Planner Inputs/20190516_Manhattan Planner Inputs -- Housing Pipeline.xlsx"
+    ],
+    "tracker": [
+        "KPDB_Tracker_20191115_MS.xlsx"
+    ] 
+}
