@@ -1,21 +1,25 @@
 -- Create a procedure that can load each source data
--- into one table at source record/bbl level
+-- into one table at project level
 CREATE OR REPLACE PROCEDURE load_to_projects(tbl text)
 LANGUAGE plpgsql
 AS $$
 BEGIN
     execute format('INSERT INTO 
-    				bbl_geoms(
+    				project_geoms(
                         source,
                         project_id,
                         project_name,
-                        bbl,
+                        project_status,
+                        project_type,
+                        number_of_units,
                         geom)
     				SELECT 
                         source,
                         project_id,
                         project_name,
-                        bbl,
+                        project_status,
+                        project_type,
+                        number_of_units,
                         geom
 				FROM %I; ', tbl);
 END;
