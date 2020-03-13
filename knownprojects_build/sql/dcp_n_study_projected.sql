@@ -1,5 +1,5 @@
 /****************** Assign bbl geometries ****************/
-ALTER TABLE esd_projects
+ALTER TABLE dcp_n_study_projected
 RENAME wkb_geometry TO geom;
 
 ALTER TABLE dcp_n_study_projected
@@ -10,8 +10,8 @@ ALTER TABLE dcp_n_study_projected
     ADD portion_built_by_2025 text,
     ADD portion_built_by_2035 text,
     ADD portion_built_by_2055 text,
-    ADD inactive text,
-    ADD geom geometry(Polygon,4326);
+    ADD inactive text
+    ;
 
 /********************* Column Mapping *******************/
 UPDATE dcp_n_study_projected t
