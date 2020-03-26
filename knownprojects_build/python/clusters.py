@@ -1,8 +1,8 @@
 from helper.engines import recipe_engine, edm_engine, build_engine
 from sqlalchemy import create_engine
 import pandas as pd
+import numpy as np
 import networkx as nx
-import matplotlib.pyplot as plt
 import os
 
 
@@ -15,6 +15,7 @@ df = pd.read_sql('''SELECT table_name FROM information_schema.tables
 # Sources to include in clusters
 tables = ['dcp_application_proj',
         'dcp_n_study_projected_proj',
+        'dcp_n_study',
         'edc_projects_proj',
         'esd_projects_proj',
         'hpd_rfp_proj',
@@ -25,8 +26,9 @@ hierarchy = {'HPD Projected Closings':1,
             'HPD RFPs':2,
             'EDC Projected Projects':3,
             'DCP Application':4,
-            'esd_projects_proj':5,
-            'dcp_n_study_projected_proj':6}
+            'Empire State Development Projected Projects':5,
+            'Neighborhood Study Rezoning Commitments':6,
+            'Neighborhood Study Projected Development Sites':7}
 
 # Compare all pairs
 pair = []
