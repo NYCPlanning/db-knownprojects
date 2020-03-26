@@ -15,7 +15,7 @@ df = pd.read_sql('''SELECT table_name FROM information_schema.tables
 # Sources to include in clusters
 tables = ['dcp_application_proj',
         'dcp_n_study_projected_proj',
-        'dcp_n_study',
+        'dcp_n_study_proj',
         'edc_projects_proj',
         'esd_projects_proj',
         'hpd_rfp_proj',
