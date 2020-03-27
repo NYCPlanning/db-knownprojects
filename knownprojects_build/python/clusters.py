@@ -9,9 +9,6 @@ import os
 if not os.path.exists('review'):
         os.makedirs('review')
 
-df = pd.read_sql('''SELECT table_name FROM information_schema.tables
-                      WHERE table_schema='public' ''', build_engine)
-
 # Sources to include in clusters
 tables = ['dcp_application_proj',
         'dcp_n_study_projected_proj',
@@ -42,50 +39,46 @@ for i in pair:
     table_b = i[1]
     sql = f'''
     with part_a as (
-    select a.*, a.source as a_source, a.project_id as a_project_id, b.source as b_source, b.project_id as b_project_id
+    select a.*, a.source as a_source, a.project_id as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id as b_project_id, b.project_name as b_project_name
     FROM {table_a} a 
     JOIN {table_b} b
     on st_intersects(a.geom, b.geom)),
     part_b as (
-    select b.*, a.source as a_source, a.project_id as a_project_id, b.source as b_source, b.project_id as b_project_id
+    select b.*, a.source as a_source, a.project_id as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id as b_project_id, b.project_name as b_project_name
     FROM {table_a} a 
     JOIN {table_b} b
     on st_intersects(a.geom, b.geom))
-    select a_source, a_project_id, b_source, b_project_id, 
+    select a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
     source, project_id, project_name, 
     project_status, number_of_units::integer,
     inactive,project_type,geom 
     FROM part_a
     UNION
-    select a_source, a_project_id, b_source, b_project_id, 
+    select a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
     source, project_id, project_name, 
     project_status, number_of_units::integer,
     inactive,project_type,geom
     FROM part_b
     '''
     df = pd.read_sql(sql, build_engine)
-    
     r.append(df)
 
 dff = pd.concat(r)
 
 
 # Map heirarchy to combined data, output pairwise comparisson
-dff['source_id']= dff['source'].map(hierarchy)
+dff['source_id'] = dff['source'].map(hierarchy)
 dff.to_csv('review/pairwise.csv')
 
 # Create unique ID
-dff['uid'] = dff['source'] + dff['project_id']
-dff['id'] = dff.apply(lambda x: [x['a_source']+x['a_project_id'],x['b_source']+x['b_project_id']], axis=1)
+dff['uid'] = dff['source'] + dff['project_id'] + dff['project_name']
+dff['id'] = dff.apply(lambda x: [x['a_source']+x['a_project_id']+x['a_project_name'],x['b_source']+x['b_project_id']+x['b_project_name']], axis=1)
 
 # Create graph object and identify connected components
-unique_records = set(sum(dff.id.to_list(), []))
-
 G=nx.Graph()
-G.add_nodes_from(unique_records)
 G.add_edges_from(dff['id'].to_list())
 components = [c for c in nx.connected_components(G)]
-
+print('\nNumber of connected components: ', len(components))
 
 # Loop through components to assign cluster IDs
 r = []
