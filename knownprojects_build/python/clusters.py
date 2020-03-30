@@ -11,7 +11,6 @@ if not os.path.exists('review'):
 
 # Sources to include in clusters
 tables = ['dcp_application',
-        'dcp_n_study_projected_proj',
         'dcp_n_study_proj',
         'edc_projects_proj',
         'esd_projects_proj',
