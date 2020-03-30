@@ -10,7 +10,7 @@ if not os.path.exists('review'):
         os.makedirs('review')
 
 # Sources to include in clusters
-tables = ['dcp_application_proj',
+tables = ['dcp_application',
         'dcp_n_study_projected_proj',
         'dcp_n_study_proj',
         'edc_projects_proj',
@@ -49,13 +49,13 @@ for i in pair:
     JOIN {table_b} b
     on st_intersects(a.geom, b.geom))
     select a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
-    source, project_id, project_name, 
-    project_status, number_of_units::integer,
-    inactive,project_type,geom 
+    source, project_id, project_name, date_projected::text, date_closed::text, date_complete::text,
+    project_status, number_of_units::integer, 
+    inactive, project_type, geom 
     FROM part_a
     UNION
     select a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
-    source, project_id, project_name, 
+    source, project_id, project_name, date_projected::text, date_closed::text, date_complete::text,
     project_status, number_of_units::integer,
     inactive,project_type,geom
     FROM part_b
@@ -86,6 +86,7 @@ a = 0
 for i in components:
     df = dff.loc[dff.uid.isin(list(i)), ['source',
        'project_id', 'project_name', 'project_status', 'number_of_units',
+       'date_projected', 'date_closed', 'date_complete',
        'inactive', 'project_type', 'geom', 'source_id']]
     df['cluster_id'] = a 
     a += 1
@@ -126,5 +127,7 @@ deduped = deduped[~deduped['cluster_id'].isin(remove_clusters)]
 '''
 
 # Export for review
-deduped_export = deduped[['source', 'project_id', 'project_name', 'project_status', 'inactive', 'project_type','number_of_units','adjusted_units','cluster_id','sub_cluster_id','geom']]
+deduped_export = deduped[['source', 'project_id', 'project_name', 'project_status', 'inactive', 'project_type',
+                        'date_projected', 'date_closed', 'date_complete',
+                        'number_of_units','adjusted_units','cluster_id','sub_cluster_id','geom']]
 deduped_export.to_csv('review/kpdb_review_adjusted.csv', index=False)
