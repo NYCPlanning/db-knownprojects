@@ -31,7 +31,7 @@ WHERE a.bbl = b.bbl::TEXT;
 /********************* Column Mapping *******************/
 UPDATE dcp_n_study t
 SET source = 'Neighborhood Study Rezoning Commitments',
-    project_id = neighborhood_study||' Rezoning Commitment',
+    project_id = neighborhood_study||' '||commitment_site,
     project_name = commitment_site,
     project_status = 'Rezoning Commitment',
     project_type = NULL,
