@@ -76,7 +76,7 @@ dff = pd.concat(r)
 
 # Map heirarchy & timeline to combined data, output pairwise comparisson
 dff['source_id'] = dff['source'].map(hierarchy)
-dff['timeline'] = dff['source'].map(timeline)
+dff['timeline'] = dff['source'].map(timeline).astype(int)
 dff.to_csv('review/pairwise.csv')
 
 # Create unique ID
@@ -133,16 +133,18 @@ for name, group in grouped:
         remove_clusters.append(name)
 
 deduped.timeline.replace(0, np.nan, inplace=True)
+deduped['timeline'] = deduped['timeline'].astype(str)          
+deduped['timeline'] = deduped['timeline'].str.replace('.0', '').str.replace('nan', '')
 deduped = deduped.sort_values(by=['cluster_id','timeline'])
 
 # Export for review
 deduped_export = deduped[['source', 'project_id', 'project_name', 'project_status', 'inactive', 'project_type',
                         'date', 'timeline', 'dcp_projectcompleted',
-                        'number_of_units','adjusted_units','cluster_id','sub_cluster_id','geom']]
-print("Full cluster review set: ", deduped_export.shape)
+                        'number_of_units', 'cluster_id','sub_cluster_id','geom']]
+print("\n\nFull cluster review set: ", deduped_export.shape)
 print(deduped_export.head(20))
 deduped_export.to_csv('review/kpdb_review_deduped.csv', index=False)
 unresolved = deduped_export[~deduped_export['cluster_id'].isin(remove_clusters)]
-print("Unresolved cluster review set: ", unresolved.shape)
+print("\n\nUnresolved cluster review set: ", unresolved.shape)
 print(unresolved.head(20))
 unresolved.to_csv('review/kpdb_review_unresolved.csv', index=False)
