@@ -76,7 +76,7 @@ dff = pd.concat(r)
 
 # Map heirarchy & timeline to combined data, output pairwise comparisson
 dff['source_id'] = dff['source'].map(hierarchy)
-dff['timeline'] = dff['source'].map(timeline)
+dff['timeline'] = dff['source'].map(timeline).astype(int)
 dff.to_csv('review/pairwise.csv')
 
 # Create unique ID
@@ -87,7 +87,7 @@ dff['id'] = dff.apply(lambda x: [x['a_source']+x['a_project_id']+x['a_project_na
 G=nx.Graph()
 G.add_edges_from(dff['id'].to_list())
 components = [c for c in nx.connected_components(G)]
-print('\nNumber of connected components: ', len(components))
+print('\nNumber of clusters found: ', len(components))
 
 # Loop through components to assign cluster IDs
 r = []
@@ -129,14 +129,22 @@ remove_clusters = []
 for name, group in grouped:
     non_zero = group[group['adjusted_units'] != 0]
     if non_zero.shape[0] == 1:
-        print(name)
+        print("Cluster resolved by exact-count match: ",name)
         remove_clusters.append(name)
 
-deduped = deduped[~deduped['cluster_id'].isin(remove_clusters)].sort_values(by=['cluster_id','timeline'])
 deduped.timeline.replace(0, np.nan, inplace=True)
+deduped['timeline'] = deduped['timeline'].astype(str)          
+deduped['timeline'] = deduped['timeline'].str.replace('.0', '').str.replace('nan', '')
+deduped = deduped.sort_values(by=['cluster_id','timeline'])
 
 # Export for review
 deduped_export = deduped[['source', 'project_id', 'project_name', 'project_status', 'inactive', 'project_type',
                         'date', 'timeline', 'dcp_projectcompleted',
-                        'number_of_units','adjusted_units','cluster_id','sub_cluster_id','geom']]
-deduped_export.to_csv('review/kpdb_review_deduped.csv', index=False)
+                        'number_of_units', 'cluster_id','sub_cluster_id','geom']]
+print("\n\nFull cluster review set: ", deduped_export.shape)
+print(deduped_export.head(20))
+deduped_export.to_csv('review/clusters.csv', index=False)
+unresolved = deduped_export[~deduped_export['cluster_id'].isin(remove_clusters)]
+print("\n\nUnresolved cluster review set: ", unresolved.shape)
+print(unresolved.head(20))
+unresolved.to_csv('review/clusters_unresolved.csv', index=False)
