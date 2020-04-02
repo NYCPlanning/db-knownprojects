@@ -8,16 +8,18 @@ ALTER TABLE edc_projects
     ADD project_status text,
     ADD project_type text,
     ADD number_of_units text,
-	ADD date_projected text,
-    ADD date_closed text,
-    ADD date_complete text,
-    ADD date_filed text,
-    ADD date_statusd text,
-    ADD date_statusp text,
-    ADD date_permittd text,
-    ADD date_statusr text,
-    ADD date_statusx text,
-    ADD date_lastupdt text,
+	ADD date text, -- Cluster date field
+    ADD dcp_projectcompleted text, -- ZAP field
+    ADD complete_year text, -- DOB field
+    ADD permit_year text, -- DOB field
+    ADD date_filed text, -- DOB field
+    ADD date_statusd text, -- DOB field
+    ADD date_statusp text, -- DOB field
+    ADD date_permittd text, -- DOB field
+    ADD date_statusr text, -- DOB field
+    ADD date_statusx text, -- DOB field
+    ADD date_lastupdt text, -- DOB field
+    ADD date_complete text, -- DOB field
     ADD portion_built_by_2025 text,
     ADD portion_built_by_2035 text,
     ADD portion_built_by_2055 text,
@@ -70,9 +72,10 @@ SET source = 'EDC Projected Projects',
     project_status = 'Projected',
     project_type = NULL,
     number_of_units = total_units,
-	date_projected = build_year,
-    date_closed = NULL,
-    date_complete = NULL,
+	date = build_year,
+    dcp_projectcompleted = NULL,
+    complete_year = NULL,
+    permit_year = NULL,
     date_filed = NULL,
     date_statusd = NULL,
     date_statusp = NULL,
@@ -80,6 +83,7 @@ SET source = 'EDC Projected Projects',
     date_statusr = NULL,
     date_statusx = NULL,
     date_lastupdt = NULL,
+    date_complete = NULL,
     portion_built_by_2025 = NULL,
     portion_built_by_2035 = NULL,
     portion_built_by_2055 = NULL,
@@ -98,10 +102,12 @@ CREATE TABLE edc_projects_proj AS(
 	)
 	SELECT b.source, b.project_id, b.project_name,
     b.project_status, b.project_type, b.inactive,
-    b.number_of_units, b.date_projected, b.date_closed,
-    b.date_complete, b.date_filed, b.date_statusd,
+    b.number_of_units, b.date, b.dcp_projectcompleted,
+    b.complete_year, b.permit_year, 
+    b.date_filed, b.date_statusd,
     b.date_statusp, b.date_permittd, b.date_statusr,
-    b.date_statusx, b.date_lastupdt, b.portion_built_by_2025,
+    b.date_statusx, b.date_lastupdt, b.date_complete,
+    b.portion_built_by_2025,
     b.portion_built_by_2035, b.portion_built_by_2055,
     a.geom
 	FROM geom_merge a

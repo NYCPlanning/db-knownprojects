@@ -35,16 +35,17 @@ With dcp_project_filtered as (
 		dcp_borough as borough,
 		statuscode as project_status,
 		dcp_numberofnewdwellingunits as number_of_units,
-		NULL as date_projected,
-    	NULL as date_closed,
-    	dcp_projectcompleted as date_complete,
-    	NULL as date_filed,
-    	NULL as date_statusd,
-    	NULL as date_statusp,
-    	NULL as date_permittd,
-    	NULL as date_statusr,
-    	NULL as date_statusx,
-    	NULL as date_lastupdt, 
+		dcp_certifiedreferred as date, -- Relevant date for clusters
+		NULL as complete_year, -- DOB field
+		NULL as permit_year, -- DOB field
+    	NULL as date_filed, -- DOB field
+    	NULL as date_statusd, -- DOB field
+    	NULL as date_statusp, -- DOB field
+    	NULL as date_permittd, -- DOB field
+    	NULL as date_statusr, -- DOB field
+    	NULL as date_statusx, -- DOB field
+    	NULL as date_lastupdt, -- DOB field
+		NULL as date_complete, -- DOB field
 		NULL as inactive, 
 		NULL as project_type, 
 		geom2 as geom,

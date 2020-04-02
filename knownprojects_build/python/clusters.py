@@ -11,7 +11,6 @@ if not os.path.exists('review'):
 
 # Sources to include in clusters
 tables = ['dcp_application',
-        'dcp_n_study_projected_proj',
         'dcp_n_study_proj',
         'edc_projects_proj',
         'esd_projects_proj',
@@ -27,6 +26,15 @@ hierarchy = {'HPD Projected Closings':1,
             'Neighborhood Study Rezoning Commitments':6,
             'Neighborhood Study Projected Development Sites':7}
 
+# Expected timeline for sorting date fields
+timeline = {'HPD Projected Closings':3,
+            'HPD RFPs':2,
+            'EDC Projected Projects':4,
+            'DCP Application':1,
+            'Empire State Development Projected Projects':0,
+            'Neighborhood Study Rezoning Commitments':0,
+            'Neighborhood Study Projected Development Sites':0}
+
 # Compare all pairs
 pair = []
 for i in tables: 
@@ -38,24 +46,24 @@ for i in pair:
     table_a = i[0]
     table_b = i[1]
     sql = f'''
-    with part_a as (
-    select a.*, a.source as a_source, a.project_id as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id as b_project_id, b.project_name as b_project_name
+    WITH part_a as (
+    SELECT a.*, a.source as a_source, a.project_id as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id as b_project_id, b.project_name as b_project_name
     FROM {table_a} a 
     JOIN {table_b} b
-    on st_intersects(a.geom, b.geom)),
+    ON st_intersects(a.geom, b.geom)),
     part_b as (
-    select b.*, a.source as a_source, a.project_id as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id as b_project_id, b.project_name as b_project_name
+    SELECT b.*, a.source as a_source, a.project_id as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id as b_project_id, b.project_name as b_project_name
     FROM {table_a} a 
     JOIN {table_b} b
-    on st_intersects(a.geom, b.geom))
-    select a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
-    source, project_id, project_name, date_projected::text, date_closed::text, date_complete::text,
+    ON st_intersects(a.geom, b.geom))
+    SELECT a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
+    source, project_id, project_name, date::text, dcp_projectcompleted::text,
     project_status, number_of_units::integer, 
     inactive, project_type, geom 
     FROM part_a
     UNION
-    select a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
-    source, project_id, project_name, date_projected::text, date_closed::text, date_complete::text,
+    SELECT a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
+    source, project_id, project_name, date::text, dcp_projectcompleted::text,
     project_status, number_of_units::integer,
     inactive,project_type,geom
     FROM part_b
@@ -66,8 +74,9 @@ for i in pair:
 dff = pd.concat(r)
 
 
-# Map heirarchy to combined data, output pairwise comparisson
+# Map heirarchy & timeline to combined data, output pairwise comparisson
 dff['source_id'] = dff['source'].map(hierarchy)
+dff['timeline'] = dff['source'].map(timeline)
 dff.to_csv('review/pairwise.csv')
 
 # Create unique ID
@@ -86,8 +95,8 @@ a = 0
 for i in components:
     df = dff.loc[dff.uid.isin(list(i)), ['source',
        'project_id', 'project_name', 'project_status', 'number_of_units',
-       'date_projected', 'date_closed', 'date_complete',
-       'inactive', 'project_type', 'geom', 'source_id']]
+       'date', 'dcp_projectcompleted',
+       'inactive', 'project_type', 'geom', 'source_id', 'timeline']]
     df['cluster_id'] = a 
     a += 1
     r.append(df)
@@ -114,7 +123,7 @@ deduped['sub_cluster_id'] = 1
 
 
 # Process to remove resolved clusters, if desired
-'''
+
 grouped = deduped.groupby('cluster_id')
 remove_clusters = []
 for name, group in grouped:
@@ -123,11 +132,11 @@ for name, group in grouped:
         print(name)
         remove_clusters.append(name)
 
-deduped = deduped[~deduped['cluster_id'].isin(remove_clusters)]
-'''
+deduped = deduped[~deduped['cluster_id'].isin(remove_clusters)].sort_values(by=['cluster_id','timeline'])
+deduped.timeline.replace(0, np.nan, inplace=True)
 
 # Export for review
 deduped_export = deduped[['source', 'project_id', 'project_name', 'project_status', 'inactive', 'project_type',
-                        'date_projected', 'date_closed', 'date_complete',
+                        'date', 'timeline', 'dcp_projectcompleted',
                         'number_of_units','adjusted_units','cluster_id','sub_cluster_id','geom']]
-deduped_export.to_csv('review/kpdb_review_adjusted.csv', index=False)
+deduped_export.to_csv('review/kpdb_review_deduped.csv', index=False)
