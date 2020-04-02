@@ -132,10 +132,7 @@ for name, group in grouped:
         print(name)
         remove_clusters.append(name)
 
-deduped = deduped[~deduped['cluster_id'].isin(remove_clusters)]
-
-# Sort first by cluster ID, then by timeline
-deduped.sort_values(by=['cluster_id','timeline'])
+deduped = deduped[~deduped['cluster_id'].isin(remove_clusters)].sort_values(by=['cluster_id','timeline'])
 
 # Export for review
 deduped_export = deduped[['source', 'project_id', 'project_name', 'project_status', 'inactive', 'project_type',
