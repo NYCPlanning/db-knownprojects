@@ -1,6 +1,6 @@
 /****************** Assign bbl geometries ****************/
-DELETE FROM edc_projects
-WHERE excluded = 'TRUE';
+-- DELETE FROM edc_projects
+-- WHERE excluded = 'TRUE';
 
 ALTER TABLE edc_projects
     ADD source text,
@@ -64,6 +64,11 @@ UPDATE edc_projects a
 SET bbl = b.bbl::TEXT
 FROM dcp_mappluto b
 WHERE a.geom = b.wkb_geometry;
+
+-- backfill bbl using wkb_geometry
+UPDATE edc_projects
+SET geom = wkb_geometry
+where geom is null;
 
 /********************* Column Mapping *******************/
 UPDATE edc_projects t
