@@ -4,7 +4,14 @@ import pandas as pd
 import numpy as np
 import networkx as nx
 import os
+from cartoframes.auth import set_default_credentials
+from cartoframes import to_carto
+from shapely import wkb
 
+set_default_credentials(
+    username=os.environ.get('CARTO_USERNAME'),
+    api_key=os.environ.get('CARTO_APIKEY')
+)
 
 if not os.path.exists('review'):
         os.makedirs('review')
@@ -144,7 +151,14 @@ deduped_export = deduped[['source', 'project_id', 'project_name', 'project_statu
 print("\n\nFull cluster review set: ", deduped_export.shape)
 print(deduped_export.head(20))
 deduped_export.to_csv('review/clusters.csv', index=False)
+gdf=gpd.GeoDataFrame(deduped_export)
+gdf['geometry'] = gdf.geom.apply(lambda x: wkb.loads(x, hex=True))
+to_carto(gdf, 'clusters', if_exists='replace')
 unresolved = deduped_export[~deduped_export['cluster_id'].isin(remove_clusters)]
+
 print("\n\nUnresolved cluster review set: ", unresolved.shape)
 print(unresolved.head(20))
 unresolved.to_csv('review/clusters_unresolved.csv', index=False)
+gdf=gpd.GeoDataFrame(unresolved)
+gdf['geometry'] = gdf.geom.apply(lambda x: wkb.loads(x, hex=True))
+to_carto(gdf, 'clusters_unresolved', if_exists='replace')
