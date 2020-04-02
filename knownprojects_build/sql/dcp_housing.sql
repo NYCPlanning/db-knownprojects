@@ -10,8 +10,8 @@ ALTER TABLE dcp_housing
     ADD project_status text,
     ADD project_type text,
     ADD number_of_units text,
-    ADD date_projected text,
-    ADD date_closed text,
+    ADD date text,
+    ADD dcp_projectcompleted text,
     ADD portion_built_by_2025 text,
     ADD portion_built_by_2035 text,
     ADD portion_built_by_2055 text,
@@ -41,8 +41,8 @@ SET source = 'DOB',
     project_status = job_status,
     project_type = job_type,
     number_of_units = units_net,
-    date_projected = NULL,
-    date_closed = NULL,
+    date = NULL,
+    dcp_projectcompleted = NULL,
     portion_built_by_2025 = NULL,
     portion_built_by_2035 = NULL,
     portion_built_by_2055 = NULL,
@@ -60,12 +60,14 @@ CREATE TABLE dcp_housing_proj AS(
 	)
 	SELECT b.source, b.project_id, b.project_name,
     b.project_status, b.project_type, b.inactive,
-	b.number_of_units, b.date_projected, b.date_closed,
-    b.date_complete, b.date_filed, b.date_statusd,
+    b.number_of_units, b.date, b.dcp_projectcompleted,
+    b.complete_year, b.permit_year, 
+    b.date_filed, b.date_statusd,
     b.date_statusp, b.date_permittd, b.date_statusr,
-    b.date_statusx, b.date_lastupdt, b.portion_built_by_2025,
-	b.portion_built_by_2035, b.portion_built_by_2055,
-	a.geom
+    b.date_statusx, b.date_lastupdt, b.date_complete,
+    b.portion_built_by_2025,
+    b.portion_built_by_2035, b.portion_built_by_2055,
+    a.geom
 	FROM geom_merge a
 	LEFT JOIN(
 		SELECT DISTINCT ON (project_id) *
