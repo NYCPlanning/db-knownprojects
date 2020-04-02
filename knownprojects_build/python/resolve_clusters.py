@@ -1,6 +1,14 @@
 import pandas as pd
 import numpy as np
 import os
+from cartoframes.auth import set_default_credentials
+from cartoframes import to_carto
+from shapely import wkb
+
+set_default_credentials(
+    username=os.environ.get('CARTO_USERNAME'),
+    api_key=os.environ.get('CARTO_APIKEY')
+)
 
 df = pd.read_csv('review/kpdb_review.csv')
 
@@ -53,3 +61,6 @@ deduped.adjusted_units.replace(99999, np.nan, inplace=True) # Reset null
 resolved = deduped.groupby(['cluster_id'], as_index=False).apply(resolve_cluster)
 resolved = resolved.drop(columns=['level_0','index'])
 resolved.to_csv('review/resolved_clusters.csv', index=False)
+gdf=gpd.GeoDataFrame(resolved)
+gdf['geometry'] = gdf.geom.apply(lambda x: wkb.loads(x, hex=True))
+to_carto(gdf, 'resolved_clusters', if_exists='replace')
