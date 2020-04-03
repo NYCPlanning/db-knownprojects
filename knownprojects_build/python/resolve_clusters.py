@@ -36,13 +36,14 @@ def resolve_cluster(group):
 
 def resolve_all_clusters(df):
     # Hierarchy to use for perfect count-match deduplication
-    hierarchy = {'HPD Projected Closings':1,
-            'HPD RFPs':2,
-            'EDC Projected Projects':3,
-            'DCP Application':4,
-            'Empire State Development Projected Projects':5,
-            'Neighborhood Study Rezoning Commitments':6,
-            'Neighborhood Study Projected Development Sites':7}
+    hierarchy = {'DOB': 1,
+            'HPD Projected Closings':2,
+            'HPD RFPs':3,
+            'EDC Projected Projects':4,
+            'DCP Application':5,
+            'Empire State Development Projected Projects':6,
+            'Neighborhood Study Rezoning Commitments':7,
+            'Neighborhood Study Projected Development Sites':8}
 
     df['source_id'] = df['source'].map(hierarchy)
     df['verified_cluster'] = df['cluster_id'].astype(str) + '.' + df['sub_cluster_id'].astype(str)
@@ -56,15 +57,18 @@ def resolve_all_clusters(df):
     deduped.adjusted_units.replace(99999, np.nan, inplace=True) # Reset null
 
     # Subtract units within cluster based on hierarchy
-    print("Subtracting units within verified clusters based on source hierarchy...\n\n\n")
+    print("Subtracting units within verified clusters based on source hierarchy...")
     resolved = deduped.groupby(['verified_cluster'], as_index=False).apply(resolve_cluster)
-    print(list(resolved), '\n\n\n')
     try:
         resolved = resolved.drop(columns=['level_0'])
     except:
         pass
     try:
         resolved = resolved.drop(columns=['index'])
+    except:
+        pass
+    try:
+        resolved = resolved.drop(columns=['verified_cluster'])
     except:
         pass
     print("Output of resolved clusters: \n", 
