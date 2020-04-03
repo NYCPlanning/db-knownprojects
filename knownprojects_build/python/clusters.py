@@ -129,9 +129,7 @@ deduped.number_of_units.replace(99999, np.nan, inplace=True)
 deduped.adjusted_units.replace(99999, np.nan, inplace=True) # Reset null
 deduped['sub_cluster_id'] = 1
 
-
 # Process to remove resolved clusters, if desired
-
 grouped = deduped.groupby('cluster_id')
 remove_clusters = []
 for name, group in grouped:
@@ -145,20 +143,19 @@ deduped['timeline'] = deduped['timeline'].astype(str)
 deduped['timeline'] = deduped['timeline'].str.replace('.0', '').str.replace('nan', '')
 deduped = deduped.sort_values(by=['cluster_id','timeline'])
 
-# Export for review
+# Export full cluster table
 deduped_export = deduped[['source', 'project_id', 'project_name', 'project_status', 'inactive', 'project_type',
                         'date', 'timeline', 'dcp_projectcompleted',
                         'number_of_units', 'cluster_id','sub_cluster_id','geom']]
-print("\n\nFull cluster review set: ", deduped_export.shape)
-print(deduped_export.head(20))
+print("\n\nSize of full cluster review set: ", deduped_export.shape)
 deduped_export.to_csv('review/clusters.csv', index=False)
 gdf=gpd.GeoDataFrame(deduped_export)
 gdf['geometry'] = gdf.geom.apply(lambda x: wkb.loads(x, hex=True))
 to_carto(gdf, 'clusters', if_exists='replace')
-unresolved = deduped_export[~deduped_export['cluster_id'].isin(remove_clusters)]
 
-print("\n\nUnresolved cluster review set: ", unresolved.shape)
-print(unresolved.head(20))
+# Export only unresolved clusters for review
+unresolved = deduped_export[~deduped_export['cluster_id'].isin(remove_clusters)]
+print("\n\nSize of unresolved cluster review set: ", unresolved.shape)
 unresolved.to_csv('review/clusters_unresolved.csv', index=False)
 gdf=gpd.GeoDataFrame(unresolved)
 gdf['geometry'] = gdf.geom.apply(lambda x: wkb.loads(x, hex=True))
