@@ -65,13 +65,13 @@ for i in pair:
     JOIN {table_b} b
     ON st_intersects(a.geom, b.geom))
     SELECT a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
-    source, project_id, project_name, date::text, dcp_projectcompleted::text,
+    source, project_id, project_name, date::text, date_type, dcp_projectcompleted::text,
     project_status, number_of_units::integer, 
     inactive, project_type, geom 
     FROM part_a
     UNION
     SELECT a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
-    source, project_id, project_name, date::text, dcp_projectcompleted::text,
+    source, project_id, project_name, date::text, date_type, dcp_projectcompleted::text,
     project_status, number_of_units::integer,
     inactive,project_type,geom
     FROM part_b
@@ -103,7 +103,7 @@ a = 0
 for i in components:
     df = dff.loc[dff.uid.isin(list(i)), ['source',
        'project_id', 'project_name', 'project_status', 'number_of_units',
-       'date', 'dcp_projectcompleted',
+       'date', 'date_type', 'dcp_projectcompleted',
        'inactive', 'project_type', 'geom', 'source_id', 'timeline']]
     df['cluster_id'] = a 
     a += 1
@@ -145,7 +145,7 @@ deduped = deduped.sort_values(by=['cluster_id','timeline'])
 
 # Export full cluster table
 deduped_export = deduped[['source', 'project_id', 'project_name', 'project_status', 'inactive', 'project_type',
-                        'date', 'timeline', 'dcp_projectcompleted',
+                        'date', 'date_type','timeline', 'dcp_projectcompleted',
                         'number_of_units', 'cluster_id','sub_cluster_id','geom']]
 print("\n\nSize of full cluster review set: ", deduped_export.shape)
 deduped_export.to_csv('review/clusters.csv', index=False)

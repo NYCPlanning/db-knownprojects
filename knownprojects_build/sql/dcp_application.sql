@@ -1,7 +1,14 @@
 DROP TABLE if exists dcp_application;
 With timefileter AS (
-	SELECT dcp_projectid,dcp_name, dcp_projectcompleted,dcp_certifiedreferred,dcp_residentialsqft,statuscode,dcp_applicanttype,
-				dcp_projectbrief, dcp_projectdescription, dcp_projectname, dcp_borough, dcp_numberofnewdwellingunits
+	SELECT dcp_projectid,dcp_name, (CASE 
+						WHEN dcp_projectcompleted IS NULL THEN NULL
+						ELSE TO_CHAR(dcp_projectcompleted, 'YYYY/MM/DD') END) as projectcompleted, 
+				(CASE 
+						WHEN dcp_certifiedreferred IS NULL THEN NULL
+						ELSE TO_CHAR(dcp_certifiedreferred, 'YYYY/MM/DD') END) as certifiedreferred,
+				dcp_residentialsqft,statuscode,dcp_applicanttype,
+				dcp_projectbrief, dcp_projectdescription, dcp_projectname, 
+				dcp_borough, dcp_numberofnewdwellingunits
 		FROM dcp_project
 		WHERE  (dcp_name ~* 'P2005M0053|P2009M0294|P2014M0257' or dcp_name !~* 'P2016Q0238|P2016R0149|P2012M0255')
 		AND (extract(year from dcp_projectcompleted) >= 2012 or extract(year from dcp_certifiedreferred) >= 2012 
@@ -40,22 +47,16 @@ With timefileter AS (
 		dcp_borough as borough,
 		statuscode as project_status,
 		dcp_numberofnewdwellingunits as number_of_units,
-		dcp_certifiedreferred as date, -- Relevant date for clusters
-		NULL as complete_year, -- DOB field
-		NULL as permit_year, -- DOB field
+		certifiedreferred as date, -- Relevant date for clusters
+		'Certified Referred' as date_type,
+		projectcompleted as dcp_projectcompleted,
     	NULL as date_filed, -- DOB field
-    	NULL as date_statusd, -- DOB field
-    	NULL as date_statusp, -- DOB field
     	NULL as date_permittd, -- DOB field
-    	NULL as date_statusr, -- DOB field
-    	NULL as date_statusx, -- DOB field
     	NULL as date_lastupdt, -- DOB field
 		NULL as date_complete, -- DOB field
 		NULL as inactive, 
 		NULL as project_type, 
 		geom2 as geom,
-		dcp_projectcompleted,
-		dcp_certifiedreferred, 
 		dcp_residentialsqft, 
 		dcp_applicanttype, 
 		dcp_projectbrief, 
