@@ -1,6 +1,6 @@
 from helper.engines import recipe_engine, edm_engine, build_engine
 from helper.exporter import exporter
-from resolve_clusters import resolve_all_clusters
+#from resolve_clusters import resolve_all_clusters
 from sqlalchemy import create_engine
 import pandas as pd
 import numpy as np
@@ -20,14 +20,13 @@ set_default_credentials(
 print("Loading cluster data from carto...")
 cluster_gdf = read_carto('clusters', limit=100)
 reviewed_gdf = read_carto('clusters_unresolved', limit=100)
-print(cluster_gdf.head())
-print(reviewed_gdf.head())
 
+'''
 # Resolve clusters
 print("Resolving clusters...")
 reviewed_gdf['adjusted_units'] = reviewed_gdf['number_of_units']
-reviewed_gdf = resolve_all_clusters(reviewed_gdf)
-print(reviewed_gdf.head())
+reviewed_gdf = resolve_all_clusters(reviewed_gdf).drop(columns=['cartodb_id','the_geom'])
+'''
 
 # Export to postgres
 today = date.today()
