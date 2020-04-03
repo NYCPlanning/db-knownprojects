@@ -44,6 +44,7 @@ timeline = {'HPD Projected Closings':3,
             'Neighborhood Study Projected Development Sites':0}
 
 # Compare all pairs
+print("Finding intersections between sources...")
 pair = []
 for i in tables: 
     for j in tables:
@@ -83,21 +84,25 @@ dff = pd.concat(r)
 
 
 # Map heirarchy & timeline to combined data, output pairwise comparisson
+print("Assigning source hierarcy and expected timeline to each record...")
 dff['source_id'] = dff['source'].map(hierarchy)
 dff['timeline'] = dff['source'].map(timeline).astype(int)
 dff.to_csv('review/pairwise.csv')
 
 # Create unique ID
+print("Creating a unique ID...")
 dff['uid'] = dff['source'] + dff['project_id'] + dff['project_name']
 dff['id'] = dff.apply(lambda x: [x['a_source']+x['a_project_id']+x['a_project_name'],x['b_source']+x['b_project_id']+x['b_project_name']], axis=1)
 
 # Create graph object and identify connected components
+print("Creating intersection graph...")
 G=nx.Graph()
 G.add_edges_from(dff['id'].to_list())
 components = [c for c in nx.connected_components(G)]
 print('\nNumber of clusters found: ', len(components))
 
 # Loop through components to assign cluster IDs
+print("Assigning cluster ID...")
 r = []
 a = 0
 for i in components:
@@ -109,11 +114,11 @@ for i in components:
     a += 1
     r.append(df)
 
-# Output clustered records pre-automatic deduplication of exact count matches
+# Drop duplicates
 dfff = pd.concat(r).drop_duplicates().reset_index()
-dfff.to_csv('review/kpdb_review.csv', index=False)
 
 # Deduplicate exact count matches
+print("Resolving clusters where all records have the same number of units...")
 def dedup_exacts(group):
     group.loc[:,'adjusted_units']=group['number_of_units']
     if group.shape[0] > 1:
@@ -130,6 +135,7 @@ deduped.adjusted_units.replace(99999, np.nan, inplace=True) # Reset null
 deduped['sub_cluster_id'] = 1
 
 # Process to remove resolved clusters, if desired
+print("Removing resolved clusters from the review table...")
 grouped = deduped.groupby('cluster_id')
 remove_clusters = []
 for name, group in grouped:
@@ -144,18 +150,20 @@ deduped['timeline'] = deduped['timeline'].str.replace('.0', '').str.replace('nan
 deduped = deduped.sort_values(by=['cluster_id','timeline'])
 
 # Export full cluster table
+print("Exporting full cluster table...")
 deduped_export = deduped[['source', 'project_id', 'project_name', 'project_status', 'inactive', 'project_type',
                         'date', 'date_type','timeline', 'dcp_projectcompleted',
-                        'number_of_units', 'cluster_id','sub_cluster_id','geom']]
-print("\n\nSize of full cluster review set: ", deduped_export.shape)
+                        'number_of_units', 'adjusted_units', 'cluster_id','sub_cluster_id','geom']]
+print("\n\nSize of full cluster table: ", deduped_export.shape)
 deduped_export.to_csv('review/clusters.csv', index=False)
 gdf=gpd.GeoDataFrame(deduped_export)
 gdf['geometry'] = gdf.geom.apply(lambda x: wkb.loads(x, hex=True))
 to_carto(gdf, 'clusters', if_exists='replace')
 
 # Export only unresolved clusters for review
-unresolved = deduped_export[~deduped_export['cluster_id'].isin(remove_clusters)]
-print("\n\nSize of unresolved cluster review set: ", unresolved.shape)
+print("Exporting unresolved cluster table for review...")
+unresolved = deduped_export[~deduped_export['cluster_id'].isin(remove_clusters)].drop(columns=['adjusted_units'])
+print("\n\nSize of unresolved cluster review table: ", unresolved.shape)
 unresolved.to_csv('review/clusters_unresolved.csv', index=False)
 gdf=gpd.GeoDataFrame(unresolved)
 gdf['geometry'] = gdf.geom.apply(lambda x: wkb.loads(x, hex=True))
