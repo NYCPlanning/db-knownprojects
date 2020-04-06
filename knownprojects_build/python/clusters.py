@@ -68,13 +68,13 @@ for i in pair:
     SELECT a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
     source, project_id, project_name, date::text, date_type, dcp_projectcompleted::text,
     project_status, number_of_units::integer, 
-    inactive, project_type, geom 
+    inactive, project_type, ST_Multi(geom) as geom
     FROM part_a
     UNION
     SELECT a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
     source, project_id, project_name, date::text, date_type, dcp_projectcompleted::text,
     project_status, number_of_units::integer,
-    inactive,project_type,geom
+    inactive,project_type, ST_Multi(geom) as geom
     FROM part_b
     '''
     df = pd.read_sql(sql, build_engine)
