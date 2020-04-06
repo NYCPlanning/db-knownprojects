@@ -59,12 +59,12 @@ for i in pair:
     table_b = i[1]
     sql = f'''
     WITH part_a as (
-    SELECT a.*, a.source as a_source, a.project_id as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id as b_project_id, b.project_name as b_project_name
+    SELECT a.*, a.source as a_source, a.project_id::text as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id::text as b_project_id, b.project_name as b_project_name
     FROM {table_a} a 
     JOIN {table_b} b
     ON st_intersects(a.geom, b.geom)),
     part_b as (
-    SELECT b.*, a.source as a_source, a.project_id as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id as b_project_id, b.project_name as b_project_name
+    SELECT b.*, a.source as a_source, a.project_id::text as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id::text as b_project_id, b.project_name as b_project_name
     FROM {table_a} a 
     JOIN {table_b} b
     ON st_intersects(a.geom, b.geom))
