@@ -27,7 +27,10 @@ WHERE a.bbl = b.bbl::TEXT;
 /********************* Column Mapping *******************/
 UPDATE hpd_pc t
 SET source = 'HPD Projected Closings',
-    project_id = project_id||'/'||building_id,
+    project_id = (CASE
+                    WHEN project_id LIKE '%/%' THEN project_id
+                    ELSE project_id||'/'||building_id
+                END),
     project_name = house_number||' '||street_name,
     project_status = 'Projected',
     project_type = NULL,
