@@ -19,6 +19,7 @@ if not os.path.exists('review'):
 
 # Sources to include in clusters
 tables = ['dcp_application',
+        'dcp_planneradded',
         'dcp_n_study_proj',
         'edc_projects_proj',
         'esd_projects_proj',
@@ -32,7 +33,8 @@ hierarchy = {'HPD Projected Closings':1,
             'DCP Application':4,
             'Empire State Development Projected Projects':5,
             'Neighborhood Study Rezoning Commitments':6,
-            'Neighborhood Study Projected Development Sites':7}
+            'Neighborhood Study Projected Development Sites':7,
+            'DCP Planner-Added Projects':8}
 
 # Expected timeline for sorting date fields
 timeline = {'HPD Projected Closings':3,
@@ -41,7 +43,8 @@ timeline = {'HPD Projected Closings':3,
             'DCP Application':1,
             'Empire State Development Projected Projects':0,
             'Neighborhood Study Rezoning Commitments':0,
-            'Neighborhood Study Projected Development Sites':0}
+            'Neighborhood Study Projected Development Sites':0,
+            'DCP Planner-Added Projects':0}
 
 # Compare all pairs
 print("Finding intersections between sources...")
