@@ -43,7 +43,8 @@ def resolve_all_clusters(df):
             'DCP Application':5,
             'Empire State Development Projected Projects':6,
             'Neighborhood Study Rezoning Commitments':7,
-            'Neighborhood Study Projected Development Sites':8}
+            'Neighborhood Study Projected Development Sites':8,
+            'DCP Planner-Added Projects':9}
 
     df['source_id'] = df['source'].map(hierarchy)
     df['verified_cluster'] = df['cluster_id'].astype(str) + '.' + df['sub_cluster_id'].astype(str)
