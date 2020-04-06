@@ -44,7 +44,7 @@ SET project_name = project_na,
 DROP TABLE IF EXISTS dcp_planneradded_proj;
 CREATE TABLE dcp_planneradded_proj AS(
 	WITH geom_merge AS (
-		SELECT project_id, ST_UNION(geom) AS geom
+		SELECT project_id, ST_MAKEVALID(ST_UNION(geom)) AS geom
 		FROM dcp_planneradded
 		GROUP BY project_id
 	)
