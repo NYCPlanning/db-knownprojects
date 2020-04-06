@@ -58,7 +58,7 @@ SET source = 'HPD RFPs',
 DROP TABLE IF EXISTS hpd_rfp_proj;
 CREATE TABLE hpd_rfp_proj AS(
 	WITH geom_merge AS (
-		SELECT project_name, ST_UNION(geom) AS geom
+		SELECT project_name, ST_MAKEVALID(ST_UNION(geom)) AS geom
 		FROM hpd_rfp
 		GROUP BY project_name
 	)
