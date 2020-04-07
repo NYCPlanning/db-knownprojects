@@ -15,6 +15,17 @@ tables = ['dcp_application',
         'hpd_rfp_proj',
         'hpd_pc_proj']
 
+print(f"Updating full cluster table with {year} reviewed data...")
+sql_update_clusters = f'''
+    UPDATE clusters."{year}" a
+    SET sub_cluster_id = b.sub_cluster_id
+    FROM reviewed_clusters."{year}" b
+    WHERE a.source = b.source
+    AND a.project_id = b.project_id
+    AND a.project_name = b.project_name;
+'''
+build_engine.execute(sql_update_clusters)
+
 # Get maximum cluster ID
 sql_get_max = f'''
     SELECT max(cluster_id::integer)
