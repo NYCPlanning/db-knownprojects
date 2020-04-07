@@ -19,8 +19,8 @@ set_default_credentials(
 
 # Get cluster data from carto
 print("Loading cluster data from carto...")
-cluster_gdf = read_carto('clusters', limit=100)
-reviewed_gdf = read_carto('clusters_unresolved', limit=100)
+cluster_gdf = read_carto(f'clusters_{year}', limit=100)
+reviewed_gdf = read_carto(f'clusters_unresolved_{year}', limit=100)
 
 # Export to postgres
 today = date.today()
@@ -40,6 +40,7 @@ DDL = {"source":"text",
     "timeline":"text",
     "dcp_projectcompleted":"text",
     "number_of_units":"text",
+    "adjusted_units":"text",
     "cluster_id":"text",
     "sub_cluster_id":"text",
     "geom":"geometry(MultiPolygon,4326)"}
@@ -47,11 +48,13 @@ DDL = {"source":"text",
 
 # Export to build engine
 print("Exporting to build engine...")
-exporter(cluster_gdf, cluster_table, DDL.update{"adjusted_units":"text"}, 
+exporter(cluster_gdf, cluster_table, DDL, 
             con=build_engine, 
             sql='', 
             sep='$', 
             geo_column='geom', SRID=4326)
+
+DDL.pop("adjusted_units")
 
 exporter(reviewed_gdf, reviewed_table, DDL, 
             con=build_engine,
