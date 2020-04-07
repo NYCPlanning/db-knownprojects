@@ -58,6 +58,10 @@ for table in tables:
     df.loc[df['adjusted_units'].isna(),'adjusted_units'] = df['number_of_units']
     largest_cluster = largest_cluster + num_nulls
 
+    # Reformat numbers
+    df['cluster_id'] = df.cluster_id.replace('\.0', '', regex=True)
+    df['adjusted_units'] = df.adjusted_units.replace('\.0', '', regex=True)
+    
     # Export to temporary table
     print(f"Creating temporary look-up table for {table}...")
     columns = ['source','project_id','project_name','cluster_id','sub_cluster_id','adjusted_units']
