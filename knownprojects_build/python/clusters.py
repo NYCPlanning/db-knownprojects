@@ -9,6 +9,8 @@ from cartoframes import to_carto
 from shapely import wkb
 import geopandas as gpd
 
+year = 'test'
+
 set_default_credentials(
     username=os.environ.get('CARTO_USERNAME'),
     api_key=os.environ.get('CARTO_APIKEY')
@@ -158,16 +160,16 @@ deduped_export = deduped[['source', 'project_id', 'project_name', 'project_statu
                         'date', 'date_type','timeline', 'dcp_projectcompleted',
                         'number_of_units', 'adjusted_units', 'cluster_id','sub_cluster_id','geom']]
 print("\n\nSize of full cluster table: ", deduped_export.shape)
-deduped_export.to_csv('review/clusters.csv', index=False)
+deduped_export.to_csv(f'review/clusters_{year}.csv', index=False)
 gdf=gpd.GeoDataFrame(deduped_export)
 gdf['geometry'] = gdf.geom.apply(lambda x: wkb.loads(x, hex=True))
-to_carto(gdf, 'clusters', if_exists='replace')
+to_carto(gdf, f'clusters_{year}', if_exists='replace')
 
 # Export only unresolved clusters for review
 print("Exporting unresolved cluster table for review...")
 unresolved = deduped_export[~deduped_export['cluster_id'].isin(remove_clusters)].drop(columns=['adjusted_units'])
 print("\n\nSize of unresolved cluster review table: ", unresolved.shape)
-unresolved.to_csv('review/clusters_unresolved.csv', index=False)
+unresolved.to_csv(f'review/clusters_unresolved_{year}.csv', index=False)
 gdf=gpd.GeoDataFrame(unresolved)
 gdf['geometry'] = gdf.geom.apply(lambda x: wkb.loads(x, hex=True))
-to_carto(gdf, 'clusters_unresolved', if_exists='replace')
+to_carto(gdf, f'clusters_unresolved_{year}', if_exists='replace')

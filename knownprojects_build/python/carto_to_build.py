@@ -10,6 +10,8 @@ from shapely import wkb
 import geopandas as gpd
 from datetime import date
 
+year = 'test'
+
 set_default_credentials(
     username=os.environ.get('CARTO_USERNAME'),
     api_key=os.environ.get('CARTO_APIKEY')
@@ -24,8 +26,8 @@ reviewed_gdf = read_carto('clusters_unresolved', limit=100)
 today = date.today()
 date = today.strftime("%Y-%m-%d")
 
-cluster_table = "clusters.\"2020\""
-reviewed_table = "reviewed_clusters.\"2020\""
+cluster_table = f"clusters.\"{year}\""
+reviewed_table = f"reviewed_clusters.\"{year}\""
 
 DDL = {"source":"text",
     "project_id":"text",
