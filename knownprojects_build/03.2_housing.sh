@@ -11,6 +11,7 @@ docker run --rm\
             -e CARTO_APIKEY=$CARTO_APIKEY\
             python:3.7-slim sh -c "
                 pip3 install -r python/requirements.txt; 
-                python3 python/carto_to_build.py"
+                python3 python/carto_to_build.py;
+                python3 python/update_proj_tables.py"
 
 psql $BUILD_ENGINE -f sql/cluster_updates.sql
