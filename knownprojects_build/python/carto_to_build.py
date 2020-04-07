@@ -24,8 +24,8 @@ reviewed_gdf = read_carto('clusters_unresolved', limit=100)
 today = date.today()
 date = today.strftime("%Y-%m-%d")
 
-cluster_table = "clusters.\"2019\""
-reviewed_table = "reviewed_clusters.\"2019\""
+cluster_table = "clusters.\"2020\""
+reviewed_table = "reviewed_clusters.\"2020\""
 
 DDL = {"source":"text",
     "project_id":"text",
@@ -45,7 +45,7 @@ DDL = {"source":"text",
 
 # Export to build engine
 print("Exporting to build engine...")
-exporter(cluster_gdf, cluster_table, DDL, 
+exporter(cluster_gdf, cluster_table, DDL.update{"adjusted_units":"text"}, 
             con=build_engine, 
             sql='', 
             sep='$', 
