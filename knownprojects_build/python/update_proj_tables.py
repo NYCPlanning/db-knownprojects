@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import os
 
-year = '2020'
+year = 'test'
 
 # Sources included in clusters
 tables = ['dcp_application',
@@ -53,19 +53,21 @@ for table in tables:
     print(f"Creating IDs for one record clusters in {table}...")
     df = pd.read_sql(f'SELECT * FROM {table}', build_engine)
     num_nulls = df[df['cluster_id'].isna()].shape[0]
-    df.loc[df['cluster_id'].isna(),'cluster_id'] = pd.Series(range(largest_cluster, largest_cluster + num_nulls))
+    df.loc[df['cluster_id'].isna(),'cluster_id'] = pd.Series(range(largest_cluster, largest_cluster + num_nulls)).astype(str)
     df.loc[df['sub_cluster_id'].isna(),'sub_cluster_id'] = '1'
+    df.loc[df['adjusted_units'].isna(),'adjusted_units'] = df['number_of_units']
     largest_cluster = largest_cluster + num_nulls
 
     # Export to temporary table
     print(f"Creating temporary look-up table for {table}...")
-    columns = ['source','project_id','project_name','cluster_id','sub_cluster_id']
+    columns = ['source','project_id','project_name','cluster_id','sub_cluster_id','adjusted_units']
     df[columns].to_sql('tmp', con=build_engine, if_exists='replace', index=False)
 
     print(f"Updating source {table} with one-record IDs.")
     sql_update=f'''UPDATE {table} a
                 SET cluster_id = b.cluster_id,
-                    sub_cluster_id = b.sub_cluster_id
+                    sub_cluster_id = b.sub_cluster_id,
+                    adjusted_units = b.adjusted_units
                 FROM tmp b
                 WHERE a.source = b.source
                 AND a.project_id::text = b.project_id::text
