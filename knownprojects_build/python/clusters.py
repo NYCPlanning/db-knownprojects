@@ -19,6 +19,7 @@ if not os.path.exists('review'):
 
 # Sources to include in clusters
 tables = ['dcp_application',
+        'dcp_planneradded_proj',
         'dcp_n_study_proj',
         'edc_projects_proj',
         'esd_projects_proj',
@@ -32,7 +33,8 @@ hierarchy = {'HPD Projected Closings':1,
             'DCP Application':4,
             'Empire State Development Projected Projects':5,
             'Neighborhood Study Rezoning Commitments':6,
-            'Neighborhood Study Projected Development Sites':7}
+            'Neighborhood Study Projected Development Sites':7,
+            'DCP Planner-Added Projects':8}
 
 # Expected timeline for sorting date fields
 timeline = {'HPD Projected Closings':3,
@@ -41,9 +43,11 @@ timeline = {'HPD Projected Closings':3,
             'DCP Application':1,
             'Empire State Development Projected Projects':0,
             'Neighborhood Study Rezoning Commitments':0,
-            'Neighborhood Study Projected Development Sites':0}
+            'Neighborhood Study Projected Development Sites':0,
+            'DCP Planner-Added Projects':0}
 
 # Compare all pairs
+print("Finding intersections between sources...")
 pair = []
 for i in tables: 
     for j in tables:
@@ -55,25 +59,25 @@ for i in pair:
     table_b = i[1]
     sql = f'''
     WITH part_a as (
-    SELECT a.*, a.source as a_source, a.project_id as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id as b_project_id, b.project_name as b_project_name
+    SELECT a.*, a.source as a_source, a.project_id::text as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id::text as b_project_id, b.project_name as b_project_name
     FROM {table_a} a 
     JOIN {table_b} b
     ON st_intersects(a.geom, b.geom)),
     part_b as (
-    SELECT b.*, a.source as a_source, a.project_id as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id as b_project_id, b.project_name as b_project_name
+    SELECT b.*, a.source as a_source, a.project_id::text as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id::text as b_project_id, b.project_name as b_project_name
     FROM {table_a} a 
     JOIN {table_b} b
     ON st_intersects(a.geom, b.geom))
     SELECT a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
-    source, project_id, project_name, date::text, date_type, dcp_projectcompleted::text,
+    source, project_id::text, project_name, date::text, date_type, dcp_projectcompleted::text,
     project_status, number_of_units::integer, 
-    inactive, project_type, geom 
+    inactive, project_type, ST_Multi(geom) as geom
     FROM part_a
     UNION
     SELECT a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
-    source, project_id, project_name, date::text, date_type, dcp_projectcompleted::text,
+    source, project_id::text, project_name, date::text, date_type, dcp_projectcompleted::text,
     project_status, number_of_units::integer,
-    inactive,project_type,geom
+    inactive,project_type, ST_Multi(geom) as geom
     FROM part_b
     '''
     df = pd.read_sql(sql, build_engine)
@@ -83,21 +87,25 @@ dff = pd.concat(r)
 
 
 # Map heirarchy & timeline to combined data, output pairwise comparisson
+print("Assigning source hierarcy and expected timeline to each record...")
 dff['source_id'] = dff['source'].map(hierarchy)
 dff['timeline'] = dff['source'].map(timeline).astype(int)
 dff.to_csv('review/pairwise.csv')
 
 # Create unique ID
+print("Creating a unique ID...")
 dff['uid'] = dff['source'] + dff['project_id'] + dff['project_name']
 dff['id'] = dff.apply(lambda x: [x['a_source']+x['a_project_id']+x['a_project_name'],x['b_source']+x['b_project_id']+x['b_project_name']], axis=1)
 
 # Create graph object and identify connected components
+print("Creating intersection graph...")
 G=nx.Graph()
 G.add_edges_from(dff['id'].to_list())
 components = [c for c in nx.connected_components(G)]
 print('\nNumber of clusters found: ', len(components))
 
 # Loop through components to assign cluster IDs
+print("Assigning cluster ID...")
 r = []
 a = 0
 for i in components:
@@ -109,11 +117,11 @@ for i in components:
     a += 1
     r.append(df)
 
-# Output clustered records pre-automatic deduplication of exact count matches
+# Drop duplicates
 dfff = pd.concat(r).drop_duplicates().reset_index()
-dfff.to_csv('review/kpdb_review.csv', index=False)
 
 # Deduplicate exact count matches
+print("Resolving clusters where all records have the same number of units...")
 def dedup_exacts(group):
     group.loc[:,'adjusted_units']=group['number_of_units']
     if group.shape[0] > 1:
@@ -129,9 +137,8 @@ deduped.number_of_units.replace(99999, np.nan, inplace=True)
 deduped.adjusted_units.replace(99999, np.nan, inplace=True) # Reset null
 deduped['sub_cluster_id'] = 1
 
-
 # Process to remove resolved clusters, if desired
-
+print("Removing resolved clusters from the review table...")
 grouped = deduped.groupby('cluster_id')
 remove_clusters = []
 for name, group in grouped:
@@ -145,20 +152,21 @@ deduped['timeline'] = deduped['timeline'].astype(str)
 deduped['timeline'] = deduped['timeline'].str.replace('.0', '').str.replace('nan', '')
 deduped = deduped.sort_values(by=['cluster_id','timeline'])
 
-# Export for review
+# Export full cluster table
+print("Exporting full cluster table...")
 deduped_export = deduped[['source', 'project_id', 'project_name', 'project_status', 'inactive', 'project_type',
                         'date', 'date_type','timeline', 'dcp_projectcompleted',
-                        'number_of_units', 'cluster_id','sub_cluster_id','geom']]
-print("\n\nFull cluster review set: ", deduped_export.shape)
-print(deduped_export.head(20))
+                        'number_of_units', 'adjusted_units', 'cluster_id','sub_cluster_id','geom']]
+print("\n\nSize of full cluster table: ", deduped_export.shape)
 deduped_export.to_csv('review/clusters.csv', index=False)
 gdf=gpd.GeoDataFrame(deduped_export)
 gdf['geometry'] = gdf.geom.apply(lambda x: wkb.loads(x, hex=True))
 to_carto(gdf, 'clusters', if_exists='replace')
-unresolved = deduped_export[~deduped_export['cluster_id'].isin(remove_clusters)]
 
-print("\n\nUnresolved cluster review set: ", unresolved.shape)
-print(unresolved.head(20))
+# Export only unresolved clusters for review
+print("Exporting unresolved cluster table for review...")
+unresolved = deduped_export[~deduped_export['cluster_id'].isin(remove_clusters)].drop(columns=['adjusted_units'])
+print("\n\nSize of unresolved cluster review table: ", unresolved.shape)
 unresolved.to_csv('review/clusters_unresolved.csv', index=False)
 gdf=gpd.GeoDataFrame(unresolved)
 gdf['geometry'] = gdf.geom.apply(lambda x: wkb.loads(x, hex=True))

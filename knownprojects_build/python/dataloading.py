@@ -15,6 +15,7 @@ def ETL():
     importer.import_table(schema_name='dcp_n_study_projected')
     importer.import_table(schema_name='hpd_rfp')
     importer.import_table(schema_name='hpd_pc')
+    importer.import_table(schema_name='dcp_planneradded')
     # shapefiles
     importer.import_table(schema_name='edc_sca_inputs')
     importer.import_table(schema_name='edc_dcp_inputs')

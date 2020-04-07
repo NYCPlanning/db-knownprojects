@@ -8,5 +8,5 @@ CREATE TABLE project_geoms (
     project_status text,
     project_type text,
     number_of_units text,
-    geom geometry(Geometry,4326)
+    geom geometry(geometry,4326)
 );

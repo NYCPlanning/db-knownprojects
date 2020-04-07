@@ -1,6 +1,8 @@
 /****************** Assign bbl geometries ****************/
-ALTER TABLE hpd_pc
-    ADD source text,
+ALTER TABLE dcp_planneradded
+RENAME wkb_geometry TO geom;
+
+ALTER TABLE dcp_planneradded
     ADD project_name text,
     ADD project_status text,
     ADD project_type text,
@@ -15,59 +17,47 @@ ALTER TABLE hpd_pc
     ADD portion_built_by_2025 text,
     ADD portion_built_by_2035 text,
     ADD portion_built_by_2055 text,
-    ADD inactive text,
-    ADD geom geometry(geometry,4326);
-
--- Merge with Mappluto using bbl
-UPDATE hpd_pc a
-SET geom = b.wkb_geometry
-FROM dcp_mappluto b
-WHERE a.bbl = b.bbl::TEXT;
+    ADD inactive text
+    ;
 
 /********************* Column Mapping *******************/
-UPDATE hpd_pc t
-SET source = 'HPD Projected Closings',
-    project_id = (CASE
-                    WHEN project_id LIKE '%/%' THEN project_id
-                    ELSE project_id||'/'||building_id
-                END),
-    project_name = house_number||' '||street_name,
-    project_status = 'Projected',
+UPDATE dcp_planneradded t
+SET project_name = project_na,
+    project_status = NULL,
     project_type = NULL,
-    number_of_units = (min_of_projected_units::INTEGER + max_of_projected_units::INTEGER)/2,
-    date = projected_fiscal_year_range,
-    date_type = 'Projected Fiscal Year Range',
+    number_of_units = total_unit,
+    date = NULL,
+    date_type = NULL,
     dcp_projectcompleted = NULL,
     date_filed = NULL,
     date_permittd = NULL,
     date_lastupdt = NULL,
     date_complete = NULL,
-    portion_built_by_2025 = NULL,
-    portion_built_by_2035 = NULL,
-    portion_built_by_2055 = NULL,
+    portion_built_by_2025 = portion_bu,
+    portion_built_by_2035 = portion__1,
+    portion_built_by_2055 = portion__2,
     inactive = NULL
     ;
 
 /************************ Merging ***********************/
 -- merge the records to project's level
-DROP TABLE IF EXISTS hpd_pc_proj;
-CREATE TABLE hpd_pc_proj AS(
+DROP TABLE IF EXISTS dcp_planneradded_proj;
+CREATE TABLE dcp_planneradded_proj AS(
 	WITH geom_merge AS (
-		SELECT project_id, ST_UNION(geom) AS geom
-		FROM hpd_pc
+		SELECT project_id, ST_MAKEVALID(ST_UNION(geom)) AS geom
+		FROM dcp_planneradded
 		GROUP BY project_id
 	)
-	SELECT b.source, b.project_id, b.project_name,
+    SELECT b.source, b.project_id, b.project_name,
     b.project_status, b.project_type, b.inactive,
     b.number_of_units, b.date, b.date_type, b.dcp_projectcompleted,
-    b.date_filed, b.date_permittd,
-    b.date_lastupdt, b.date_complete,
+    b.date_filed, b.date_permittd, b.date_lastupdt, b.date_complete,
     b.portion_built_by_2025,
     b.portion_built_by_2035, b.portion_built_by_2055,
     a.geom
 	FROM geom_merge a
 	LEFT JOIN(
 		SELECT DISTINCT ON (project_id) *
-		FROM hpd_pc) AS b
+		FROM dcp_planneradded) AS b
 	ON a.project_id = b.project_id
 );
