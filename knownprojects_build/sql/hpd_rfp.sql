@@ -13,7 +13,7 @@ ALTER TABLE hpd_rfp
     ADD date_permittd text,
     ADD date_lastupdt text,
     ADD date_complete text,
-    ADD portion_built_by_2025 text,s
+    ADD portion_built_by_2025 text,
     ADD portion_built_by_2035 text,
     ADD portion_built_by_2055 text,
     ADD inactive text,
