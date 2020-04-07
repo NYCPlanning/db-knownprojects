@@ -48,6 +48,7 @@ for table in tables:
     df = pd.read_sql(f'SELECT * FROM {table}', build_engine)
     num_nulls = df[df['cluster_id'].isna()].shape[0]
     df.loc[df['cluster_id'].isna(),'cluster_id'] = pd.Series(range(largest_cluster, largest_cluster + num_nulls))
+    df.loc[df['cluster_id'].isna(),'sub_cluster_id'] = '1'
     largest_cluster = largest_cluster + num_nulls
 
 
