@@ -17,7 +17,7 @@ ALTER TABLE dcp_n_study_future
     ADD portion_built_by_2035 text,
     ADD portion_built_by_2055 text,
     ADD inactive text,
-    ADD geom geometry(Polygon,4326);
+    ADD geom geometry(geometry,4326);
 
 -- join to nyc rezoning
 UPDATE dcp_n_study_future a
