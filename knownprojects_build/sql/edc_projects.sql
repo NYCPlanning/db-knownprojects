@@ -19,7 +19,7 @@ ALTER TABLE edc_projects
     ADD portion_built_by_2035 text,
     ADD portion_built_by_2055 text,
     ADD inactive text,
-    ADD geom geometry(Polygon,4326);
+    ADD geom geometry(geometry,4326);
 
 -- Merge with Mappluto using bbl
 UPDATE edc_projects a

@@ -11,17 +11,6 @@ set_default_credentials(
     api_key=os.environ.get('CARTO_APIKEY')
 )
 
-df = pd.read_csv('review/kpdb_review.csv')
-
-# Hierarchy to use for perfect count-match deduplication
-hierarchy = {'HPD Projected Closings':1,
-            'HPD RFPs':2,
-            'EDC Projected Projects':3,
-            'DCP Application':4,
-            'Empire State Development Projected Projects':5,
-            'Neighborhood Study Rezoning Commitments':6,
-            'Neighborhood Study Projected Development Sites':7}
-
 def dedup_exacts(group):
     group.loc[:,'adjusted_units']=group['number_of_units']
     if group.shape[0] > 1:
@@ -39,29 +28,58 @@ def subtract_units(row, group):
     return row
 
 def resolve_cluster(group):
-    print('\n\n\n=== Initial cluster: ===\n', group)
-    print('Number of records in cluster: ', group.shape[0])
     if group.shape[0] > 1:
         group = group.reset_index()
         for index, row in group.iterrows():
-            print('\nProcessing group row: ', index)
             group.iloc[index] = subtract_units(row, group)
-    print('\n=== Resolved cluster: ===\n', group)
     return group
 
-#TODO: Function to subtract DOB units
+def resolve_all_clusters(df):
+    # Hierarchy to use for perfect count-match deduplication
+    hierarchy = {'DOB': 1,
+            'HPD Projected Closings':2,
+            'HPD RFPs':3,
+            'EDC Projected Projects':4,
+            'DCP Application':5,
+            'Empire State Development Projected Projects':6,
+            'Neighborhood Study Rezoning Commitments':7,
+            'Neighborhood Study Projected Development Sites':8,
+            'DCP Planner-Added Projects':9}
 
-# Deduplicate exact count matches
-df.sort_values(by=['cluster_id','source_id'])
-df.number_of_units.fillna(value=99999, inplace=True) # Temporarily fill null so that it can be used as groupby
-deduped = df.groupby(['cluster_id','number_of_units'], as_index=False).apply(dedup_exacts)
-deduped.number_of_units.replace(99999, np.nan, inplace=True)
-deduped.adjusted_units.replace(99999, np.nan, inplace=True) # Reset null
+    df['source_id'] = df['source'].map(hierarchy)
+    df['verified_cluster'] = df['cluster_id'].astype(str) + '.' + df['sub_cluster_id'].astype(str)
 
-# Subtract units within cluster based on hierarchy
-resolved = deduped.groupby(['cluster_id'], as_index=False).apply(resolve_cluster)
-resolved = resolved.drop(columns=['level_0','index'])
-resolved.to_csv('review/resolved_clusters.csv', index=False)
-gdf=gpd.GeoDataFrame(resolved)
-gdf['geometry'] = gdf.geom.apply(lambda x: wkb.loads(x, hex=True))
-to_carto(gdf, 'resolved_clusters', if_exists='replace')
+    # Deduplicate exact count matches
+    print("Deduplicating exact count matches...")
+    df.sort_values(by=['verified_cluster','source_id'])
+    df.number_of_units.fillna(value=99999, inplace=True) # Temporarily fill null so that it can be used as groupby
+    deduped = df.groupby(['verified_cluster','number_of_units'], as_index=False).apply(dedup_exacts)
+    deduped.number_of_units.replace(99999, np.nan, inplace=True)
+    deduped.adjusted_units.replace(99999, np.nan, inplace=True) # Reset null
+
+    # Subtract units within cluster based on hierarchy
+    print("Subtracting units within verified clusters based on source hierarchy...")
+    resolved = deduped.groupby(['verified_cluster'], as_index=False).apply(resolve_cluster)
+    try:
+        resolved = resolved.drop(columns=['level_0'])
+    except:
+        pass
+    try:
+        resolved = resolved.drop(columns=['index'])
+    except:
+        pass
+    try:
+        resolved = resolved.drop(columns=['verified_cluster'])
+    except:
+        pass
+    print("Output of resolved clusters: \n", 
+        resolved[['source', 'number_of_units', 'adjusted_units', 'cluster_id', 'sub_cluster_id']].head(10))
+    resolved.to_csv('review/resolved_clusters.csv', index=False)
+
+    '''
+    gdf=gpd.GeoDataFrame(resolved)
+    gdf['geometry'] = gdf.geom.apply(lambda x: wkb.loads(x, hex=True))
+    to_carto(gdf, 'resolved_clusters', if_exists='replace')
+    '''
+
+    return resolved
