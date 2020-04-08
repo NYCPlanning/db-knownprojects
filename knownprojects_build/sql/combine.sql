@@ -4,7 +4,7 @@ create table combined as (
         source, project_id::text, project_name, 
         project_status, project_type,
         number_of_units::integer, date, date_type, 
-        dcp_projectcompleted, null as ortion_built_by_2025, 
+        dcp_projectcompleted, null as portion_built_by_2025, 
         null as portion_built_by_2035, null as portion_built_by_2055, 
         cluster_id, sub_cluster_id, adjusted_units,
         inactive, geom
