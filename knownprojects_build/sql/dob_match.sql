@@ -19,11 +19,18 @@ with combined_dob as (
     b.inactive,
     b.geom
     FROM combined a
-    JOIN dcp_housing b
+    INNER JOIN dcp_housing b
     ON st_intersects(a.geom, b.geom)
     AND split_part(split_part(a.date, '/', 1), '-', 1)::numeric - 1 < extract(year from b.date::timestamp)
     union
-    select * from combined),
+    select *
+	from combined),
+relevantcluster as (
+	select distinct cluster_id
+	FROM combined a
+	INNER JOIN dcp_housing b
+    ON st_intersects(a.geom, b.geom)
+    AND split_part(split_part(a.date, '/', 1), '-', 1)::numeric - 1 < extract(year from b.date::timestamp)),
 multimatch as (
     select project_id
     from combined_dob
@@ -36,10 +43,13 @@ multimatchcluster as (
 	where project_id in (
 		select project_id 
 		from multimatch))
-select *, 
+select *,
     (case when cluster_id in 
-        (select cluster_id from multimatchcluster) then 1 
-        else 0 end) as review_flag 
-        into dob_review
+	 (select cluster_id from multimatchcluster) then 1 
+        else 0 end) as review_flag
+    into dob_review
 	from combined_dob
-	order by cluster_id, sub_cluster_id;
+	where cluster_id in (
+		select cluster_id 
+		from relevantcluster)
+	order by cluster_id, sub_cluster_id
