@@ -1,5 +1,5 @@
 drop table if exists dob_review;
-with combined_dob as (
+with matches as (
     SELECT 
     b.source, 
     b.project_id::text, 
@@ -21,16 +21,16 @@ with combined_dob as (
     FROM combined a
     INNER JOIN dcp_housing b
     ON st_intersects(a.geom, b.geom)
-    AND split_part(split_part(a.date, '/', 1), '-', 1)::numeric - 1 < extract(year from b.date::timestamp)
+    AND split_part(split_part(a.date, '/', 1), '-', 1)::numeric - 1 < extract(year from b.date::timestamp)),
+combined_dob as (
+	select * 
+	from matches
     union
     select *
 	from combined),
 relevantcluster as (
 	select distinct cluster_id
-	FROM combined a
-	INNER JOIN dcp_housing b
-    ON st_intersects(a.geom, b.geom)
-    AND split_part(split_part(a.date, '/', 1), '-', 1)::numeric - 1 < extract(year from b.date::timestamp)),
+	FROM matches),
 multimatch as (
     select project_id
     from combined_dob
@@ -52,4 +52,4 @@ select *,
 	where cluster_id in (
 		select cluster_id 
 		from relevantcluster)
-	order by cluster_id, sub_cluster_id
+	order by cluster_id, sub_cluster_id;
