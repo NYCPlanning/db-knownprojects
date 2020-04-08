@@ -12,6 +12,16 @@ set_default_credentials(
     api_key=os.environ.get('CARTO_APIKEY')
 )
 
-sql = 'select * from dob_review'
+sql = '''
+    select 
+        source, project_id, 
+        project_name, project_status, 
+        project_type, number_of_units::integer, 
+        date, date_type, dcp_projectcompleted,
+        cluster_id, sub_cluster_id, review_flag,
+        inactive, geom
+    from dob_review
+    order by review_flag, cluster_id, sub_cluster_id
+    '''
 df = gpd.GeoDataFrame.from_postgis(sql, build_engine, geom_col='geom')
 to_carto(df, f'dob_review_{year}', if_exists='replace')
