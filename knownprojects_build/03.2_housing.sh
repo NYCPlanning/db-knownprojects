@@ -12,6 +12,7 @@ docker run --rm\
     python:3.7-slim sh -c "
         pip3 install -r python/requirements.txt; 
         python3 python/carto_to_build.py;
-        python3 python/update_proj_tables.py;
-        python3 python/dob_match.py"
+        python3 python/update_proj_tables.py"
 
+psql $BUILD_ENGINE -f sql/combine.sql
+psql $BUILD_ENGINE -f sql/dob_match.sql
