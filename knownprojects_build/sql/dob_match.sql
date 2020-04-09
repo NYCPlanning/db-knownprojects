@@ -41,11 +41,18 @@ multimatch as (
     from matches
     where source = 'DOB'
     group by project_id
-    having count(cluster_id) > 1)
+    having count(cluster_id) > 1),
+multimatchcluster as (
+    select distinct cluster_id
+    from combined_dob
+    where project_id in (select project_id from multimatch)
+)
 select *,
     (case when project_id in 
 	 (select project_id from multimatch) and source='DOB' then 1 
-        else 0 end) as review_flag
+        else 0 end) as dob_multimatch,
+    (case when cluster_id in 
+        (select cluster_id from multimatchcluster) then 1 else 0 end) as needs_review
 	into dob_review
     from combined_dob
 	where cluster_id in (
