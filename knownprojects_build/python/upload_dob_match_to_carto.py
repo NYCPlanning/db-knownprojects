@@ -5,7 +5,7 @@ from cartoframes import to_carto
 from shapely import wkb
 import geopandas as gpd
 
-year = 'test'
+year = 'bothflags'
 
 set_default_credentials(
     username=os.environ.get('CARTO_USERNAME'),
@@ -15,11 +15,11 @@ set_default_credentials(
 sql = '''
     select 
         source, project_id, 
-        project_name, project_status, 
+        project_name, project_status, inactive,
         project_type, number_of_units::integer, 
         date, date_type, dcp_projectcompleted,
-        cluster_id, sub_cluster_id, review_flag,
-        inactive, geom
+        cluster_id, sub_cluster_id, dob_multimatch, needs_review,
+        geom
     from dob_review
     order by cluster_id, sub_cluster_id
     '''
