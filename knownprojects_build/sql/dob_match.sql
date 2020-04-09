@@ -1,3 +1,8 @@
+-- Create matches, containing inner spatial join of DOB and non-DOB given time constraint
+-- Add KPDB-relevant DOB jobs to the combination of all other sources. This is called combined_dob
+-- Get a list of relevant clusters. These clusters are the ones that contain overlap between DOB and non-DOB
+-- Find cases where a DOB job matches with more than one non-DOB job, and flag for review.
+
 drop table if exists dob_review;
 with matches as (
     SELECT 
@@ -32,23 +37,17 @@ relevantcluster as (
 	select distinct cluster_id
 	FROM matches),
 multimatch as (
-    select project_id
-    from combined_dob
+    select distinct project_id
+    from matches
     where source = 'DOB'
     group by project_id
-    having count(*) > 1),
-multimatchcluster as (
-	select distinct cluster_id
-	from combined_dob 
-	where project_id in (
-		select project_id 
-		from multimatch))
+    having count(cluster_id) > 1)
 select *,
-    (case when cluster_id in 
-	 (select cluster_id from multimatchcluster) then 1 
+    (case when project_id in 
+	 (select project_id from multimatch) and source='DOB' then 1 
         else 0 end) as review_flag
-    into dob_review
-	from combined_dob
+	into dob_review
+    from combined_dob
 	where cluster_id in (
 		select cluster_id 
 		from relevantcluster)
