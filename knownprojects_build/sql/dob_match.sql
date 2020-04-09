@@ -24,7 +24,7 @@ with matches as (
     b.inactive,
     b.geom
     FROM combined a
-    INNER JOIN dcp_housing b
+    INNER JOIN dcp_housing_proj b
     ON st_intersects(a.geom, b.geom)
     AND split_part(split_part(a.date, '/', 1), '-', 1)::numeric - 1 < extract(year from b.date::timestamp)),
 combined_dob as (
