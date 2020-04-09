@@ -21,7 +21,7 @@ sql = '''
         cluster_id, sub_cluster_id, review_flag,
         inactive, geom
     from dob_review
-    order by review_flag, cluster_id, sub_cluster_id
+    order by cluster_id, sub_cluster_id
     '''
 df = gpd.GeoDataFrame.from_postgis(sql, build_engine, geom_col='geom')
 to_carto(df, f'dob_review_{year}', if_exists='replace')
