@@ -77,6 +77,9 @@ CREATE TABLE dcp_housing_proj AS(
 	WITH geom_merge AS (
 		SELECT project_id, ST_UNION(geom) AS geom
 		FROM dcp_housing
+        WHERE dcp_housing.job_type <> 'Demolition'
+        AND dcp_housing.job_status <> 'Withdrawn'
+        AND dcp_housing.units_prop::int >= 0
 		GROUP BY project_id
 	)
 	SELECT b.source, b.project_id, b.project_name,
@@ -88,7 +91,7 @@ CREATE TABLE dcp_housing_proj AS(
     a.geom
 	FROM geom_merge a
 	LEFT JOIN(
-		SELECT DISTINCT ON (project_id) *
-		FROM dcp_housing) AS b
+        SELECT DISTINCT ON (project_id) *
+        FROM dcp_housing) AS b
 	ON a.project_id = b.project_id
 );
