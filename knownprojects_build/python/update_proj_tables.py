@@ -18,7 +18,9 @@ tables = ['dcp_application',
 print(f"Updating full cluster table with {year} reviewed data...")
 sql_update_clusters = f'''
     UPDATE clusters."{year}" a
-    SET sub_cluster_id = b.sub_cluster_id
+    SET sub_cluster_id = b.sub_cluster_id,
+        review_initials = b.review_initials,
+        review_notes = b.review_notes
     FROM reviewed_clusters."{year}" b
     WHERE a.source = b.source
     AND a.project_id = b.project_id
@@ -40,7 +42,9 @@ for table in tables:
     ALTER TABLE {table}
     ADD COLUMN IF NOT EXISTS cluster_id text,
     ADD COLUMN IF NOT EXISTS sub_cluster_id text,
-    ADD COLUMN IF NOT EXISTS adjusted_units text;
+    ADD COLUMN IF NOT EXISTS adjusted_units text,
+    ADD COLUMN IF NOT EXISTS review_initials text,
+    ADD COLUMN IF NOT EXISTS review_notes text;
     '''
 
     # Update project-level table with cluster-review results
@@ -48,7 +52,9 @@ for table in tables:
     UPDATE {table} a
     SET cluster_id = b.cluster_id,
         sub_cluster_id = b.sub_cluster_id,
-        adjusted_units = b.adjusted_units
+        adjusted_units = b.adjusted_units,
+        review_initials = b.review_initials,
+        review_notes = b.review_notes
     FROM clusters."{year}" b
     WHERE a.source = b.source
     AND a.project_id::text = b.project_id::text

@@ -18,10 +18,12 @@ sql = '''
         project_name, project_status, inactive,
         project_type, number_of_units::integer, 
         date, date_type, dcp_projectcompleted,
-        development_id, dob_multimatch, needs_review,
+        review_notes, development_id, 
+        dob_multimatch, needs_review,
         geom
     from dob_review
     order by development_id
     '''
 df = gpd.GeoDataFrame.from_postgis(sql, build_engine, geom_col='geom')
+df['dob_review_initials'] = ''
 to_carto(df, f'dob_review_{year}', if_exists='replace')
