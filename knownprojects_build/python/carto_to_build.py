@@ -45,6 +45,8 @@ DDL = {"source":"text",
     "adjusted_units":"text",
     "cluster_id":"text",
     "sub_cluster_id":"text",
+    "review_initials":"text",
+    "review_notes":"text",
     "geom":"geometry(MultiPolygon,4326)"}
 
 
