@@ -99,6 +99,17 @@ print("Creating a unique ID...")
 dff['uid'] = dff['source'] + dff['project_id'] + dff['project_name']
 dff['id'] = dff.apply(lambda x: [x['a_source']+x['a_project_id']+x['a_project_name'],x['b_source']+x['b_project_id']+x['b_project_name']], axis=1)
 
+# Merge project descriptions from ZAP
+project_description_sql = '''
+        SELECT source, project_id, project_name, dcp_projectdescription
+        FROM dcp_application;
+'''
+project_desc_df = pd.read_sql(project_description_sql, build_engine)
+project_desc_df['uid'] = project_desc_df['source'] + project_desc_df['project_id'] + project_desc_df['project_name']
+project_desc_df.drop(columns=['source', 'project_id', 'project_name'], inplace=True)
+dff = dff.merge(project_desc_df, on='uid', how='left')
+dff = dff.replace(np.nan, '', regex=True)
+
 # Create graph object and identify connected components
 print("Creating intersection graph...")
 G=nx.Graph()
@@ -114,7 +125,7 @@ for i in components:
     df = dff.loc[dff.uid.isin(list(i)), ['source',
        'project_id', 'project_name', 'project_status', 'number_of_units',
        'date', 'date_type', 'dcp_projectcompleted',
-       'inactive', 'project_type', 'geom', 'source_id', 'timeline']]
+       'inactive', 'project_type', 'dcp_projectdescription', 'geom', 'source_id', 'timeline']]
     df['cluster_id'] = a 
     a += 1
     r.append(df)
@@ -161,7 +172,8 @@ deduped['review_notes'] = ''
 # Export full cluster table
 print("Exporting full cluster table...")
 deduped_export = deduped[['source', 'project_id', 'project_name', 'project_status', 'inactive', 'project_type',
-                        'date', 'date_type','timeline', 'dcp_projectcompleted',
+
+                        'date', 'date_type','timeline', 'dcp_projectcompleted', 'dcp_projectdescription',
                         'number_of_units', 'adjusted_units','cluster_id','sub_cluster_id',
                         'review_initials','review_notes','geom']]
 print("\n\nSize of full cluster table: ", deduped_export.shape)
