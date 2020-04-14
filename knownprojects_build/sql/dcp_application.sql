@@ -10,8 +10,7 @@ With timefileter AS (
 				dcp_projectbrief, dcp_projectdescription, dcp_projectname, 
 				dcp_borough, dcp_numberofnewdwellingunits
 		FROM dcp_project
-		WHERE  (dcp_name ~* 'P2005M0053|P2009M0294|P2014M0257' or dcp_name !~* 'P2016Q0238|P2016R0149|P2012M0255')
-		AND (extract(year from dcp_projectcompleted) >= 2012 or extract(year from dcp_certifiedreferred) >= 2012 
+		WHERE (extract(year from dcp_projectcompleted) >= 2012 or extract(year from dcp_certifiedreferred) >= 2012 
 			or (dcp_projectcompleted is null and dcp_certifiedreferred is null))
 	),
 	dcp_project_filtered as (
