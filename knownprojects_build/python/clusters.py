@@ -165,11 +165,17 @@ deduped['timeline'] = deduped['timeline'].astype(str)
 deduped['timeline'] = deduped['timeline'].str.replace('.0', '').str.replace('nan', '')
 deduped = deduped.sort_values(by=['cluster_id','timeline'])
 
+# Add empty fields for review initials and notes
+deduped['review_initials'] = ''
+deduped['review_notes'] = ''
+
 # Export full cluster table
 print("Exporting full cluster table...")
 deduped_export = deduped[['source', 'project_id', 'project_name', 'project_status', 'inactive', 'project_type',
+
                         'date', 'date_type','timeline', 'dcp_projectcompleted', 'dcp_projectdescription',
-                        'number_of_units', 'adjusted_units', 'cluster_id','sub_cluster_id','geom']]
+                        'number_of_units', 'adjusted_units','cluster_id','sub_cluster_id',
+                        'review_initials','review_notes','geom']]
 print("\n\nSize of full cluster table: ", deduped_export.shape)
 deduped_export.to_csv(f'review/clusters_{year}.csv', index=False)
 gdf=gpd.GeoDataFrame(deduped_export)
