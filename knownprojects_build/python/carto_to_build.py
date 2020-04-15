@@ -10,7 +10,7 @@ from shapely import wkb
 import geopandas as gpd
 from datetime import date
 
-year = 'test'
+year = 'zapurl'
 
 set_default_credentials(
     username=os.environ.get('CARTO_USERNAME'),
@@ -20,9 +20,7 @@ set_default_credentials(
 # Get cluster data from carto
 print("Loading cluster data from carto...")
 cluster_gdf = read_carto(f'clusters_{year}', limit=100)
-cluster_gdf.drop(columns=['dcp_projectdescription'], inplace=True)
 reviewed_gdf = read_carto(f'clusters_unresolved_{year}', limit=100)
-reviewed_gdf.drop(columns=['dcp_projectdescription'], inplace=True)
 
 # Export to postgres
 today = date.today()
@@ -37,6 +35,7 @@ DDL = {"source":"text",
     "project_status":"text",
     "inactive":"text",
     "project_type":"text",
+    "zap_search_url":"text",
     "date":"text",
     "date_type":"text",
     "timeline":"text",

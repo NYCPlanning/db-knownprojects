@@ -49,6 +49,7 @@ With timefileter AS (
 		certifiedreferred as date, -- Relevant date for clusters
 		'Certified Referred' as date_type,
 		projectcompleted as dcp_projectcompleted,
+		'https://zap.planning.nyc.gov/projects/'||dcp_name as zap_search_url,
     	NULL as date_filed, -- DOB field
     	NULL as date_permittd, -- DOB field
     	NULL as date_lastupdt, -- DOB field
