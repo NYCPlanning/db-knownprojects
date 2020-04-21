@@ -10,7 +10,7 @@ from shapely import wkb
 import geopandas as gpd
 from datetime import date
 
-year = 'test'
+year = 'newfields'
 
 set_default_credentials(
     username=os.environ.get('CARTO_USERNAME'),
