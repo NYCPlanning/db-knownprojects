@@ -10,7 +10,7 @@ from shapely import wkb
 import geopandas as gpd
 from datetime import date
 
-year = 'newfields'
+year = '2020'
 
 set_default_credentials(
     username=os.environ.get('CARTO_USERNAME'),
@@ -20,9 +20,7 @@ set_default_credentials(
 # Get cluster data from carto
 print("Loading cluster data from carto...")
 cluster_gdf = read_carto(f'clusters_{year}', limit=100)
-cluster_gdf.drop(columns=['dcp_projectdescription'], inplace=True)
 reviewed_gdf = read_carto(f'clusters_unresolved_{year}', limit=100)
-reviewed_gdf.drop(columns=['dcp_projectdescription'], inplace=True)
 
 # Export to postgres
 today = date.today()
