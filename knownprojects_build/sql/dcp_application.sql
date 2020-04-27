@@ -40,10 +40,31 @@ text_filter as (
 	FROM dcp_project
 	WHERE statuscode !~* 'Record Closed|Terminated|Withdrawn'
 	AND dcp_applicanttype != 'DCP'
-	AND dcp_projectbrief||dcp_projectdescription||dcp_projectname ~*'home|family|resid|appartment|apt|affordable|dwell|living|housi|mih|DUs'
-	AND dcp_projectbrief||dcp_projectdescription||dcp_projectname !~*'RESIDENTIAL TO COMMERCIAL|SINGLE-FAMILY|SINGLE FAMILY|1-FAMILY|ONE FAMILY|ONE-FAMILY|1 FAMILY'
-	AND dcp_projectbrief||dcp_projectdescription||dcp_projectname !~*'FLOATING|TRANSITIONAL|FOSTER|ILLUMIN|RESIDENCE DISTRICT|LANDMARKS PRESERVATION COMMISSION'
-	AND dcp_projectbrief||dcp_projectdescription||dcp_projectname !~*'EXISTING HOME|EXISTING HOUSE|NUMBER OF BEDS|EATING AND DRINKING|NO INCREASE|ENLARGEMENT|NON-RESIDENTIAL|LIVINGSTON|AMBULATORY'),
+	AND regexp_replace(
+			dcp_projectbrief||dcp_projectdescription||dcp_projectname, 
+			'[^a-zA-Z0-9]+', ' ','g') ~* 
+		array_to_string(ARRAY[
+		'home','family','resid',
+		'appartment','apt','affordable',
+		'living', 'housi', 'mih','DUs'], '|')
+	AND regexp_replace(
+			dcp_projectbrief||dcp_projectdescription||dcp_projectname, 
+			'[^a-zA-Z0-9]+', ' ','g') !~* 
+		array_to_string(ARRAY[
+		'RESIDENTIAL TO COMMERCIAL', 
+		'SINGLE-FAMILY', 'SINGLE FAMILY', 
+		'1-FAMILY', 'ONE FAMILY', 
+		'ONE-FAMILY', '1 FAMILY',
+		'FLOATING', 'TRANSITIONAL', 'FOSTER', 
+		'ILLUMIN', 'RESIDENCE DISTRICT', 
+		'LANDMARKS PRESERVATION COMMISSION',
+		'EXISTING HOME', 'EXISTING HOUSE', 
+		'NUMBER OF BEDS', 'EATING AND DRINKING', 
+		'NO INCREASE', 'ENLARGEMENT', 'NON-RESIDENTIAL', 
+		'LIVINGSTON', 'AMBULATORY', 
+		'APPLICATION FOR PARKING',
+		'CHAIRPERSON CERTIFICATION',
+		'ROOFTOP'], '|')),
 consolidated_filter as (
 	SELECT dcp_name 
 	FROM text_filter
@@ -72,12 +93,12 @@ zap_extract as (
 	(CASE WHEN dcp_certifiedreferred IS NULL THEN NULL
 		ELSE TO_CHAR(dcp_certifiedreferred, 'YYYY/MM/DD') END) 
 		as certifiedreferred,
-	dcp_totalnoofdusinprojecd,
-	dcp_mihdushighernumber,
-	dcp_mihduslowernumber,
-	dcp_numberofnewdwellingunits,
-	dcp_noofvoluntaryaffordabledus,
-	dcp_residentialsqft
+	COALESCE(dcp_totalnoofdusinprojecd, 0) as dcp_totalnoofdusinprojecd,
+	COALESCE(dcp_mihdushighernumber, 0) as dcp_mihdushighernumber,
+	COALESCE(dcp_mihduslowernumber, 0) as dcp_mihduslowernumber,
+	COALESCE(dcp_numberofnewdwellingunits, 0) as dcp_numberofnewdwellingunits,
+	COALESCE(dcp_noofvoluntaryaffordabledus, 0) as dcp_noofvoluntaryaffordabledus,
+	COALESCE(dcp_residentialsqft, 0) as dcp_residentialsqft
 	FROM dcp_project
 	WHERE dcp_name in (SELECT dcp_name FROM relevant_projects)),
 zap_geom as (
@@ -124,22 +145,21 @@ SELECT distinct
 	
 --calculate number_of_units
 	COALESCE(
-		dcp_numberofnewdwellingunits,
-		dcp_totalnoofdusinprojecd,
-		dcp_mihdushighernumber+ 
-			dcp_noofvoluntaryaffordabledus,
-		dcp_mihduslowernumber+ 
-			dcp_noofvoluntaryaffordabledus,
-		dcp_noofvoluntaryaffordabledus) 
+		nullif(dcp_numberofnewdwellingunits,0),
+		nullif(dcp_totalnoofdusinprojecd,0),
+		nullif(dcp_mihdushighernumber+ 
+			dcp_noofvoluntaryaffordabledus,0),
+		nullif(dcp_mihduslowernumber+ 
+			dcp_noofvoluntaryaffordabledus,0))
 	as number_of_units,
 	
 --identify unit source
 	COALESCE(
-		(case when dcp_numberofnewdwellingunits is not NULL then 'dcp_numberofnewdwellingunits' end),
-		(case when dcp_totalnoofdusinprojecd is not NULL then 'dcp_totalnoofdusinprojecd' end),
-		(case when dcp_mihdushighernumber+ dcp_noofvoluntaryaffordabledus is not NULL 
+		(case when nullif(dcp_numberofnewdwellingunits,0) is not NULL then 'dcp_numberofnewdwellingunits' end),
+		(case when nullif(dcp_totalnoofdusinprojecd,0) is not NULL then 'dcp_totalnoofdusinprojecd' end),
+		(case when nullif(dcp_mihdushighernumber+dcp_noofvoluntaryaffordabledus,0) is not NULL 
 		then 'dcp_mihdushighernumber + dcp_noofvoluntaryaffordabledus' end),
-		(case when dcp_mihduslowernumber+ dcp_noofvoluntaryaffordabledus is not NULL 
+		(case when nullif(dcp_mihduslowernumber+ dcp_noofvoluntaryaffordabledus,0) is not NULL 
 		then 'dcp_mihduslowernumber + dcp_noofvoluntaryaffordabledus' end)
 		) 
 	as number_of_units_source,
