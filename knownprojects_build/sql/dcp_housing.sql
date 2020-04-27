@@ -77,9 +77,6 @@ CREATE TABLE dcp_housing_proj AS(
 	WITH geom_merge AS (
 		SELECT project_id, ST_UNION(geom) AS geom
 		FROM dcp_housing
-        WHERE dcp_housing.job_type <> 'Demolition'
-        AND dcp_housing.job_status <> 'Withdrawn'
-        AND dcp_housing.units_prop::int >= 0
 		GROUP BY project_id
 	)
 	SELECT b.source, b.project_id, b.project_name,
