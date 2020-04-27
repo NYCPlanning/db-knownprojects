@@ -38,9 +38,7 @@ year_filter as (
 text_filter as (
 	SELECT dcp_name
 	FROM dcp_project
-	WHERE statuscode !~* 'Record Closed|Terminated|Withdrawn'
-	AND dcp_applicanttype != 'DCP'
-	AND regexp_replace(
+	WHERE regexp_replace(
 			dcp_projectbrief||dcp_projectdescription||dcp_projectname, 
 			'[^a-zA-Z0-9]+', ' ','g') ~* 
 		array_to_string(ARRAY[
