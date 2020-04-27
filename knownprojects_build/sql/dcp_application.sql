@@ -6,7 +6,7 @@ school_seat_filter as (
 	FROM dcp_project
 	WHERE dcp_sischoolseat is TRUE
 	or dcp_projectbrief||dcp_projectdescription||dcp_projectname like 'SS%'
-	or dcp_projectbrief||dcp_projectdescription||dcp_projectname ~* 'School seat cert'
+	or dcp_projectbrief||dcp_projectdescription||dcp_projectname ~* 'school seat|schools seat'
 ),
 -- we exclude projects that have record closed, terminated or withdrawn as status
 status_filter as (
