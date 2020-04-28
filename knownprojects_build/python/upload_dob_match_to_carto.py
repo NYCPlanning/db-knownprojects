@@ -17,7 +17,7 @@ sql = '''
         source, project_id::text, 
         project_name, project_status, inactive,
         project_type, number_of_units::integer, 
-        date, date_type, date_permittd, date_complete,
+        date, date_type, date_filed, date_complete,
         dcp_projectcompleted, review_notes, development_id, 
         dob_multimatch, needs_review,
         geom

@@ -43,15 +43,15 @@ SET source = 'DOB',
     project_type = job_type,
     number_of_units = units_net,
     date = CASE
-            WHEN date_filed IS NULL THEN NULL
-            WHEN  date_filed LIKE '%-%' THEN TO_CHAR(TO_DATE(date_filed, 'YYYY-MM-DD'), 'YYYY/MM/DD')
-            ELSE TO_CHAR(TO_DATE(date_filed, 'MM/DD/YYYY'), 'YYYY/MM/DD')
-        END,
-    date_type = 'Date Filed',
-    date_permittd = CASE
             WHEN date_permittd IS NULL THEN NULL
             WHEN  date_permittd LIKE '%-%' THEN TO_CHAR(TO_DATE(date_permittd, 'YYYY-MM-DD'), 'YYYY/MM/DD')
             ELSE TO_CHAR(TO_DATE(date_permittd, 'MM/DD/YYYY'), 'YYYY/MM/DD')
+        END,
+    date_type = 'Date Permitted',
+    date_filed = CASE
+            WHEN date_filed IS NULL THEN NULL
+            WHEN  date_filed LIKE '%-%' THEN TO_CHAR(TO_DATE(date_filed, 'YYYY-MM-DD'), 'YYYY/MM/DD')
+            ELSE TO_CHAR(TO_DATE(date_filed, 'MM/DD/YYYY'), 'YYYY/MM/DD')
         END,
     date_lastupdt = CASE
             WHEN date_lastupdt IS NULL THEN NULL
@@ -82,7 +82,7 @@ CREATE TABLE dcp_housing_proj AS(
 	SELECT b.source, b.project_id, b.project_name,
     b.project_status, b.project_type, b.inactive,
     b.number_of_units, b.date, b.date_type, b.dcp_projectcompleted,
-    b.date_permittd, b.date_lastupdt, b.date_complete,
+    b.date_filed, b.date_lastupdt, b.date_complete,
     b.portion_built_by_2025,
     b.portion_built_by_2035, b.portion_built_by_2055,
     a.geom
