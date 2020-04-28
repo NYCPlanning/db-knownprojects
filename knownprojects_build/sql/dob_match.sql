@@ -61,6 +61,11 @@ matches as (
         then TRUE 
         else split_part(split_part(a.date, '/', 1), '-', 1)::numeric - 1 
             < extract(year from b.date::timestamp) 
+        end)
+    AND (case WHEN b.source = 'EDC Projected Projects' 
+        then TRUE 
+        else split_part(split_part(a.date, '/', 1), '-', 1)::numeric + 2 
+            > extract(year from b.date::timestamp)
         end)),
 combined_dob as (
 	select * 
