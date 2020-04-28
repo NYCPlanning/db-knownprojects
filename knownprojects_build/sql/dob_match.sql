@@ -57,7 +57,11 @@ matches as (
     FROM combined a
     INNER JOIN filtered_dcp_housing_proj b
     ON st_intersects(a.geom, b.geom)
-    AND split_part(split_part(a.date, '/', 1), '-', 1)::numeric - 1 < extract(year from b.date::timestamp)),
+    AND (case WHEN b.source = 'EDC Projected Projects' 
+        then TRUE 
+        else split_part(split_part(a.date, '/', 1), '-', 1)::numeric - 1 
+            < extract(year from b.date::timestamp) 
+        end)),
 combined_dob as (
 	select * 
 	from matches
