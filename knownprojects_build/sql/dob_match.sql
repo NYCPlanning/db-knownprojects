@@ -29,6 +29,8 @@ filtered_dcp_housing_proj as (
     WHERE a.project_type <> 'Demolition'
     AND a.project_status <> 'Withdrawn'
     AND b.units_prop::int > 0
+    AND (a.project_type <> 'Alteration'
+        and a.number_of_units::integer > 0)
 ),
 matches as (
     SELECT 
@@ -85,8 +87,7 @@ multimatch as (
 multimatchcluster as (
     select distinct development_id
     from combined_dob
-    where project_id in (select project_id from multimatch)
-)
+    where project_id in (select project_id from multimatch))
 select *,
     (case when project_id in 
 	 (select project_id from multimatch) and source='DOB' then 1 
