@@ -126,8 +126,8 @@ get_ulurp_geom as (
 SELECT distinct 
 --descriptor fields
 	'DCP Application' as source,
-	dcp_name as project_id,
-	dcp_projectname as project_name,
+	dcp_name as record_id,
+	dcp_projectname as record_name,
 	dcp_applicanttype, 
 	dcp_projectbrief, 
 	dcp_projectdescription,

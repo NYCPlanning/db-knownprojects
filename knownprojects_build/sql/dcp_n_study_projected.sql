@@ -3,7 +3,8 @@ ALTER TABLE dcp_n_study_projected
 RENAME wkb_geometry TO geom;
 
 ALTER TABLE dcp_n_study_projected
-    ADD project_name text,
+    ADD record_name text,
+    ADD record_id text,
     ADD project_status text,
     ADD project_type text,
     ADD number_of_units text,
@@ -23,7 +24,8 @@ ALTER TABLE dcp_n_study_projected
 /********************* Column Mapping *******************/
 UPDATE dcp_n_study_projected t
 SET source = 'Neighborhood Study Projected Development Sites',
-    project_name = REPLACE(project_id, ' Projected Development Sites', ''),
+    record_id = project_id,
+    record_name = REPLACE(project_id, ' Projected Development Sites', ''),
     project_status = 'Projected Development',
     project_type = NULL,
     number_of_units = total_unit,
@@ -45,11 +47,11 @@ SET source = 'Neighborhood Study Projected Development Sites',
 DROP TABLE IF EXISTS dcp_n_study_projected_proj;
 CREATE TABLE dcp_n_study_projected_proj AS(
 	WITH geom_merge AS (
-		SELECT project_id, ST_UNION(geom) AS geom
+		SELECT record_id, ST_UNION(geom) AS geom
 		FROM dcp_n_study_projected
-		GROUP BY project_id
+		GROUP BY record_id
 	)
-    SELECT b.source, b.project_id, b.project_name,
+    SELECT b.source, b.record_id, b.record_name,
     b.project_status, b.project_type, b.inactive,
     b.number_of_units, b.date, b.date_type, b.dcp_projectcompleted,
     b.date_filed, b.date_permittd, b.date_lastupdt, b.date_complete,
@@ -58,7 +60,7 @@ CREATE TABLE dcp_n_study_projected_proj AS(
     a.geom
 	FROM geom_merge a
 	LEFT JOIN(
-		SELECT DISTINCT ON (project_id) *
+		SELECT DISTINCT ON (record_id) *
 		FROM dcp_n_study_projected) AS b
-	ON a.project_id = b.project_id
+	ON a.record_id = b.record_id
 );
