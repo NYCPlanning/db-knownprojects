@@ -4,7 +4,8 @@ RENAME source TO source_1;
 
 ALTER TABLE esd_projects
     ADD source text,
-    ADD project_id text,
+    ADD record_id text,
+    ADD record_name text,
     ADD project_status text,
     ADD project_type text,
     ADD number_of_units text,
@@ -30,7 +31,8 @@ WHERE a.bbl = b.bbl::TEXT;
 /********************* Column Mapping *******************/
 UPDATE esd_projects t
 SET source = 'Empire State Development Projected Projects',
-    project_id = project_name,
+    record_id = project_name,
+    record_name = project_name,
     project_status = 'Projected',
     project_type = NULL,
     number_of_units = total_units,
@@ -52,11 +54,11 @@ SET source = 'Empire State Development Projected Projects',
 DROP TABLE IF EXISTS esd_projects_proj;
 CREATE TABLE esd_projects_proj AS(
 	WITH geom_merge AS (
-		SELECT project_name, ST_UNION(geom) AS geom
+		SELECT record_name, ST_UNION(geom) AS geom
 		FROM esd_projects
-		GROUP BY project_name
+		GROUP BY record_name
 	)
-	SELECT b.source, b.project_id, b.project_name,
+	SELECT b.source, b.record_id, b.record_name,
     b.project_status, b.project_type, b.inactive,
     b.number_of_units, b.date, b.date_type, b.dcp_projectcompleted, 
     b.date_filed,b.date_permittd, b.date_lastupdt, b.date_complete,
@@ -65,7 +67,7 @@ CREATE TABLE esd_projects_proj AS(
     a.geom
 	FROM geom_merge a
 	LEFT JOIN(
-		SELECT DISTINCT ON (project_name) *
+		SELECT DISTINCT ON (record_name) *
 		FROM esd_projects) AS b
-	ON a.project_name = b.project_name
+	ON a.record_name = b.record_name
 );

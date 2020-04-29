@@ -1,8 +1,8 @@
 /****************** Assign bbl geometries ****************/
 ALTER TABLE dcp_n_study_future
     ADD source text,
-    ADD project_id text,
-    ADD project_name text,
+    ADD record_id text,
+    ADD record_name text,
     ADD project_status text,
     ADD project_type text,
     ADD number_of_units text,
@@ -28,8 +28,8 @@ WHERE a.neighborhood = b.study;
 /********************* Column Mapping *******************/
 UPDATE dcp_n_study_future t
 SET source = 'Future Neighborhood Studies',
-    project_id = neighborhood||' '||'Future Rezoning Development',
-    project_name = neighborhood,
+    record_id = neighborhood||' '||'Future Rezoning Development',
+    record_name = neighborhood,
     project_status = 'Projected',
     project_type = 'Future Rezoning',
     number_of_units = incremental_units_with_certainty_factor,
@@ -51,11 +51,11 @@ SET source = 'Future Neighborhood Studies',
 DROP TABLE IF EXISTS dcp_n_study_future_proj;
 CREATE TABLE dcp_n_study_future_proj AS(
 	WITH geom_merge AS (
-		SELECT project_id, ST_UNION(geom) AS geom
+		SELECT record_id, ST_UNION(geom) AS geom
 		FROM dcp_n_study_future
-		GROUP BY project_id
+		GROUP BY record_id
 	)
-	SELECT b.source, b.project_id, b.project_name,
+	SELECT b.source, b.record_id, b.record_name,
     b.project_status, b.project_type, b.inactive,
     b.number_of_units, b.date, b.date_type, b.dcp_projectcompleted,
     b.date_filed, b.date_permittd, 
@@ -65,7 +65,7 @@ CREATE TABLE dcp_n_study_future_proj AS(
     a.geom
 	FROM geom_merge a
 	LEFT JOIN(
-		SELECT DISTINCT ON (project_id) *
+		SELECT DISTINCT ON (record_id) *
 		FROM dcp_n_study_future) AS b
-	ON a.project_id = b.project_id
+	ON a.record_id = b.record_id
 );

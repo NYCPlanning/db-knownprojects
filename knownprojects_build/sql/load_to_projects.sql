@@ -7,16 +7,16 @@ BEGIN
     execute format('INSERT INTO 
     				project_geoms(
                         source,
-                        project_id,
-                        project_name,
+                        record_id,
+                        record_name,
                         project_status,
                         project_type,
                         number_of_units,
                         geom)
     				SELECT 
                         source,
-                        project_id,
-                        project_name,
+                        record_id,
+                        record_name,
                         project_status,
                         project_type,
                         number_of_units,

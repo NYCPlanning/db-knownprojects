@@ -4,7 +4,8 @@
 
 ALTER TABLE edc_projects
     ADD source text,
-    ADD project_id text,
+    ADD record_id text,
+    ADD record_name text,
     ADD project_status text,
     ADD project_type text,
     ADD number_of_units text,
@@ -68,7 +69,8 @@ where geom is null;
 /********************* Column Mapping *******************/
 UPDATE edc_projects t
 SET source = 'EDC Projected Projects',
-    project_id = edc_id,
+    record_id = edc_id,
+    record_name = project_name,
     project_status = 'Projected',
     project_type = NULL,
     number_of_units = total_units,
@@ -91,11 +93,11 @@ SET source = 'EDC Projected Projects',
 DROP TABLE IF EXISTS edc_projects_proj;
 CREATE TABLE edc_projects_proj AS(
 	WITH geom_merge AS (
-		SELECT project_id, ST_UNION(geom) AS geom
+		SELECT record_id, ST_UNION(geom) AS geom
 		FROM edc_projects
-		GROUP BY project_id
+		GROUP BY record_id
 	)
-	SELECT b.source, b.project_id, b.project_name,
+	SELECT b.source, b.record_id, b.record_name,
     b.project_status, b.project_type, b.inactive,
     b.number_of_units, b.date, b.date_type, b.dcp_projectcompleted,
     b.date_filed, b.date_permittd,
@@ -105,7 +107,7 @@ CREATE TABLE edc_projects_proj AS(
     a.geom
 	FROM geom_merge a
 	LEFT JOIN(
-		SELECT DISTINCT ON (project_id) *
+		SELECT DISTINCT ON (record_id) *
 		FROM edc_projects) AS b
-	ON a.project_id = b.project_id
+	ON a.record_id = b.record_id
 );
