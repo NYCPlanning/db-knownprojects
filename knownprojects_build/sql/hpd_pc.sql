@@ -1,7 +1,8 @@
 /****************** Assign bbl geometries ****************/
 ALTER TABLE hpd_pc
     ADD source text,
-    ADD project_name text,
+    ADD record_id text,
+    ADD record_name text,
     ADD project_status text,
     ADD project_type text,
     ADD number_of_units text,
@@ -27,11 +28,8 @@ WHERE a.bbl = b.bbl::TEXT;
 /********************* Column Mapping *******************/
 UPDATE hpd_pc t
 SET source = 'HPD Projected Closings',
-    project_id = (CASE
-                    WHEN project_id LIKE '%/%' THEN project_id
-                    ELSE project_id||'/'||building_id
-                END),
-    project_name = house_number||' '||street_name,
+    record_id = project_id||'/'||building_id,
+    record_name = house_number||' '||street_name,
     project_status = 'Projected',
     project_type = NULL,
     number_of_units = (min_of_projected_units::INTEGER + max_of_projected_units::INTEGER)/2,
@@ -53,11 +51,11 @@ SET source = 'HPD Projected Closings',
 DROP TABLE IF EXISTS hpd_pc_proj;
 CREATE TABLE hpd_pc_proj AS(
 	WITH geom_merge AS (
-		SELECT project_id, ST_UNION(geom) AS geom
+		SELECT record_id, ST_UNION(geom) AS geom
 		FROM hpd_pc
-		GROUP BY project_id
+		GROUP BY record_id
 	)
-	SELECT b.source, b.project_id, b.project_name,
+	SELECT b.source, b.record_id, b.record_name,
     b.project_status, b.project_type, b.inactive,
     b.number_of_units, b.date, b.date_type, b.dcp_projectcompleted,
     b.date_filed, b.date_permittd,
@@ -67,7 +65,7 @@ CREATE TABLE hpd_pc_proj AS(
     a.geom
 	FROM geom_merge a
 	LEFT JOIN(
-		SELECT DISTINCT ON (project_id) *
+		SELECT DISTINCT ON (record_id) *
 		FROM hpd_pc) AS b
-	ON a.project_id = b.project_id
+	ON a.record_id = b.record_id
 );
