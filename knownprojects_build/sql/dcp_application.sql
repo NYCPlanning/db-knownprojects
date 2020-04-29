@@ -214,8 +214,8 @@ SELECT distinct
 		union 
 		select project_id from text_renewal) 
 		then 1 else 0 end) as renewal,
-	dcp_name as project_id,
-	dcp_projectname as project_name,
+	dcp_name as record_id,
+	dcp_projectname as record_name,
 	dcp_applicanttype, 
 	dcp_projectbrief, 
 	dcp_projectdescription,

@@ -23,8 +23,8 @@ sql_update_clusters = f'''
         review_notes = b.review_notes
     FROM reviewed_clusters."{year}" b
     WHERE a.source = b.source
-    AND a.project_id = b.project_id
-    AND a.project_name = b.project_name;
+    AND a.record_id = b.record_id
+    AND a.record_name = b.record_name;
 '''
 build_engine.execute(sql_update_clusters)
 
@@ -57,8 +57,8 @@ for table in tables:
         review_notes = b.review_notes
     FROM clusters."{year}" b
     WHERE a.source = b.source
-    AND a.project_id::text = b.project_id::text
-    AND a.project_name = b.project_name;
+    AND a.record_id::text = b.record_id::text
+    AND a.record_name = b.record_name;
     '''
 
     print(f"\n\nAdding cluster fields to {table}...")
@@ -81,7 +81,7 @@ for table in tables:
     
     # Export to temporary table
     print(f"Creating temporary look-up table for {table}...")
-    columns = ['source','project_id','project_name','cluster_id','sub_cluster_id','adjusted_units']
+    columns = ['source','record_id','record_name','cluster_id','sub_cluster_id','adjusted_units']
     df[columns].to_sql('tmp', con=build_engine, if_exists='replace', index=False)
 
     print(f"Updating source {table} with one-record IDs.")
@@ -91,8 +91,8 @@ for table in tables:
                     adjusted_units = b.adjusted_units
                 FROM tmp b
                 WHERE a.source = b.source
-                AND a.project_id::text = b.project_id::text
-                AND a.project_name = b.project_name;
+                AND a.record_id::text = b.record_id::text
+                AND a.record_name = b.record_name;
                 '''
     build_engine.execute(sql_update)
     build_engine.execute('DROP TABLE tmp;')

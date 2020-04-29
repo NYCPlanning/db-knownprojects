@@ -1,8 +1,8 @@
 /****************** Assign bbl geometries ****************/
 ALTER TABLE hpd_rfp
     ADD source text,
-    ADD project_id text,
-    ADD project_name text,
+    ADD record_id text,
+    ADD record_name text,
     ADD project_status text,
     ADD project_type text,
     ADD number_of_units text,
@@ -28,8 +28,8 @@ WHERE a.bbl = b.bbl::TEXT;
 /********************* Column Mapping *******************/
 UPDATE hpd_rfp t
 SET source = 'HPD RFPs',
-    project_id = request_for_proposals_name,
-    project_name = request_for_proposals_name,
+    record_id = md5(CAST((t.*)AS text)),
+    record_name = request_for_proposals_name,
     project_status = (CASE 
 			  	WHEN designated = 'Y' AND closed = 'Y' THEN 'RFP designated; financing closed'
 			  	WHEN designated = 'Y' AND closed = 'N' THEN 'RFP designated; financing not closed'
@@ -58,11 +58,11 @@ SET source = 'HPD RFPs',
 DROP TABLE IF EXISTS hpd_rfp_proj;
 CREATE TABLE hpd_rfp_proj AS(
 	WITH geom_merge AS (
-		SELECT project_name, ST_MAKEVALID(ST_UNION(geom)) AS geom
+		SELECT record_name, ST_MAKEVALID(ST_UNION(geom)) AS geom
 		FROM hpd_rfp
-		GROUP BY project_name
+		GROUP BY record_name
 	)
-	SELECT b.source, b.project_id, b.project_name,
+	SELECT b.source, b.record_id, b.record_name,
     b.project_status, b.project_type, b.inactive,
     b.number_of_units, b.date, b.date_type, b.dcp_projectcompleted,
     b.date_filed, b.date_permittd, 
@@ -72,8 +72,8 @@ CREATE TABLE hpd_rfp_proj AS(
     a.geom
 	FROM geom_merge a
 	LEFT JOIN(
-		SELECT DISTINCT ON (project_name) *
+		SELECT DISTINCT ON (record_name) *
 		FROM hpd_rfp) AS b
-	ON a.project_name = b.project_name
+	ON a.record_name = b.record_name
 );
 
