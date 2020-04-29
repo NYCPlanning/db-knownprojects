@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import os
 
-year = '2020'
+year = 'test'
 
 # Sources included in clusters
 tables = ['dcp_application',
