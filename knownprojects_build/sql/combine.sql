@@ -1,7 +1,7 @@
 DROP TABLE if exists combined;
 create table combined as (
     select 
-        source, project_id::text, project_name, 
+        source, record_id::text, record_name, 
         project_status, project_type,
         number_of_units::integer, date, date_type, 
         null as date_filed, null as date_complete,
@@ -14,7 +14,7 @@ create table combined as (
     from dcp_application
     union
     select 
-        source, project_id::text, project_name, 
+        source, record_id::text, record_name, 
         project_status, project_type,
         number_of_units::integer, date, date_type,
         null as date_filed, null as date_complete, 
@@ -27,7 +27,7 @@ create table combined as (
     from dcp_planneradded_proj
     union
     select 
-        source, project_id::text, project_name, 
+        source, record_id::text, record_name, 
         project_status, project_type,
         number_of_units::integer, date, date_type,
         null as date_filed, null as date_complete, 
@@ -40,7 +40,7 @@ create table combined as (
     from dcp_n_study_proj
     union
     select 
-        source, project_id::text, project_name, 
+        source, record_id::text, record_name, 
         project_status, project_type,
         number_of_units::integer, date, date_type,
         null as date_filed, null as date_complete, 
@@ -53,7 +53,7 @@ create table combined as (
     from edc_projects_proj
     union
     select 
-        source, project_id::text, project_name, 
+        source, record_id::text, record_name, 
         project_status, project_type,
         number_of_units::integer, date, date_type,
         null as date_filed, null as date_complete, 
@@ -66,7 +66,7 @@ create table combined as (
     from esd_projects_proj
     union
     select 
-        source, project_id::text, project_name, 
+        source, record_id::text, record_name, 
         project_status, project_type,
         number_of_units::integer, date, date_type,
         null as date_filed, null as date_complete, 
@@ -79,7 +79,7 @@ create table combined as (
     from hpd_rfp_proj
     union
     select 
-        source, project_id::text, project_name, 
+        source, record_id::text, record_name, 
         project_status, project_type,
         number_of_units::integer, date, date_type,
         null as date_filed, null as date_complete, 

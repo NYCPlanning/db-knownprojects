@@ -5,7 +5,7 @@ from cartoframes import to_carto
 from shapely import wkb
 import geopandas as gpd
 
-year = '2020'
+year = 'test'
 
 set_default_credentials(
     username=os.environ.get('CARTO_USERNAME'),
