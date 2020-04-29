@@ -3,8 +3,8 @@
 DROP TABLE IF EXISTS bbl_geoms CASCADE;
 CREATE TABLE bbl_geoms (
     source text,
-    project_id text,
-    project_name text,
+    record_id text,
+    record_name text,
     bbl text,
     geom geometry(Geometry,4326)
 );
