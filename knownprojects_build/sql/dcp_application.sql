@@ -69,20 +69,37 @@ year_filter as (
 text_filter as (
 	SELECT dcp_name
 	FROM dcp_project
-	WHERE regexp_replace(
+	WHERE (regexp_replace(
 		array_to_string(
 			ARRAY[dcp_projectbrief,
 				dcp_projectdescription,
 				dcp_projectname], 
 			' '),
 		'[^a-zA-Z0-9]+', ' ','g'
-	) ~* 
-	array_to_string(ARRAY[
-		'HUDSON YARDS',
-		'home','family','resid',
-		'appartment','apt','affordable', 
-		'mix-','mixed-', 'dwelling',
-		'living', 'housi', 'mih','DUs'], '|')
+		) like '%DUs%'
+		or regexp_replace(
+			array_to_string(
+				ARRAY[dcp_projectbrief,
+					dcp_projectdescription,
+					dcp_projectname], 
+				' '),
+			'[^a-zA-Z0-9]+', ' ','g'
+			) like '%MIH%'
+		or regexp_replace(
+			array_to_string(
+				ARRAY[dcp_projectbrief,
+					dcp_projectdescription,
+					dcp_projectname], 
+				' '),
+			'[^a-zA-Z0-9]+', ' ','g'
+		) ~* 
+		array_to_string(ARRAY[
+			'HUDSON YARDS',
+			'home','family','resid',
+			'appartment','apt','affordable', 
+			'mix-','mixed-', 'dwelling',
+			'living', 'housi'], '|')
+	)
 	AND regexp_replace(
 		array_to_string(
 			ARRAY[dcp_projectbrief,
