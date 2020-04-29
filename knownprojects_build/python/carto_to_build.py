@@ -30,8 +30,8 @@ cluster_table = f"clusters.\"{year}\""
 reviewed_table = f"reviewed_clusters.\"{year}\""
 
 DDL = {"source":"text",
-    "project_id":"text",
-    "project_name":"text",
+    "record_id":"text",
+    "record_name":"text",
     "project_status":"text",
     "inactive":"text",
     "project_type":"text",

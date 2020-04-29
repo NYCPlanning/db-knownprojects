@@ -3,8 +3,8 @@
 DROP TABLE IF EXISTS project_geoms CASCADE;
 CREATE TABLE project_geoms (
     source text,
-    project_id text,
-    project_name text,
+    record_id text,
+    record_name text,
     project_status text,
     project_type text,
     number_of_units text,

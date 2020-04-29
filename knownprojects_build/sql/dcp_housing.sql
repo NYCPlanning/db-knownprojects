@@ -4,8 +4,8 @@ RENAME geom TO wkb_geometry;
 
 ALTER TABLE dcp_housing
     ADD source text,
-    ADD project_id text,
-    ADD project_name text,
+    ADD record_id text,
+    ADD record_name text,
     ADD borough text,
     ADD project_status text,
     ADD project_type text,
@@ -37,8 +37,8 @@ AND a.geom IS NULL;
 /********************* Column Mapping *******************/
 UPDATE dcp_housing t
 SET source = 'DOB',
-    project_id = job_number,
-    project_name = address,
+    record_id = job_number,
+    record_name = address,
     project_status = job_status,
     project_type = job_type,
     number_of_units = units_net,
@@ -75,11 +75,11 @@ SET source = 'DOB',
 DROP TABLE IF EXISTS dcp_housing_proj;
 CREATE TABLE dcp_housing_proj AS(
 	WITH geom_merge AS (
-		SELECT project_id, ST_UNION(geom) AS geom
+		SELECT record_id, ST_UNION(geom) AS geom
 		FROM dcp_housing
-		GROUP BY project_id
+		GROUP BY record_id
 	)
-	SELECT b.source, b.project_id, b.project_name,
+	SELECT b.source, b.record_id, b.record_name,
     b.project_status, b.project_type, b.inactive,
     b.number_of_units, b.date, b.date_type, b.dcp_projectcompleted,
     b.date_filed, b.date_lastupdt, b.date_complete,
@@ -88,7 +88,7 @@ CREATE TABLE dcp_housing_proj AS(
     a.geom
 	FROM geom_merge a
 	LEFT JOIN(
-        SELECT DISTINCT ON (project_id) *
+        SELECT DISTINCT ON (record_id) *
         FROM dcp_housing) AS b
-	ON a.project_id = b.project_id
+	ON a.record_id = b.record_id
 );
