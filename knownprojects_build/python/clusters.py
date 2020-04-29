@@ -9,7 +9,7 @@ from cartoframes import to_carto
 from shapely import wkb
 import geopandas as gpd
 
-year = '2020'
+year = 'test'
 
 set_default_credentials(
     username=os.environ.get('CARTO_USERNAME'),
@@ -162,7 +162,6 @@ deduped['review_notes'] = ''
 # Export full cluster table
 print("Exporting full cluster table...")
 deduped_export = deduped[['source', 'record_id', 'record_name', 'project_status', 'inactive', 'project_type',
-
                         'date', 'date_type','timeline', 'dcp_projectcompleted',
                         'number_of_units', 'adjusted_units','cluster_id','sub_cluster_id',
                         'review_initials','review_notes','geom']]

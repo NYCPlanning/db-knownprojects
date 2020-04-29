@@ -10,7 +10,7 @@ from shapely import wkb
 import geopandas as gpd
 from datetime import date
 
-year = '2020'
+year = 'test'
 
 set_default_credentials(
     username=os.environ.get('CARTO_USERNAME'),
@@ -45,7 +45,7 @@ DDL = {"source":"text",
     "sub_cluster_id":"text",
     "review_initials":"text",
     "review_notes":"text",
-    "geom":"geometry(MultiPolygon,4326)"}
+    "geom":"geometry(geometry,4326)"}
 
 
 # Export to build engine
