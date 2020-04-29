@@ -24,7 +24,7 @@ ALTER TABLE dcp_n_study_projected
 /********************* Column Mapping *******************/
 UPDATE dcp_n_study_projected t
 SET source = 'Neighborhood Study Projected Development Sites',
-    record_id = project_id,
+    record_id = md5(CAST((t.*)AS text)),
     record_name = REPLACE(project_id, ' Projected Development Sites', ''),
     project_status = 'Projected Development',
     project_type = NULL,

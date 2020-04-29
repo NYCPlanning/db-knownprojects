@@ -31,7 +31,7 @@ WHERE a.bbl = b.bbl::TEXT;
 /********************* Column Mapping *******************/
 UPDATE esd_projects t
 SET source = 'Empire State Development Projected Projects',
-    record_id = project_name,
+    record_id = md5(CAST((t.*)AS text)),
     record_name = project_name,
     project_status = 'Projected',
     project_type = NULL,

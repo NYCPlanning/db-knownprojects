@@ -28,7 +28,7 @@ WHERE a.bbl = b.bbl::TEXT;
 /********************* Column Mapping *******************/
 UPDATE hpd_rfp t
 SET source = 'HPD RFPs',
-    record_id = request_for_proposals_name,
+    record_id = md5(CAST((t.*)AS text)),
     record_name = request_for_proposals_name,
     project_status = (CASE 
 			  	WHEN designated = 'Y' AND closed = 'Y' THEN 'RFP designated; financing closed'
