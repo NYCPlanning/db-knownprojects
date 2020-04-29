@@ -7,14 +7,14 @@ BEGIN
     execute format('INSERT INTO 
     				bbl_geoms(
                         source,
-                        project_id,
-                        project_name,
+                        record_id,
+                        record_name,
                         bbl,
                         geom)
     				SELECT 
                         source,
-                        project_id,
-                        project_name,
+                        record_id,
+                        record_name,
                         bbl,
                         geom
 				FROM %I; ', tbl);
