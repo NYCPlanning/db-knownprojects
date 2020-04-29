@@ -28,8 +28,8 @@ WHERE a.bbl = b.bbl::TEXT;
 /********************* Column Mapping *******************/
 UPDATE dcp_n_study t
 SET source = 'Neighborhood Study Rezoning Commitments',
-    record_id = neighborhood_study||' '||commitment_site,
-    record_name = commitment_site,
+    record_id = md5(CAST((t.*)AS text)),
+    record_name = neighborhood_study||': '||commitment_site,
     project_status = 'Rezoning Commitment',
     project_type = NULL,
     date = NULL,

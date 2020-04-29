@@ -28,8 +28,8 @@ WHERE a.neighborhood = b.study;
 /********************* Column Mapping *******************/
 UPDATE dcp_n_study_future t
 SET source = 'Future Neighborhood Studies',
-    record_id = neighborhood||' '||'Future Rezoning Development',
-    record_name = neighborhood,
+    record_id = md5(CAST((t.*)AS text)),
+    record_name = neighborhood||' '||'Future Rezoning Development',
     project_status = 'Projected',
     project_type = 'Future Rezoning',
     number_of_units = incremental_units_with_certainty_factor,

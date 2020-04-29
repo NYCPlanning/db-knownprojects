@@ -69,7 +69,7 @@ where geom is null;
 /********************* Column Mapping *******************/
 UPDATE edc_projects t
 SET source = 'EDC Projected Projects',
-    record_id = edc_id,
+    record_id = md5(CAST((t.*)AS text)),
     record_name = project_name,
     project_status = 'Projected',
     project_type = NULL,
