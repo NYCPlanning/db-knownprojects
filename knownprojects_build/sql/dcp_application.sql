@@ -161,7 +161,8 @@ corr_relevant_projects as (
 		select dcp_name
 		from corr_include
 	) a 
-	WHERE dcp_name not in (select dcp_name from corr_exclude)
+	WHERE dcp_name not in 
+		(select dcp_name from corr_exclude)
 ),
 zap_extract as (
 	SELECT
@@ -296,3 +297,35 @@ from kpdb_corrections b
 where a.record_id = b.record_id
 and ((number_of_units is null and b.old_value is null)
 or number_of_units::text = b.old_value);
+
+DELETE FROM dcp_application
+WHERE record_id in (
+	select record_id
+	from kpdb_corrections
+	where field ~* 'exclude'
+);
+
+-- apply renewal unit counts
+WITH 
+renewal as (
+	select record_id, number_of_units
+	from dcp_application
+	where record_id in
+	(select renewal_id as record_id from renewal_lookup)),
+updated_nonrenewal as (
+	select a.nonrenewal_id as record_id, 
+		b.number_of_units 
+	from renewal_lookup a
+	join renewal b
+	on a.renewal_id = b.record_id)
+update dcp_application a
+set number_of_units = b.number_of_units
+from updated_nonrenewal b
+where a.record_id = b.record_id
+and b.number_of_units is not null;
+
+DROP TABLE IF EXISTS dcp_application_proj;
+SELECT * INTO dcp_application_proj
+FROM dcp_application
+WHERE record_id not in 
+(select renewal_id as record_id from renewal_lookup);
