@@ -2,6 +2,9 @@
 -- DELETE FROM edc_projects
 -- WHERE excluded = 'TRUE';
 
+ALTER TABLE edc_projects 
+    RENAME COLUMN status TO edc_status;
+
 ALTER TABLE edc_projects
     ADD source text,
     ADD record_id text,

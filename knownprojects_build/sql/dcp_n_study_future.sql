@@ -1,5 +1,8 @@
 /****************** Assign bbl geometries ****************/
 ALTER TABLE dcp_n_study_future
+    RENAME COLUMN status TO n_study_future_status;
+
+ALTER TABLE dcp_n_study_future
     ADD source text,
     ADD record_id text,
     ADD record_name text,
