@@ -1,12 +1,43 @@
 DROP TABLE if exists dcp_application;
 with
+cm_renewal as (
+	select dcp_name as project_id
+	from dcp_project
+	where dcp_leadaction in (
+		select dcp_projectactionid 
+		from dcp_projectaction
+		where dcp_name ~* 'CM')
+	union 
+	select split_part(dcp_dmsourceid, '_', 1) as project_id
+	from dcp_projectaction
+	where dcp_name ~* 'CM'
+	union
+	select dcp_name as project_id
+	from dcp_project where dcp_projectid in (
+	select dcp_project 
+	from dcp_projectaction 
+	where dcp_name ~* 'CM')),
 --these are the projects that we are confident that are residential
 school_seat_filter as (
 	SELECT dcp_name
 	FROM dcp_project
 	WHERE dcp_sischoolseat is TRUE
-	or dcp_projectbrief||dcp_projectdescription||dcp_projectname like 'SS%'
-	or dcp_projectbrief||dcp_projectdescription||dcp_projectname ~* 'school seat|schools seat'
+	or regexp_replace(
+		array_to_string(
+			ARRAY[dcp_projectbrief,
+				dcp_projectdescription,
+				dcp_projectname], 
+			' '),
+		'[^a-zA-Z0-9]+', ' ','g'
+		) like 'SS%'
+	or regexp_replace(
+		array_to_string(
+			ARRAY[dcp_projectbrief,
+				dcp_projectdescription,
+				dcp_projectname], 
+			' '),
+		'[^a-zA-Z0-9]+', ' ','g'
+		) ~* 'school seat|schools seat'
 ),
 -- we exclude projects that have record closed, terminated or withdrawn as status
 status_filter as (
@@ -38,16 +69,45 @@ year_filter as (
 text_filter as (
 	SELECT dcp_name
 	FROM dcp_project
-	WHERE regexp_replace(
-			dcp_projectbrief||dcp_projectdescription||dcp_projectname, 
-			'[^a-zA-Z0-9]+', ' ','g') ~* 
+	WHERE (regexp_replace(
+		array_to_string(
+			ARRAY[dcp_projectbrief,
+				dcp_projectdescription,
+				dcp_projectname], 
+			' '),
+		'[^a-zA-Z0-9]+', ' ','g'
+		) like '%DUs%'
+		or regexp_replace(
+			array_to_string(
+				ARRAY[dcp_projectbrief,
+					dcp_projectdescription,
+					dcp_projectname], 
+				' '),
+			'[^a-zA-Z0-9]+', ' ','g'
+			) like '%MIH%'
+		or regexp_replace(
+			array_to_string(
+				ARRAY[dcp_projectbrief,
+					dcp_projectdescription,
+					dcp_projectname], 
+				' '),
+			'[^a-zA-Z0-9]+', ' ','g'
+		) ~* 
 		array_to_string(ARRAY[
-		'home','family','resid',
-		'appartment','apt','affordable',
-		'living', 'housi', 'mih','DUs'], '|')
+			'HUDSON YARDS',
+			'home','family','resid',
+			'appartment','apt','affordable', 
+			'mix-','mixed-', 'dwelling',
+			'living', 'housi'], '|')
+	)
 	AND regexp_replace(
-			dcp_projectbrief||dcp_projectdescription||dcp_projectname, 
-			'[^a-zA-Z0-9]+', ' ','g') !~* 
+		array_to_string(
+			ARRAY[dcp_projectbrief,
+				dcp_projectdescription,
+				dcp_projectname],
+			' '),
+		'[^a-zA-Z0-9]+', ' ','g'
+	) !~* 
 		array_to_string(ARRAY[
 		'RESIDENTIAL TO COMMERCIAL', 
 		'SINGLE-FAMILY', 'SINGLE FAMILY', 
@@ -62,6 +122,7 @@ text_filter as (
 		'LIVINGSTON', 'AMBULATORY', 
 		'APPLICATION FOR PARKING',
 		'CHAIRPERSON CERTIFICATION',
+		'Chair Cert',
 		'ROOFTOP'], '|')),
 consolidated_filter as (
 	SELECT dcp_name 
@@ -75,7 +136,15 @@ relevant_projects as (
 	WHERE dcp_name in (SELECT dcp_name FROM year_filter)
 	and dcp_name not in (SELECT dcp_name FROM school_seat_filter)
 	and dcp_name not in (SELECT dcp_name FROM status_filter)
-	and dcp_name not in (SELECT dcp_name FROM applicant_filter)),
+	and dcp_name not in (SELECT dcp_name FROM applicant_filter)
+	UNION
+	SELECT distinct project_id as dcp_name 
+	FROM dcp_knownprojects 
+	WHERE source = 'DCP Applications'
+	and project_id in (SELECT dcp_name FROM year_filter)
+	and project_id not in (SELECT dcp_name FROM school_seat_filter)
+	and project_id not in (SELECT dcp_name FROM status_filter)
+	and project_id not in (SELECT dcp_name FROM applicant_filter)),
 zap_extract as (
 	SELECT
 	dcp_name,
@@ -98,7 +167,21 @@ zap_extract as (
 	COALESCE(dcp_noofvoluntaryaffordabledus, 0) as dcp_noofvoluntaryaffordabledus,
 	COALESCE(dcp_residentialsqft, 0) as dcp_residentialsqft
 	FROM dcp_project
-	WHERE dcp_name in (SELECT dcp_name FROM relevant_projects)),
+	WHERE dcp_name in 
+		(SELECT distinct dcp_name 
+		FROM relevant_projects)),
+text_renewal as (
+	select dcp_name as project_id 
+	from zap_extract
+	where regexp_replace(
+		array_to_string(
+			ARRAY[dcp_projectbrief,
+				dcp_projectdescription,
+				dcp_projectname], 
+			' '),
+		'[^a-zA-Z0-9]+', ' ','g'
+		) ~* 'renewal'
+),
 zap_geom as (
 	SELECT a.*, b.wkb_geometry as geom 
 	FROM zap_extract a
@@ -126,6 +209,11 @@ get_ulurp_geom as (
 SELECT distinct 
 --descriptor fields
 	'DCP Application' as source,
+	(case when dcp_name in (
+		select project_id from cm_renewal
+		union 
+		select project_id from text_renewal) 
+		then 1 else 0 end) as renewal,
 	dcp_name as record_id,
 	dcp_projectname as record_name,
 	dcp_applicanttype, 
@@ -133,6 +221,7 @@ SELECT distinct
 	dcp_projectdescription,
 	dcp_borough as borough,
 	statuscode as project_status,
+
 --units fields
 	dcp_numberofnewdwellingunits,
 	dcp_totalnoofdusinprojecd,
@@ -153,12 +242,14 @@ SELECT distinct
 	
 --identify unit source
 	COALESCE(
-		(case when nullif(dcp_numberofnewdwellingunits,0) is not NULL then 'dcp_numberofnewdwellingunits' end),
-		(case when nullif(dcp_totalnoofdusinprojecd,0) is not NULL then 'dcp_totalnoofdusinprojecd' end),
+		(case when nullif(dcp_numberofnewdwellingunits,0) is not NULL 
+			then 'dcp_numberofnewdwellingunits' end),
+		(case when nullif(dcp_totalnoofdusinprojecd,0) is not NULL 
+			then 'dcp_totalnoofdusinprojecd' end),
 		(case when nullif(dcp_mihdushighernumber+dcp_noofvoluntaryaffordabledus,0) is not NULL 
-		then 'dcp_mihdushighernumber + dcp_noofvoluntaryaffordabledus' end),
+			then 'dcp_mihdushighernumber + dcp_noofvoluntaryaffordabledus' end),
 		(case when nullif(dcp_mihduslowernumber+ dcp_noofvoluntaryaffordabledus,0) is not NULL 
-		then 'dcp_mihduslowernumber + dcp_noofvoluntaryaffordabledus' end)
+			then 'dcp_mihduslowernumber + dcp_noofvoluntaryaffordabledus' end)
 		) 
 	as number_of_units_source,
 
@@ -166,11 +257,13 @@ SELECT distinct
 	certifiedreferred as date,	
 	'Certified Referred' as date_type,
 	projectcompleted as dcp_projectcompleted,
+
 --dob fields
 	NULL as date_filed,
 	NULL as date_permittd, 
 	NULL as date_lastupdt,
 	NULL as date_complete,
+	
 --kpdb fields
 	NULL as inactive, 
 	NULL as project_type, 
