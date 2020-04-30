@@ -12,19 +12,19 @@ set_default_credentials(
 )
 
 def dedup_exacts(group):
-    group.loc[:,'adjusted_units']=group['number_of_units']
+    group.loc[:,'units_net']=group['units_gross']
     if group.shape[0] > 1:
         if group.source_id.unique().shape[0] > 1:
             top_priority = min(group.source_id.unique())
-            group.loc[group['source_id'] != top_priority, 'adjusted_units'] = 0.0
+            group.loc[group['source_id'] != top_priority, 'units_net'] = 0.0
     return group
 
 def subtract_units(row, group):
     higher_priority = group[group['source_id'] < row['source_id']]
-    higher_priority_units = higher_priority['adjusted_units'].sum()
-    row['adjusted_units'] = row['adjusted_units'] - higher_priority_units
-    if row['adjusted_units'] < 0:
-        row['adjusted_units'] = 0
+    higher_priority_units = higher_priority['units_net'].sum()
+    row['units_net'] = row['units_net'] - higher_priority_units
+    if row['units_net'] < 0:
+        row['units_net'] = 0
     return row
 
 def resolve_cluster(group):
@@ -52,10 +52,10 @@ def resolve_all_clusters(df):
     # Deduplicate exact count matches
     print("Deduplicating exact count matches...")
     df.sort_values(by=['verified_cluster','source_id'])
-    df.number_of_units.fillna(value=99999, inplace=True) # Temporarily fill null so that it can be used as groupby
-    deduped = df.groupby(['verified_cluster','number_of_units'], as_index=False).apply(dedup_exacts)
-    deduped.number_of_units.replace(99999, np.nan, inplace=True)
-    deduped.adjusted_units.replace(99999, np.nan, inplace=True) # Reset null
+    df.units_gross.fillna(value=99999, inplace=True) # Temporarily fill null so that it can be used as groupby
+    deduped = df.groupby(['verified_cluster','units_gross'], as_index=False).apply(dedup_exacts)
+    deduped.units_gross.replace(99999, np.nan, inplace=True)
+    deduped.units_net.replace(99999, np.nan, inplace=True) # Reset null
 
     # Subtract units within cluster based on hierarchy
     print("Subtracting units within verified clusters based on source hierarchy...")
@@ -73,7 +73,7 @@ def resolve_all_clusters(df):
     except:
         pass
     print("Output of resolved clusters: \n", 
-        resolved[['source', 'number_of_units', 'adjusted_units', 'cluster_id', 'sub_cluster_id']].head(10))
+        resolved[['source', 'units_gross', 'units_net', 'cluster_id', 'sub_cluster_id']].head(10))
     resolved.to_csv('review/resolved_clusters.csv', index=False)
 
     '''

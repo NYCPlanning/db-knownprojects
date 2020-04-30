@@ -32,15 +32,15 @@ reviewed_table = f"reviewed_clusters.\"{year}\""
 DDL = {"source":"text",
     "record_id":"text",
     "record_name":"text",
-    "project_status":"text",
+    "status":"text",
     "inactive":"text",
-    "project_type":"text",
+    "type":"text",
     "date":"text",
     "date_type":"text",
     "timeline":"text",
     "dcp_projectcompleted":"text",
-    "number_of_units":"text",
-    "adjusted_units":"text",
+    "units_gross":"text",
+    "units_net":"text",
     "cluster_id":"text",
     "sub_cluster_id":"text",
     "review_initials":"text",
@@ -56,7 +56,7 @@ exporter(cluster_gdf, cluster_table, DDL,
             sep='$', 
             geo_column='geom', SRID=4326)
 
-DDL.pop("adjusted_units")
+DDL.pop("units_net")
 
 exporter(reviewed_gdf, reviewed_table, DDL, 
             con=build_engine,
