@@ -3,9 +3,9 @@ ALTER TABLE hpd_rfp
     ADD source text,
     ADD record_id text,
     ADD record_name text,
-    ADD project_status text,
-    ADD project_type text,
-    ADD number_of_units text,
+    ADD status text,
+    ADD type text,
+    ADD units_gross text,
     ADD date text,
     ADD date_type text,
     ADD dcp_projectcompleted text,
@@ -30,13 +30,13 @@ UPDATE hpd_rfp t
 SET source = 'HPD RFPs',
     record_id = md5(CAST((t.*)AS text)),
     record_name = request_for_proposals_name,
-    project_status = (CASE 
+    status = (CASE 
 			  	WHEN designated = 'Y' AND closed = 'Y' THEN 'RFP designated; financing closed'
 			  	WHEN designated = 'Y' AND closed = 'N' THEN 'RFP designated; financing not closed'
 			  	WHEN designated = 'N' AND closed = 'N' THEN 'RFP issued; financing not closed'
 		END),
-    project_type = NULL,
-    number_of_units = (CASE WHEN est_units ~* '-' THEN NULL 
+    type = NULL,
+    units_gross = (CASE WHEN est_units ~* '-' THEN NULL 
                         ELSE REPLACE(est_units, ',', '') END),
     date = (CASE 
             WHEN closed_date = '-' THEN NULL 
@@ -63,8 +63,8 @@ CREATE TABLE hpd_rfp_proj AS(
 		GROUP BY record_name
 	)
 	SELECT b.source, b.record_id, b.record_name,
-    b.project_status, b.project_type, b.inactive,
-    b.number_of_units, b.date, b.date_type, b.dcp_projectcompleted,
+    b.status, b.type, b.inactive,
+    b.units_gross, b.date, b.date_type, b.dcp_projectcompleted,
     b.date_filed, b.date_permittd, 
     b.date_lastupdt, b.date_complete,
     b.portion_built_by_2025,
