@@ -20,7 +20,7 @@ if not os.path.exists('review'):
         os.makedirs('review')
 
 # Sources to include in clusters
-tables = ['dcp_application',
+tables = ['dcp_application_proj',
         'dcp_planneradded_proj',
         'dcp_n_study_proj',
         'edc_projects_proj',
