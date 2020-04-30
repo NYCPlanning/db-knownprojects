@@ -9,10 +9,10 @@ filtered_dcp_housing_proj as (
     SELECT a.source, 
         a.record_id::text, 
         a.record_name, 
-        a.project_status, 
-        a.project_type,
+        a.status, 
+        a.type,
         a.inactive,
-        a.number_of_units::integer, 
+        a.units_gross::integer, 
         a.date, 
         a.date_type,
         a.date_filed,
@@ -26,20 +26,20 @@ filtered_dcp_housing_proj as (
     from dcp_housing_proj a
     LEFT JOIN dcp_housing b
     ON a.record_id = b.job_number
-    WHERE a.project_type <> 'Demolition'
-    AND a.project_status <> 'Withdrawn'
+    WHERE a.type <> 'Demolition'
+    AND a.status <> 'Withdrawn'
     AND b.units_prop::int > 0
-    AND (a.project_type <> 'Alteration'
-        and a.number_of_units::integer > 0)
+    AND (a.type <> 'Alteration'
+        and a.units_gross::integer > 0)
 ),
 matches as (
     SELECT 
     b.source, 
     b.record_id::text, 
     b.record_name, 
-    b.project_status, 
-    b.project_type,
-    b.number_of_units::integer, 
+    b.status, 
+    b.type,
+    b.units_gross::integer, 
     b.date, 
     b.date_type,
     b.date_filed,
@@ -52,8 +52,8 @@ matches as (
     a.sub_cluster_id,
     a.review_initials,
     a.review_notes, 
-    a.development_id, 
-    null as adjusted_units,
+    a.project_id, 
+    null as units_net,
     b.inactive,
     b.geom
     FROM combined a
@@ -76,27 +76,27 @@ combined_dob as (
     select *
 	from combined),
 relevantcluster as (
-	select distinct development_id
+	select distinct project_id
 	FROM matches),
 multimatch as (
     select distinct record_id
     from matches
     where source = 'DOB'
     group by record_id
-    having count(development_id) > 1),
+    having count(project_id) > 1),
 multimatchcluster as (
-    select distinct development_id
+    select distinct project_id
     from combined_dob
     where record_id in (select record_id from multimatch))
 select *,
     (case when record_id in 
 	 (select record_id from multimatch) and source='DOB' then 1 
         else 0 end) as dob_multimatch,
-    (case when development_id in 
-        (select development_id from multimatchcluster) then 1 else 0 end) as needs_review
+    (case when project_id in 
+        (select project_id from multimatchcluster) then 1 else 0 end) as needs_review
 	into dob_review
     from combined_dob
-	where development_id in (
-		select development_id 
+	where project_id in (
+		select project_id 
 		from relevantcluster)
-	order by development_id;
+	order by project_id;

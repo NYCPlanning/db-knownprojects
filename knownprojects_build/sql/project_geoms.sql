@@ -5,8 +5,8 @@ CREATE TABLE project_geoms (
     source text,
     record_id text,
     record_name text,
-    project_status text,
-    project_type text,
-    number_of_units text,
+    status text,
+    type text,
+    units_gross text,
     geom geometry(geometry,4326)
 );

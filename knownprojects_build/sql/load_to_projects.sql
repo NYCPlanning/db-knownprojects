@@ -9,17 +9,17 @@ BEGIN
                         source,
                         record_id,
                         record_name,
-                        project_status,
-                        project_type,
-                        number_of_units,
+                        status,
+                        type,
+                        units_gross,
                         geom)
     				SELECT 
                         source,
                         record_id,
                         record_name,
-                        project_status,
-                        project_type,
-                        number_of_units,
+                        status,
+                        type,
+                        units_gross,
                         geom
 				FROM %I; ', tbl);
 END;

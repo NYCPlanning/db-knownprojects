@@ -9,7 +9,7 @@ from cartoframes import to_carto
 from shapely import wkb
 import geopandas as gpd
 
-year = '2020'
+year = 'test'
 
 set_default_credentials(
     username=os.environ.get('CARTO_USERNAME'),
@@ -72,14 +72,14 @@ for i in pair:
     ON st_intersects(a.geom, b.geom))
     SELECT a_source, a_record_id, a_record_name, b_source, b_record_id, b_record_name,
     source, record_id::text, record_name, date::text, date_type, dcp_projectcompleted::text,
-    project_status, number_of_units::integer, 
-    inactive, project_type, ST_Multi(geom) as geom
+    status, units_gross::integer, 
+    inactive, type, ST_Multi(geom) as geom
     FROM part_a
     UNION
     SELECT a_source, a_record_id, a_record_name, b_source, b_record_id, b_record_name,
     source, record_id::text, record_name, date::text, date_type, dcp_projectcompleted::text,
-    project_status, number_of_units::integer,
-    inactive,project_type, ST_Multi(geom) as geom
+    status, units_gross::integer,
+    inactive,type, ST_Multi(geom) as geom
     FROM part_b
     '''
     df = pd.read_sql(sql, build_engine)
@@ -113,9 +113,9 @@ r = []
 a = 0
 for i in components:
     df = dff.loc[dff.uid.isin(list(i)), ['source',
-       'record_id', 'record_name', 'project_status', 'number_of_units',
+       'record_id', 'record_name', 'status', 'units_gross',
        'date', 'date_type', 'dcp_projectcompleted',
-       'inactive', 'project_type', 'geom', 'source_id', 'timeline']]
+       'inactive', 'type', 'geom', 'source_id', 'timeline']]
     df['cluster_id'] = a 
     a += 1
     r.append(df)
@@ -126,18 +126,18 @@ dfff = pd.concat(r).drop_duplicates().reset_index()
 # Deduplicate exact count matches
 print("Resolving clusters where all records have the same number of units...")
 def dedup_exacts(group):
-    group.loc[:,'adjusted_units']=group['number_of_units']
+    group.loc[:,'units_net']=group['units_gross']
     if group.shape[0] > 1:
         if group.source_id.unique().shape[0] > 1:
             top_priority = min(group.source_id.unique())
-            group.loc[group['source_id'] != top_priority, 'adjusted_units'] = 0.0
+            group.loc[group['source_id'] != top_priority, 'units_net'] = 0.0
     return group
 
 dfff.sort_values(by=['cluster_id','source_id'])
-dfff.number_of_units.fillna(value=99999, inplace=True) # Temporarily fill null so that it can be used as groupby
-deduped = dfff.groupby(['cluster_id','number_of_units'], as_index=False).apply(dedup_exacts)
-deduped.number_of_units.replace(99999, np.nan, inplace=True)
-deduped.adjusted_units.replace(99999, np.nan, inplace=True) # Reset null
+dfff.units_gross.fillna(value=99999, inplace=True) # Temporarily fill null so that it can be used as groupby
+deduped = dfff.groupby(['cluster_id','units_gross'], as_index=False).apply(dedup_exacts)
+deduped.units_gross.replace(99999, np.nan, inplace=True)
+deduped.units_net.replace(99999, np.nan, inplace=True) # Reset null
 deduped['sub_cluster_id'] = 1
 
 # Process to remove resolved clusters, if desired
@@ -145,7 +145,7 @@ print("Removing resolved clusters from the review table...")
 grouped = deduped.groupby('cluster_id')
 remove_clusters = []
 for name, group in grouped:
-    non_zero = group[group['adjusted_units'] != 0]
+    non_zero = group[group['units_net'] != 0]
     if non_zero.shape[0] == 1:
         print("Cluster resolved by exact-count match: ",name)
         remove_clusters.append(name)
@@ -161,10 +161,9 @@ deduped['review_notes'] = ''
 
 # Export full cluster table
 print("Exporting full cluster table...")
-deduped_export = deduped[['source', 'record_id', 'record_name', 'project_status', 'inactive', 'project_type',
-
+deduped_export = deduped[['source', 'record_id', 'record_name', 'status', 'inactive', 'type',
                         'date', 'date_type','timeline', 'dcp_projectcompleted',
-                        'number_of_units', 'adjusted_units','cluster_id','sub_cluster_id',
+                        'units_gross', 'units_net','cluster_id','sub_cluster_id',
                         'review_initials','review_notes','geom']]
 print("\n\nSize of full cluster table: ", deduped_export.shape)
 deduped_export.to_csv(f'review/clusters_{year}.csv', index=False)
@@ -174,7 +173,7 @@ to_carto(gdf, f'clusters_{year}', if_exists='replace')
 
 # Export only unresolved clusters for review
 print("Exporting unresolved cluster table for review...")
-unresolved = deduped_export[~deduped_export['cluster_id'].isin(remove_clusters)].drop(columns=['adjusted_units'])
+unresolved = deduped_export[~deduped_export['cluster_id'].isin(remove_clusters)].drop(columns=['units_net'])
 print("\n\nSize of unresolved cluster review table: ", unresolved.shape)
 unresolved.to_csv(f'review/clusters_unresolved_{year}.csv', index=False)
 gdf=gpd.GeoDataFrame(unresolved)

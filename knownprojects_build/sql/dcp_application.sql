@@ -239,7 +239,7 @@ SELECT distinct
 	dcp_projectbrief, 
 	dcp_projectdescription,
 	dcp_borough as borough,
-	statuscode as project_status,
+	statuscode as status,
 
 --units fields
 	dcp_numberofnewdwellingunits,
@@ -249,7 +249,7 @@ SELECT distinct
 	dcp_noofvoluntaryaffordabledus,
 	dcp_residentialsqft, 
 	
---calculate number_of_units
+--calculate units_gross
 	COALESCE(
 		nullif(dcp_numberofnewdwellingunits,0),
 		nullif(dcp_totalnoofdusinprojecd,0),
@@ -257,7 +257,7 @@ SELECT distinct
 			dcp_noofvoluntaryaffordabledus,0),
 		nullif(dcp_mihduslowernumber+ 
 			dcp_noofvoluntaryaffordabledus,0))
-	as number_of_units,
+	as units_gross,
 	
 --identify unit source
 	COALESCE(
@@ -270,7 +270,7 @@ SELECT distinct
 		(case when nullif(dcp_mihduslowernumber+ dcp_noofvoluntaryaffordabledus,0) is not NULL 
 			then 'dcp_mihduslowernumber + dcp_noofvoluntaryaffordabledus' end)
 		) 
-	as number_of_units_source,
+	as units_gross_source,
 
 --date fields
 	certifiedreferred as date,	
@@ -285,7 +285,7 @@ SELECT distinct
 	
 --kpdb fields
 	NULL as inactive, 
-	NULL as project_type, 
+	NULL as type, 
 	geom2 as geom
 	INTO dcp_application
 	FROM get_ulurp_geom;
