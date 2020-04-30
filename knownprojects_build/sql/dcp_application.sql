@@ -292,11 +292,12 @@ SELECT distinct
 
 -- correct number of units 
 UPDATE dcp_application a
-set number_of_units = b.new_value::integer
+set units_gross = b.new_value::integer
 from kpdb_corrections b
-where a.record_id = b.record_id
-and ((number_of_units is null and b.old_value is null)
-or number_of_units::text = b.old_value);
+where b.field = 'units_gross'
+and a.record_id = b.record_id
+and ((units_gross is null and b.old_value is null)
+or units_gross::text = b.old_value);
 
 DELETE FROM dcp_application
 WHERE record_id in (
@@ -308,21 +309,21 @@ WHERE record_id in (
 -- apply renewal unit counts
 WITH 
 renewal as (
-	select record_id, number_of_units
+	select record_id, units_gross
 	from dcp_application
 	where record_id in
 	(select renewal_id as record_id from renewal_lookup)),
 updated_nonrenewal as (
 	select a.nonrenewal_id as record_id, 
-		b.number_of_units 
+		b.units_gross 
 	from renewal_lookup a
 	join renewal b
 	on a.renewal_id = b.record_id)
 update dcp_application a
-set number_of_units = b.number_of_units
+set units_gross = b.units_gross
 from updated_nonrenewal b
 where a.record_id = b.record_id
-and b.number_of_units is not null;
+and b.units_gross is not null;
 
 DROP TABLE IF EXISTS dcp_application_proj;
 SELECT * INTO dcp_application_proj
