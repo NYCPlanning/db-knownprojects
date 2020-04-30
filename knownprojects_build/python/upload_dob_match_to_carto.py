@@ -15,8 +15,8 @@ set_default_credentials(
 sql = '''
     select 
         source, record_id::text, 
-        record_name, project_status, inactive,
-        project_type, number_of_units::integer, 
+        record_name, status, inactive,
+        type, units_gross::integer, 
         date, date_type, date_filed, date_complete,
         dcp_projectcompleted, review_notes, development_id, 
         dob_multimatch, needs_review,

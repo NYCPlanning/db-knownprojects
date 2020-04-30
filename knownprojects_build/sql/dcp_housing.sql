@@ -7,9 +7,9 @@ ALTER TABLE dcp_housing
     ADD record_id text,
     ADD record_name text,
     ADD borough text,
-    ADD project_status text,
-    ADD project_type text,
-    ADD number_of_units text,
+    ADD status text,
+    ADD type text,
+    ADD units_gross text,
     ADD date text,
     ADD date_type text,
     ADD dcp_projectcompleted text,
@@ -39,9 +39,9 @@ UPDATE dcp_housing t
 SET source = 'DOB',
     record_id = job_number,
     record_name = address,
-    project_status = job_status,
-    project_type = job_type,
-    number_of_units = units_net,
+    status = job_status,
+    type = job_type,
+    units_gross = units_net,
     date = CASE
             WHEN date_permittd IS NULL THEN NULL
             WHEN  date_permittd LIKE '%-%' THEN TO_CHAR(TO_DATE(date_permittd, 'YYYY-MM-DD'), 'YYYY/MM/DD')
@@ -80,8 +80,8 @@ CREATE TABLE dcp_housing_proj AS(
 		GROUP BY record_id
 	)
 	SELECT b.source, b.record_id, b.record_name,
-    b.project_status, b.project_type, b.inactive,
-    b.number_of_units, b.date, b.date_type, b.dcp_projectcompleted,
+    b.status, b.type, b.inactive,
+    b.units_gross, b.date, b.date_type, b.dcp_projectcompleted,
     b.date_filed, b.date_lastupdt, b.date_complete,
     b.portion_built_by_2025,
     b.portion_built_by_2035, b.portion_built_by_2055,

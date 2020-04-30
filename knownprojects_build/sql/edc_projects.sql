@@ -6,9 +6,9 @@ ALTER TABLE edc_projects
     ADD source text,
     ADD record_id text,
     ADD record_name text,
-    ADD project_status text,
-    ADD project_type text,
-    ADD number_of_units text,
+    ADD status text,
+    ADD type text,
+    ADD units_gross text,
 	ADD date text, -- Cluster date field
     ADD date_type text,
     ADD dcp_projectcompleted text, -- ZAP field
@@ -71,9 +71,9 @@ UPDATE edc_projects t
 SET source = 'EDC Projected Projects',
     record_id = md5(CAST((t.*)AS text)),
     record_name = project_name,
-    project_status = 'Projected',
-    project_type = NULL,
-    number_of_units = total_units,
+    status = 'Projected',
+    type = NULL,
+    units_gross = total_units,
 	date = build_year,
     date_type = 'Build Year',
     dcp_projectcompleted = NULL,
@@ -98,8 +98,8 @@ CREATE TABLE edc_projects_proj AS(
 		GROUP BY record_id
 	)
 	SELECT b.source, b.record_id, b.record_name,
-    b.project_status, b.project_type, b.inactive,
-    b.number_of_units, b.date, b.date_type, b.dcp_projectcompleted,
+    b.status, b.type, b.inactive,
+    b.units_gross, b.date, b.date_type, b.dcp_projectcompleted,
     b.date_filed, b.date_permittd,
     b.date_lastupdt, b.date_complete,
     b.portion_built_by_2025,

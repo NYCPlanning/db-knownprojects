@@ -9,10 +9,10 @@ filtered_dcp_housing_proj as (
     SELECT a.source, 
         a.record_id::text, 
         a.record_name, 
-        a.project_status, 
-        a.project_type,
+        a.status, 
+        a.type,
         a.inactive,
-        a.number_of_units::integer, 
+        a.units_gross::integer, 
         a.date, 
         a.date_type,
         a.date_filed,
@@ -26,20 +26,20 @@ filtered_dcp_housing_proj as (
     from dcp_housing_proj a
     LEFT JOIN dcp_housing b
     ON a.record_id = b.job_number
-    WHERE a.project_type <> 'Demolition'
-    AND a.project_status <> 'Withdrawn'
+    WHERE a.type <> 'Demolition'
+    AND a.status <> 'Withdrawn'
     AND b.units_prop::int > 0
-    AND (a.project_type <> 'Alteration'
-        and a.number_of_units::integer > 0)
+    AND (a.type <> 'Alteration'
+        and a.units_gross::integer > 0)
 ),
 matches as (
     SELECT 
     b.source, 
     b.record_id::text, 
     b.record_name, 
-    b.project_status, 
-    b.project_type,
-    b.number_of_units::integer, 
+    b.status, 
+    b.type,
+    b.units_gross::integer, 
     b.date, 
     b.date_type,
     b.date_filed,
@@ -53,7 +53,7 @@ matches as (
     a.review_initials,
     a.review_notes, 
     a.development_id, 
-    null as adjusted_units,
+    null as units_net,
     b.inactive,
     b.geom
     FROM combined a
