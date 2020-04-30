@@ -1,5 +1,13 @@
 DROP TABLE if exists dcp_application;
 with
+corr_include as (
+	select record_id as dcp_name
+	from kpdb_corrections
+	where field ~* 'include'),
+corr_exclude as (
+	select record_id as dcp_name
+	from kpdb_corrections
+	where field ~* 'exclude'),
 cm_renewal as (
 	select dcp_name as project_id
 	from dcp_project
@@ -145,6 +153,17 @@ relevant_projects as (
 	and project_id not in (SELECT dcp_name FROM school_seat_filter)
 	and project_id not in (SELECT dcp_name FROM status_filter)
 	and project_id not in (SELECT dcp_name FROM applicant_filter)),
+corr_relevant_projects as (
+	select dcp_name from (
+		select distinct dcp_name
+		from relevant_projects
+		UNION
+		select dcp_name
+		from corr_include
+	) a 
+	WHERE dcp_name not in 
+		(select dcp_name from corr_exclude)
+),
 zap_extract as (
 	SELECT
 	dcp_name,
@@ -169,7 +188,7 @@ zap_extract as (
 	FROM dcp_project
 	WHERE dcp_name in 
 		(SELECT distinct dcp_name 
-		FROM relevant_projects)),
+		FROM corr_relevant_projects)),
 text_renewal as (
 	select dcp_name as project_id 
 	from zap_extract
@@ -270,3 +289,44 @@ SELECT distinct
 	geom2 as geom
 	INTO dcp_application
 	FROM get_ulurp_geom;
+
+-- correct number of units 
+UPDATE dcp_application a
+set units_gross = b.new_value::integer
+from kpdb_corrections b
+where b.field = 'units_gross'
+and a.record_id = b.record_id
+and ((units_gross is null and b.old_value is null)
+or units_gross::text = b.old_value);
+
+DELETE FROM dcp_application
+WHERE record_id in (
+	select record_id
+	from kpdb_corrections
+	where field ~* 'exclude'
+);
+
+-- apply renewal unit counts
+WITH 
+renewal as (
+	select record_id, units_gross
+	from dcp_application
+	where record_id in
+	(select renewal_id as record_id from renewal_lookup)),
+updated_nonrenewal as (
+	select a.nonrenewal_id as record_id, 
+		b.units_gross 
+	from renewal_lookup a
+	join renewal b
+	on a.renewal_id = b.record_id)
+update dcp_application a
+set units_gross = b.units_gross
+from updated_nonrenewal b
+where a.record_id = b.record_id
+and b.units_gross is not null;
+
+DROP TABLE IF EXISTS dcp_application_proj;
+SELECT * INTO dcp_application_proj
+FROM dcp_application
+WHERE record_id not in 
+(select renewal_id as record_id from renewal_lookup);
