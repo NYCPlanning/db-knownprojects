@@ -9,7 +9,7 @@ from cartoframes import to_carto
 from shapely import wkb
 import geopandas as gpd
 
-year = 'test'
+year = '2020'
 
 set_default_credentials(
     username=os.environ.get('CARTO_USERNAME'),
@@ -169,7 +169,7 @@ print("\n\nSize of full cluster table: ", deduped_export.shape)
 deduped_export.to_csv(f'review/clusters_{year}.csv', index=False)
 gdf=gpd.GeoDataFrame(deduped_export)
 gdf['geometry'] = gdf.geom.apply(lambda x: wkb.loads(x, hex=True))
-to_carto(gdf, f'clusters_{year}', if_exists='replace')
+to_carto(gdf, f'clusters_{year}', if_exists='replace', geom_col='geom')
 
 # Export only unresolved clusters for review
 print("Exporting unresolved cluster table for review...")
@@ -178,4 +178,4 @@ print("\n\nSize of unresolved cluster review table: ", unresolved.shape)
 unresolved.to_csv(f'review/clusters_unresolved_{year}.csv', index=False)
 gdf=gpd.GeoDataFrame(unresolved)
 gdf['geometry'] = gdf.geom.apply(lambda x: wkb.loads(x, hex=True))
-to_carto(gdf, f'clusters_unresolved_{year}', if_exists='replace')
+to_carto(gdf, f'clusters_unresolved_{year}', if_exists='replace', geom_col='geom')
