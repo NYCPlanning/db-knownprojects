@@ -42,7 +42,7 @@ for table in tables:
     ALTER TABLE {table}
     ADD COLUMN IF NOT EXISTS cluster_id text,
     ADD COLUMN IF NOT EXISTS sub_cluster_id text,
-    ADD COLUMN IF NOT EXISTS adjusted_units text,
+    ADD COLUMN IF NOT EXISTS units_net text,
     ADD COLUMN IF NOT EXISTS review_initials text,
     ADD COLUMN IF NOT EXISTS review_notes text;
     '''
@@ -52,7 +52,7 @@ for table in tables:
     UPDATE {table} a
     SET cluster_id = b.cluster_id,
         sub_cluster_id = b.sub_cluster_id,
-        adjusted_units = b.adjusted_units,
+        units_net = b.units_net,
         review_initials = b.review_initials,
         review_notes = b.review_notes
     FROM clusters."{year}" b
@@ -72,23 +72,23 @@ for table in tables:
     num_nulls = df[df['cluster_id'].isna()].shape[0]
     df.loc[df['cluster_id'].isna(),'cluster_id'] = pd.Series(range(largest_cluster, largest_cluster + num_nulls)).astype(str)
     df.loc[df['sub_cluster_id'].isna(),'sub_cluster_id'] = '1'
-    df.loc[df['adjusted_units'].isna(),'adjusted_units'] = df['number_of_units']
+    df.loc[df['units_net'].isna(),'units_net'] = df['units_gross']
     largest_cluster = largest_cluster + num_nulls
 
     # Reformat numbers
     df['cluster_id'] = df.cluster_id.replace('\.0', '', regex=True)
-    df['adjusted_units'] = df.adjusted_units.replace('\.0', '', regex=True)
+    df['units_net'] = df.units_net.replace('\.0', '', regex=True)
     
     # Export to temporary table
     print(f"Creating temporary look-up table for {table}...")
-    columns = ['source','record_id','record_name','cluster_id','sub_cluster_id','adjusted_units']
+    columns = ['source','record_id','record_name','cluster_id','sub_cluster_id','units_net']
     df[columns].to_sql('tmp', con=build_engine, if_exists='replace', index=False)
 
     print(f"Updating source {table} with one-record IDs.")
     sql_update=f'''UPDATE {table} a
                 SET cluster_id = b.cluster_id,
                     sub_cluster_id = b.sub_cluster_id,
-                    adjusted_units = b.adjusted_units
+                    units_net = b.units_net
                 FROM tmp b
                 WHERE a.source = b.source
                 AND a.record_id::text = b.record_id::text

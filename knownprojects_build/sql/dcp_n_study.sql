@@ -3,9 +3,9 @@ ALTER TABLE dcp_n_study
     ADD source text,
     ADD record_id text,
     ADD record_name text,
-    ADD project_status text,
-    ADD project_type text,
-    ADD number_of_units text,
+    ADD status text,
+    ADD type text,
+    ADD units_gross text,
     ADD date text,
     ADD date_type text,
     ADD dcp_projectcompleted text,
@@ -30,8 +30,8 @@ UPDATE dcp_n_study t
 SET source = 'Neighborhood Study Rezoning Commitments',
     record_id = md5(CAST((t.*)AS text)),
     record_name = neighborhood_study||': '||commitment_site,
-    project_status = 'Rezoning Commitment',
-    project_type = NULL,
+    status = 'Rezoning Commitment',
+    type = NULL,
     date = NULL,
     date_type = NULL,
     dcp_projectcompleted = NULL,
@@ -46,7 +46,7 @@ SET source = 'Neighborhood Study Rezoning Commitments',
     ;
 
 UPDATE dcp_n_study a
-SET number_of_units = b.total_units
+SET units_gross = b.total_units
 FROM dcp_knownprojects b
 WHERE a.record_name = b.project_name_address
 AND b.source = 'Neighborhood Study Rezoning Commitments'
@@ -63,8 +63,8 @@ CREATE TABLE dcp_n_study_proj AS(
 		GROUP BY record_id, record_name
 	)
 	SELECT b.source, b.record_id, b.record_name,
-    b.project_status, b.project_type, b.inactive,
-    b.number_of_units, b.date, b.date_type, b.dcp_projectcompleted,
+    b.status, b.type, b.inactive,
+    b.units_gross, b.date, b.date_type, b.dcp_projectcompleted,
     b.date_filed, b.date_permittd, 
     b.date_lastupdt, b.date_complete,
     b.portion_built_by_2025,
