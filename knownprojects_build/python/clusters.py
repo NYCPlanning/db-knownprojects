@@ -61,23 +61,23 @@ for i in pair:
     table_b = i[1]
     sql = f'''
     WITH part_a as (
-    SELECT a.*, a.source as a_source, a.project_id::text as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id::text as b_project_id, b.project_name as b_project_name
+    SELECT a.*, a.source as a_source, a.record_id::text as a_record_id, a.record_name as a_record_name, b.source as b_source, b.record_id::text as b_record_id, b.record_name as b_record_name
     FROM {table_a} a 
     JOIN {table_b} b
     ON st_intersects(a.geom, b.geom)),
     part_b as (
-    SELECT b.*, a.source as a_source, a.project_id::text as a_project_id, a.project_name as a_project_name, b.source as b_source, b.project_id::text as b_project_id, b.project_name as b_project_name
+    SELECT b.*, a.source as a_source, a.record_id::text as a_record_id, a.record_name as a_record_name, b.source as b_source, b.record_id::text as b_record_id, b.record_name as b_record_name
     FROM {table_a} a 
     JOIN {table_b} b
     ON st_intersects(a.geom, b.geom))
-    SELECT a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
-    source, project_id::text, project_name, date::text, date_type, dcp_projectcompleted::text,
+    SELECT a_source, a_record_id, a_record_name, b_source, b_record_id, b_record_name,
+    source, record_id::text, record_name, date::text, date_type, dcp_projectcompleted::text,
     project_status, number_of_units::integer, 
     inactive, project_type, ST_Multi(geom) as geom
     FROM part_a
     UNION
-    SELECT a_source, a_project_id, a_project_name, b_source, b_project_id, b_project_name,
-    source, project_id::text, project_name, date::text, date_type, dcp_projectcompleted::text,
+    SELECT a_source, a_record_id, a_record_name, b_source, b_record_id, b_record_name,
+    source, record_id::text, record_name, date::text, date_type, dcp_projectcompleted::text,
     project_status, number_of_units::integer,
     inactive,project_type, ST_Multi(geom) as geom
     FROM part_b
@@ -96,8 +96,8 @@ dff.to_csv('review/pairwise.csv')
 
 # Create unique ID
 print("Creating a unique ID...")
-dff['uid'] = dff['source'] + dff['project_id'] + dff['project_name']
-dff['id'] = dff.apply(lambda x: [x['a_source']+x['a_project_id']+x['a_project_name'],x['b_source']+x['b_project_id']+x['b_project_name']], axis=1)
+dff['uid'] = dff['source'] + dff['record_id'] + dff['record_name']
+dff['id'] = dff.apply(lambda x: [x['a_source']+x['a_record_id']+x['a_record_name'],x['b_source']+x['b_record_id']+x['b_record_name']], axis=1)
 
 
 # Create graph object and identify connected components
@@ -113,7 +113,7 @@ r = []
 a = 0
 for i in components:
     df = dff.loc[dff.uid.isin(list(i)), ['source',
-       'project_id', 'project_name', 'project_status', 'number_of_units',
+       'record_id', 'record_name', 'project_status', 'number_of_units',
        'date', 'date_type', 'dcp_projectcompleted',
        'inactive', 'project_type', 'geom', 'source_id', 'timeline']]
     df['cluster_id'] = a 
@@ -161,7 +161,7 @@ deduped['review_notes'] = ''
 
 # Export full cluster table
 print("Exporting full cluster table...")
-deduped_export = deduped[['source', 'project_id', 'project_name', 'project_status', 'inactive', 'project_type',
+deduped_export = deduped[['source', 'record_id', 'record_name', 'project_status', 'inactive', 'project_type',
 
                         'date', 'date_type','timeline', 'dcp_projectcompleted',
                         'number_of_units', 'adjusted_units','cluster_id','sub_cluster_id',

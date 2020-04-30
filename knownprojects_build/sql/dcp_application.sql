@@ -1,5 +1,13 @@
 DROP TABLE if exists dcp_application;
 with
+corr_include as (
+	select record_id as dcp_name
+	from kpdb_corrections
+	where field ~* 'include'),
+corr_exclude as (
+	select record_id as dcp_name
+	from kpdb_corrections
+	where field ~* 'exclude'),
 cm_renewal as (
 	select dcp_name as project_id
 	from dcp_project
@@ -145,6 +153,16 @@ relevant_projects as (
 	and project_id not in (SELECT dcp_name FROM school_seat_filter)
 	and project_id not in (SELECT dcp_name FROM status_filter)
 	and project_id not in (SELECT dcp_name FROM applicant_filter)),
+corr_relevant_projects as (
+	select dcp_name from (
+		select distinct dcp_name
+		from relevant_projects
+		UNION
+		select dcp_name
+		from corr_include
+	) a 
+	WHERE dcp_name not in (select dcp_name from corr_exclude)
+),
 zap_extract as (
 	SELECT
 	dcp_name,
@@ -169,7 +187,7 @@ zap_extract as (
 	FROM dcp_project
 	WHERE dcp_name in 
 		(SELECT distinct dcp_name 
-		FROM relevant_projects)),
+		FROM corr_relevant_projects)),
 text_renewal as (
 	select dcp_name as project_id 
 	from zap_extract
@@ -214,8 +232,8 @@ SELECT distinct
 		union 
 		select project_id from text_renewal) 
 		then 1 else 0 end) as renewal,
-	dcp_name as project_id,
-	dcp_projectname as project_name,
+	dcp_name as record_id,
+	dcp_projectname as record_name,
 	dcp_applicanttype, 
 	dcp_projectbrief, 
 	dcp_projectdescription,
@@ -270,3 +288,11 @@ SELECT distinct
 	geom2 as geom
 	INTO dcp_application
 	FROM get_ulurp_geom;
+
+-- correct number of units 
+UPDATE dcp_application a
+set number_of_units = b.new_value::integer
+from kpdb_corrections b
+where a.record_id = b.record_id
+and ((number_of_units is null and b.old_value is null)
+or number_of_units::text = b.old_value);

@@ -7,8 +7,8 @@ drop table if exists dob_review;
 with 
 filtered_dcp_housing_proj as (
     SELECT a.source, 
-        a.project_id::text, 
-        a.project_name, 
+        a.record_id::text, 
+        a.record_name, 
         a.project_status, 
         a.project_type,
         a.inactive,
@@ -25,16 +25,18 @@ filtered_dcp_housing_proj as (
         b.units_prop
     from dcp_housing_proj a
     LEFT JOIN dcp_housing b
-    ON a.project_id = b.job_number
+    ON a.record_id = b.job_number
     WHERE a.project_type <> 'Demolition'
     AND a.project_status <> 'Withdrawn'
     AND b.units_prop::int > 0
+    AND (a.project_type <> 'Alteration'
+        and a.number_of_units::integer > 0)
 ),
 matches as (
     SELECT 
     b.source, 
-    b.project_id::text, 
-    b.project_name, 
+    b.record_id::text, 
+    b.record_name, 
     b.project_status, 
     b.project_type,
     b.number_of_units::integer, 
@@ -61,6 +63,11 @@ matches as (
         then TRUE 
         else split_part(split_part(a.date, '/', 1), '-', 1)::numeric - 1 
             < extract(year from b.date::timestamp) 
+        end)
+    AND (case WHEN b.source = 'EDC Projected Projects' 
+        then TRUE 
+        else split_part(split_part(a.date, '/', 1), '-', 1)::numeric + 2 
+            > extract(year from b.date::timestamp)
         end)),
 combined_dob as (
 	select * 
@@ -72,19 +79,18 @@ relevantcluster as (
 	select distinct development_id
 	FROM matches),
 multimatch as (
-    select distinct project_id
+    select distinct record_id
     from matches
     where source = 'DOB'
-    group by project_id
+    group by record_id
     having count(development_id) > 1),
 multimatchcluster as (
     select distinct development_id
     from combined_dob
-    where project_id in (select project_id from multimatch)
-)
+    where record_id in (select record_id from multimatch))
 select *,
-    (case when project_id in 
-	 (select project_id from multimatch) and source='DOB' then 1 
+    (case when record_id in 
+	 (select record_id from multimatch) and source='DOB' then 1 
         else 0 end) as dob_multimatch,
     (case when development_id in 
         (select development_id from multimatchcluster) then 1 else 0 end) as needs_review
