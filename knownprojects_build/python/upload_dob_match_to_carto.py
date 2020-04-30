@@ -18,11 +18,11 @@ sql = '''
         record_name, status, inactive,
         type, units_gross::integer, 
         date, date_type, date_filed, date_complete,
-        dcp_projectcompleted, review_notes, development_id, 
+        dcp_projectcompleted, review_notes, project_id, 
         dob_multimatch, needs_review,
         geom
     from dob_review
-    order by development_id
+    order by project_id
     '''
 df = gpd.GeoDataFrame.from_postgis(sql, build_engine, geom_col='geom')
 df['dob_review_initials'] = ''
