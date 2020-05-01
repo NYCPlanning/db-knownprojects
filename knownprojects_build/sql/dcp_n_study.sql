@@ -28,7 +28,6 @@ WHERE a.bbl = b.bbl::TEXT;
 /********************* Column Mapping *******************/
 UPDATE dcp_n_study t
 SET source = 'Neighborhood Study Rezoning Commitments',
-    record_id = md5(CAST((t.*)AS text)),
     record_name = neighborhood_study||': '||commitment_site,
     status = 'Rezoning Commitment',
     type = NULL,
@@ -48,7 +47,7 @@ SET source = 'Neighborhood Study Rezoning Commitments',
 UPDATE dcp_n_study a
 SET units_gross = b.total_units
 FROM dcp_knownprojects b
-WHERE a.record_name = b.project_name_address
+WHERE a.commitment_site = b.project_name_address
 AND b.source = 'Neighborhood Study Rezoning Commitments'
 ;
 
@@ -58,9 +57,9 @@ AND b.source = 'Neighborhood Study Rezoning Commitments'
 DROP TABLE IF EXISTS dcp_n_study_proj;
 CREATE TABLE dcp_n_study_proj AS(
 	WITH geom_merge AS (
-		SELECT record_id, record_name, ST_UNION(geom) AS geom
+		SELECT record_name, ST_UNION(geom) AS geom
 		FROM dcp_n_study
-		GROUP BY record_id, record_name
+		GROUP BY record_name
 	)
 	SELECT b.source, b.record_id, b.record_name,
     b.status, b.type, b.inactive,
@@ -74,6 +73,8 @@ CREATE TABLE dcp_n_study_proj AS(
 	LEFT JOIN(
 		SELECT DISTINCT ON (record_id, record_name) *
 		FROM dcp_n_study) AS b
-	ON a.record_id = b.record_id
-    AND a.record_name = b.record_name
+	ON a.record_name = b.record_name
 );
+
+UPDATE dcp_n_study_proj t
+SET record_id = md5(CAST((t.*)AS text));
