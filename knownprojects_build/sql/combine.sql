@@ -11,7 +11,7 @@ create table combined as (
         cluster_id||'-'||sub_cluster_id as project_id,
         units_net,
         inactive, geom
-    from dcp_application
+    from dcp_application_proj
     union
     select 
         source, record_id::text, record_name, 
