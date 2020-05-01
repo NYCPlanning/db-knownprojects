@@ -7,7 +7,7 @@ import os
 year = 'test'
 
 # Sources included in clusters
-tables = ['dcp_application',
+tables = ['dcp_application_proj',
         'dcp_planneradded_proj',
         'dcp_n_study_proj',
         'edc_projects_proj',
