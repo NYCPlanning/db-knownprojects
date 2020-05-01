@@ -19,7 +19,7 @@ set_default_credentials(
 
 # Get dob-review data from carto
 print("Loading dob-review data from carto...")
-dob_review_gdf = read_carto(f'dob_review_{year}', limit=100)
+dob_review_gdf = read_carto(f'dob_review_{year}')
 dob_review_gdf.rename(columns={'the_geom':'geom'}, inplace=True)
 print(list(dob_review_gdf))
 
