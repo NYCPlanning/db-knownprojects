@@ -81,7 +81,7 @@ multimatch as (
     from matches
     where source = 'DOB'
     group by record_id
-    having count(project_id) > 1),
+    having count(distinct(project_id)) > 1),
 multimatchcluster as (
     select distinct project_id
     from combined_dob
