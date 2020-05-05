@@ -7,11 +7,11 @@ import os
 year = '2020'
 
 
-print(f"Making kpdb with {year} reviewed DOB data...")
-sql_make_kpdb = f'''
-    CREATE SCHEMA IF NOT EXISTS kpdb;
-    DROP TABLE kpdb."{year}";
-    CREATE TABLE kpdb."{year}" as (
+print(f"Making kpdb_gross with {year} reviewed DOB data...")
+sql_make_kpdb_gross = f'''
+    CREATE SCHEMA IF NOT EXISTS kpdb_gross;
+    DROP TABLE kpdb_gross."{year}";
+    CREATE TABLE kpdb_gross."{year}" as (
         SELECT 
         source, record_id::text, record_name, 
         status, type, units_gross::integer, 
@@ -34,11 +34,11 @@ sql_make_kpdb = f'''
         inactive, geom
     from dcp_housing_proj)
 '''
-print(f"\n\nCombining DOB and non-DOB data into kpdb.{year}...")
-build_engine.execute(sql_make_kpdb)
+print(f"\n\nCombining DOB and non-DOB data into kpdb_gross.{year}...")
+build_engine.execute(sql_make_kpdb_gross)
 
 sql_update_dob = f'''
-UPDATE kpdb."{year}" a
+UPDATE kpdb_gross."{year}" a
     SET project_id = b.project_id
     FROM reviewed_dob_match."{year}" b
     WHERE a.source = 'DOB'
@@ -47,19 +47,19 @@ UPDATE kpdb."{year}" a
     AND a.record_name = b.record_name
     AND b.incorrect_match = '0';
 '''
-print(f"Updating kpdb.{year} with DOB-review results...")
+print(f"Updating kpdb_gross.{year} with DOB-review results...")
 build_engine.execute(sql_update_dob)
 
 # Get maximum project ID
 sql_get_max = f'''
     SELECT max(SPLIT_PART(project_id, '-', 1)::integer)
-    FROM kpdb."{year}";
+    FROM kpdb_gross."{year}";
     '''
 largest_project_id = int(pd.read_sql(sql_get_max, build_engine).values[0][0])
 
 # Add columns
 sql_add_fields = f'''
-ALTER TABLE kpdb."{year}"
+ALTER TABLE kpdb_gross."{year}"
 ADD COLUMN IF NOT EXISTS within_5_years text,
 ADD COLUMN IF NOT EXISTS from_5_to_10_years text,
 ADD COLUMN IF NOT EXISTS after_10_years text,
@@ -70,12 +70,12 @@ ADD COLUMN IF NOT EXISTS gq text,
 ADD COLUMN IF NOT EXISTS senior_housing text,
 ADD COLUMN IF NOT EXISTS assisted_living text;
 '''
-print(f"\n\nAdding fields to kpdb.{year}...")
+print(f"\n\nAdding fields to kpdb_gross.{year}...")
 build_engine.execute(sql_add_fields)
 
 # Create cluster IDs for stand-alone DOB records
-print(f"Creating IDs for stand-alone DOB records in kpdb.{year}...")
-df = pd.read_sql(f'SELECT * FROM kpdb."{year}"', build_engine)
+print(f"Creating IDs for stand-alone DOB records in kpdb_gross.{year}...")
+df = pd.read_sql(f'SELECT * FROM kpdb_gross."{year}"', build_engine)
 num_nulls = df[df['project_id'].isna()].shape[0]
 df.loc[df['project_id'].isna(),'project_id'] = pd.Series(range(largest_project_id, largest_project_id + num_nulls)).astype(str)
 df.loc[~df['project_id'].str.contains('-', na=False),'project_id'] = df['project_id'] + '-1'
@@ -85,12 +85,12 @@ df.loc[df['units_net'].isna(),'units_net'] = df['units_gross']
 df['units_net'] = df.units_net.replace('\.0', '', regex=True)
 
 # Export to temporary table
-print(f"Creating temporary look-up table for kpdb.{year}...")
+print(f"Creating temporary look-up table for kpdb_gross.{year}...")
 columns = ['source','record_id','record_name','project_id','units_net']
 df[columns].to_sql('tmp', con=build_engine, if_exists='replace', index=False)
 
-print(f"Updating kpdb.{year} with one-record IDs.")
-sql_update=f'''UPDATE kpdb."{year}" a
+print(f"Updating kpdb_gross.{year} with one-record IDs.")
+sql_update=f'''UPDATE kpdb_gross."{year}" a
             SET project_id = b.project_id,
                 units_net = b.units_net
             FROM tmp b
