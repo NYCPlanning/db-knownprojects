@@ -4,10 +4,10 @@ import pandas as pd
 import numpy as np
 import os
 
-year = 'test'
+year = '2020'
 
 # Sources included in clusters
-tables = ['dcp_application',
+tables = ['dcp_application_proj',
         'dcp_planneradded_proj',
         'dcp_n_study_proj',
         'edc_projects_proj',
