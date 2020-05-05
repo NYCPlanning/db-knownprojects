@@ -19,8 +19,10 @@ set_default_credentials(
 
 # Get cluster data from carto
 print("Loading cluster data from carto...")
-cluster_gdf = read_carto(f'clusters_{year}', limit=100)
-reviewed_gdf = read_carto(f'clusters_unresolved_{year}', limit=100)
+cluster_gdf = read_carto(f'clusters_{year}')
+cluster_gdf.rename(columns={'the_geom':'geom'}, inplace=True)
+reviewed_gdf = read_carto(f'clusters_unresolved_{year}')
+reviewed_gdf.rename(columns={'the_geom':'geom'}, inplace=True)
 
 # Export to postgres
 today = date.today()
