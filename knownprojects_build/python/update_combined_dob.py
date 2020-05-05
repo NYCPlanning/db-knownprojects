@@ -10,7 +10,7 @@ year = '2020'
 print(f"Making kpdb_gross with {year} reviewed DOB data...")
 sql_make_kpdb_gross = f'''
     CREATE SCHEMA IF NOT EXISTS kpdb_gross;
-    DROP TABLE kpdb_gross."{year}";
+    DROP TABLE IF EXISTS kpdb_gross."{year}";
     CREATE TABLE kpdb_gross."{year}" as (
         SELECT 
         source, record_id::text, record_name, 
