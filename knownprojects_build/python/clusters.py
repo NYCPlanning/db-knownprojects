@@ -9,7 +9,7 @@ from cartoframes import to_carto
 from shapely import wkb
 import geopandas as gpd
 
-year = '2020'
+year = 'nullnull'
 
 set_default_credentials(
     username=os.environ.get('CARTO_USERNAME'),
@@ -128,9 +128,12 @@ print("Resolving clusters where all records have the same number of units...")
 def dedup_exacts(group):
     group.loc[:,'units_net']=group['units_gross']
     if group.shape[0] > 1:
-        if group.source_id.unique().shape[0] > 1:
-            top_priority = min(group.source_id.unique())
-            group.loc[group['source_id'] != top_priority, 'units_net'] = 0.0
+        if group[group['units_gross']==99999].shape[0] == 0:
+            if group.source_id.unique().shape[0] > 1:
+                top_priority = min(group.source_id.unique())
+                group.loc[group['source_id'] != top_priority, 'units_net'] = 0.0
+        else:
+            print("All records in this cluster have missing unit data, skipping cluster...")
     return group
 
 dfff.sort_values(by=['cluster_id','source_id'])
@@ -148,6 +151,7 @@ for name, group in grouped:
     non_zero = group[group['units_net'] != 0]
     if non_zero.shape[0] == 1:
         print("Cluster resolved by exact-count match: ",name)
+        print(group[['record_id','units_gross','units_net']])
         remove_clusters.append(name)
 
 deduped.timeline.replace(0, np.nan, inplace=True)
