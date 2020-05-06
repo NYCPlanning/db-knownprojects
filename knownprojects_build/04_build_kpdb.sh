@@ -1,5 +1,6 @@
 #!/bin/bash
 source config.sh
+psql $BUILD_ENGINE -f sql/update_combined_dob.sql
 
 docker run --rm\
     -v $(pwd):/home/knownprojects_build\
@@ -11,5 +12,4 @@ docker run --rm\
     -e CARTO_APIKEY=$CARTO_APIKEY\
     python:3.7-slim sh -c "
         pip3 install -r python/requirements.txt; 
-        python3 python/update_combined_dob.py;
         python3 python/resolve_clusters.py"
