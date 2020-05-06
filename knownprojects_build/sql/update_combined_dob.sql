@@ -38,6 +38,9 @@ VACUUM ANALYZE kpdb_gross."2020";
 
 -- additional columns
 ALTER TABLE kpdb_gross."2020"
+    ADD COLUMN IF NOT EXISTS prop_within_5_years text,
+    ADD COLUMN IF NOT EXISTS prop_5_to_10_years text,
+    ADD COLUMN IF NOT EXISTS prop_after_10_years text,
     ADD COLUMN IF NOT EXISTS within_5_years text,
     ADD COLUMN IF NOT EXISTS from_5_to_10_years text,
     ADD COLUMN IF NOT EXISTS after_10_years text,
