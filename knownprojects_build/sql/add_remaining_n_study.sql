@@ -46,4 +46,5 @@ tmp as (
         NULL as inactive,
         geom
 	from remaining_n_study a, max_proj b)
-INSERT INTO kpdb."2020" (SELECT * FROM tmp);
+INSERT INTO kpdb."2020" (SELECT * FROM tmp 
+		WHERE tmp.record_id NOT IN (SELECT DISTINCT record_id FROM kpdb."2020"));
