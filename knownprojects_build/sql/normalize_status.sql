@@ -10,6 +10,7 @@ SET status =
                 WHEN status = 'Partial complete' THEN 'DOB 4: CofO issued for part of building'
                 WHEN status = 'In progress (last plan disapproved)' THEN 'DOB 2: Application in progress'
                 WHEN status = 'Complete' THEN 'DOB 5: CofO issued for entire building'
+                WHEN status = 'Complete (demolition)' THEN 'DOB 0: Building demolished'
                 WHEN status = 'Filed' THEN 'DOB 1: Application filed'
                 WHEN status = 'In progress' THEN 'DOB 2: Application in progress'
                 ELSE NULL
