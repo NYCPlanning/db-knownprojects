@@ -80,6 +80,8 @@ if __name__ == "__main__":
     "record_name":"text",
     "status":"text",
     "type":"text",
+    "date":"text",
+    "date_type":"text",
     "units_gross":"text",
     "units_net":"text",
     "prop_within_5_years":"text",
