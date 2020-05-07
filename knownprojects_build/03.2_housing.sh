@@ -9,6 +9,7 @@ docker run --rm\
     -e BUILD_ENGINE=$BUILD_ENGINE\
     -e CARTO_USERNAME=$CARTO_USERNAME\
     -e CARTO_APIKEY=$CARTO_APIKEY\
+    -e VERSION=$VERSION\
     python:3.7-slim sh -c "
         pip3 install -r python/requirements.txt; 
         python3 python/carto_to_build.py;
@@ -25,6 +26,7 @@ docker run --rm\
     -e BUILD_ENGINE=$BUILD_ENGINE\
     -e CARTO_USERNAME=$CARTO_USERNAME\
     -e CARTO_APIKEY=$CARTO_APIKEY\
+    -e VERSION=$VERSION\
     python:3.7-slim sh -c "
         pip3 install -r python/requirements.txt; 
         python3 python/upload_dob_match_to_carto.py"

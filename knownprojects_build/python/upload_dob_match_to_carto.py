@@ -5,14 +5,13 @@ from cartoframes import to_carto
 from shapely import wkb
 import geopandas as gpd
 
-year = '2020'
+year = os.environ.get('VERSION', 'test')
 
 set_default_credentials(
-    username=os.environ.get('CARTO_USERNAME'),
-    api_key=os.environ.get('CARTO_APIKEY')
+    username=os.environ.get("CARTO_USERNAME"), api_key=os.environ.get("CARTO_APIKEY")
 )
 
-sql = '''
+sql = """
     select 
         source, record_id::text, 
         record_name, status, inactive,
@@ -23,8 +22,8 @@ sql = '''
         geom
     from dob_review
     order by project_id
-    '''
-df = gpd.GeoDataFrame.from_postgis(sql, build_engine, geom_col='geom')
-df['dob_review_initials'] = ''
-df['incorrect_match'] = 0
-to_carto(df, f'dob_review_{year}', if_exists='replace')
+    """
+df = gpd.GeoDataFrame.from_postgis(sql, build_engine, geom_col="geom")
+df["dob_review_initials"] = ""
+df["incorrect_match"] = 0
+to_carto(df, f"dob_review_{year}", if_exists="replace")
