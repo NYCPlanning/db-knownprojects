@@ -87,18 +87,18 @@ WHERE source = 'Future Neighborhood Studies';
 UPDATE kpdb."2020"
 SET prop_within_5_years = (CASE WHEN (prop_5_to_10_years IS NULL 
                                    AND prop_after_10_years IS NULL) THEN NULL
-                              ELSE 1-(prop_5_to_10_years::numeric + prop_after_10_years::numeric)
+                              ELSE 1-(COALESCE(prop_5_to_10_years::numeric, 0) + COALESCE(prop_after_10_years::numeric, 0))
                               END) 
 WHERE prop_within_5_years IS NULL;
 
 UPDATE kpdb."2020"
 SET prop_5_to_10_years = (CASE WHEN (prop_within_5_years IS NULL
                                    AND prop_after_10_years IS NULL) THEN NULL
-                              ELSE 1-(prop_within_5_years::numeric + prop_after_10_years::numeric)
+                              ELSE 1-(prop_within_5_years::numeric + COALESCE(prop_after_10_years::numeric,  0))
                               END)
 WHERE prop_5_to_10_years IS NULL;
 
-UPDATE
+UPDATE kpdb."2020"
 SET prop_after_10_years = (CASE WHEN (prop_within_5_years IS NULL
                                    AND prop_5_to_10_years IS NULL) THEN NULL
                               ELSE 1-(prop_within_5_years::numeric + prop_5_to_10_years::numeric)
