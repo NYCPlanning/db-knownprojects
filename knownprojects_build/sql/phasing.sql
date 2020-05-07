@@ -1,30 +1,30 @@
 -- DOB
-UPDATE kpdb_gross."2020"
+UPDATE kpdb."2020"
 SET    prop_within_5_years = CASE WHEN status = 'Permit issued' OR status = 'Filed' OR status LIKE 'In progress%' THEN 1 ELSE NULL END
      , prop_5_to_10_years = CASE WHEN status <> 'Withdrawn' AND inactive = 1 THEN 1 ELSE NULL END
      , phasingknown = 0
 WHERE source = 'DOB';
 -- HPD Projected Closings
-UPDATE kpdb_gross."2020"
+UPDATE kpdb."2020"
 SET    prop_within_5_years = CASE WHEN date_part('year',age(to_date((CONCAT(RIGHT(date,4)::numeric+3,'-06-30')),'YYYY-MM-DD'),CURRENT_DATE)) <= 5 THEN 1 ELSE NULL END
      , prop_5_to_10_years = CASE WHEN date_part('year',age(to_date((CONCAT(RIGHT(date,4)::numeric+3,'-06-30')),'YYYY-MM-DD'),CURRENT_DATE)) > 5 AND date_part('year',age(to_date((CONCAT(RIGHT(date,4)::numeric+3,'-06-30')),'YYYY-MM-DD'),CURRENT_DATE)) <= 10 THEN 1 ELSE NULL END
      , prop_after_10_years = CASE WHEN date_part('year',age(to_date((CONCAT(RIGHT(date,4)::numeric+3,'-06-30')),'YYYY-MM-DD'),CURRENT_DATE)) > 10 THEN 1 ELSE NULL END
      , phasingknown = 1
 WHERE source = 'HPD Projected Closings';
 -- HPD RFPs
-UPDATE kpdb_gross."2020"
+UPDATE kpdb."2020"
 SET    prop_within_5_years = 1
      , phasingknown = 1
 WHERE source = 'HPD RFPs';
 -- EDC
-UPDATE kpdb_gross."2020"
+UPDATE kpdb."2020"
 SET    prop_within_5_years = CASE WHEN date::numeric <= date_part('year', CURRENT_DATE)+5 THEN 1 ELSE NULL END
      , prop_5_to_10_years = CASE WHEN date::numeric > date_part('year', CURRENT_DATE)+5 AND date::numeric <= date_part('year', CURRENT_DATE)+10 THEN 1 ELSE NULL END
      , prop_after_10_years = CASE WHEN date::numeric > date_part('year', CURRENT_DATE)+10 THEN 1 ELSE NULL END
      , phasingknown = 1
 WHERE source = 'EDC Projected Projects';
 -- DCP Application
-UPDATE kpdb_gross."2020"
+UPDATE kpdb."2020"
 SET   prop_5_to_10_years = 1 
      , phasingknown = 0
 WHERE source = 'DCP Application' AND status <> 'Record Closed';
@@ -40,7 +40,7 @@ yeargroups as (
           sum(case when yearspan > date_part('year', CURRENT_DATE)+10 then 1 else 0 end)::numeric AS tenyearplus
      FROM years
      GROUP BY record_id)
-UPDATE kpdb_gross."2020" a
+UPDATE kpdb."2020" a
 SET   prop_within_5_years = round(fiveyear/total,2)
      ,prop_5_to_10_years = round(tenyear/total,2)
      ,prop_after_10_years = round(tenyearplus/total,2)
@@ -60,7 +60,7 @@ yeargroups as (
           sum(case when yearspan > date_part('year', CURRENT_DATE)+10 then 1 else 0 end)::numeric AS tenyearplus
      FROM years
      GROUP BY record_id)
-UPDATE kpdb_gross."2020" a
+UPDATE kpdb."2020" a
 SET   prop_within_5_years = round(fiveyear/total,2)
      ,prop_5_to_10_years = round(tenyear/total,2)
      ,prop_after_10_years = round(tenyearplus/total,2)
@@ -69,7 +69,7 @@ WHERE a.record_id=b.record_id
 AND source = 'Neighborhood Study Projected Development Sites'
 AND record_name = 'East New York';
 -- Future Neighborhood Studies
-UPDATE kpdb_gross."2020"
+UPDATE kpdb."2020"
 SET   prop_5_to_10_years = CASE WHEN record_name LIKE 'Gowanus%' THEN round(1/3::numeric,2) ELSE .5 END
       prop_after_10_years = CASE WHEN record_name LIKE 'Gowanus%' THEN round(2/3::numeric,2) ELSE .5 END
      , phasingknown = 0
