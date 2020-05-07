@@ -47,27 +47,27 @@ nycha_records as (
 	select record_id from stringy_proj
 	where stringy ~* 'NYCHA|BTP|HOUSING AUTHORITY|NEXT GEN|NEXT-GEN|NEXTGEN|NEXTGEN'
 	union
-	select record_id from kpdb_gross."2020"
+	select record_id from kpdb."2020"
 	where record_name ~* 'NYCHA|BTP|HOUSING AUTHORITY|NEXT GEN|NEXT-GEN|NEXTGEN|NEXTGEN'),
 gq_flag as (
 	select record_id from stringy_proj
 	where stringy ~* 'CORRECTIONAL|NURSING| MENTAL|DORMITOR|MILITARY|GROUP HOME|BARRACK'
 	union
-	select record_id from kpdb_gross."2020"
+	select record_id from kpdb."2020"
 	where record_name ~* 'CORRECTIONAL|NURSING| MENTAL|DORMITOR|MILITARY|GROUP HOME|BARRACK'),
 senior_flag as (
 	select record_id from stringy_proj
 	where stringy ~* 'SENIOR|ELDERLY| AIRS |A.I.R.S|CONTINUING CARE|NURSING| SARA |S.A.R.A'
 	union
-	select record_id from kpdb_gross."2020"
+	select record_id from kpdb."2020"
 	where record_name ~* 'SENIOR|ELDERLY| AIRS |A.I.R.S|CONTINUING CARE|NURSING| SARA |S.A.R.A'),
 assisted_flag as (
 	select record_id from stringy_proj
 	where stringy ~* 'ASSISTED LIVING'
 	union
-	select record_id from kpdb_gross."2020"
+	select record_id from kpdb."2020"
 	where record_name ~* 'ASSISTED LIVING')
-update kpdb_gross."2020"
+update kpdb."2020"
 set nycha = (case when record_id in (select record_id from nycha_records) then 1 else 0 end),
 	gq = (case when record_id in (select record_id from gq_flag) then 1 else 0 end),
 	senior_housing = (case when record_id in (select record_id from senior_flag) then 1 else 0 end),
