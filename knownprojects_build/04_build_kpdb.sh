@@ -16,3 +16,4 @@ docker run --rm\
 
 psql $BUILD_ENGINE -f sql/add_remaining_n_study.sql
 psql $BUILD_ENGINE -f sql/phasing.sql
+psql $BUILD_ENGINE -f sql/phasing_counts.sql
