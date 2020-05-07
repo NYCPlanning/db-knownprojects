@@ -45,7 +45,7 @@ ALTER TABLE kpdb_gross."2020"
     ADD COLUMN IF NOT EXISTS from_5_to_10_years text,
     ADD COLUMN IF NOT EXISTS after_10_years text,
     ADD COLUMN IF NOT EXISTS phasing_rationale text,
-    ADD COLUMN IF NOT EXISTS phasing_assume_or_known text,
+    ADD COLUMN IF NOT EXISTS phasing_known text,
     ADD COLUMN IF NOT EXISTS nycha text,
     ADD COLUMN IF NOT EXISTS gq text,
     ADD COLUMN IF NOT EXISTS senior_housing text,
