@@ -82,3 +82,21 @@ SET   prop_5_to_10_years = CASE WHEN record_name LIKE 'Gowanus%' THEN round(1/3:
      , prop_after_10_years = CASE WHEN record_name LIKE 'Gowanus%' THEN round(2/3::numeric,2) ELSE .5 END
      , phasing_known = 0
 WHERE source = 'Future Neighborhood Studies';
+
+-- Make sure proportions add up to 1
+UPDATE kpdb."2020"
+SET prop_within_5_years = (CASE WHEN (prop_within_5_years IS NULL
+                                   AND prop_5_to_10_years IS NULL
+                                   AND prop_after_10_years IS NULL) THEN NULL
+                              ELSE 1-(prop_5_to_10_years::numeric + prop_after_10_years::numeric)
+                              END),
+prop_5_to_10_years = (CASE WHEN (prop_within_5_years IS NULL
+                                   AND prop_5_to_10_years IS NULL
+                                   AND prop_after_10_years IS NULL) THEN NULL
+                              ELSE 1-(prop_within_5_years::numeric + prop_after_10_years::numeric)
+                              END),
+prop_after_10_years = (CASE WHEN (prop_within_5_years IS NULL
+                                   AND prop_5_to_10_years IS NULL
+                                   AND prop_after_10_years IS NULL) THEN NULL
+                              ELSE 1-(prop_within_5_years::numeric + prop_5_to_10_years::numeric)
+                              END);
