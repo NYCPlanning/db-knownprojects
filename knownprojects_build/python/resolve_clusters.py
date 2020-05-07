@@ -91,7 +91,7 @@ if __name__ == "__main__":
     "from_5_to_10_years":"text",
     "after_10_years":"text",
     "phasing_rationale":"text",
-    "phasing_assume_or_known":"text",
+    "phasing_known":"text",
     "nycha":"text",
     "gq":"text",
     "senior_housing":"text",
