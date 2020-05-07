@@ -15,3 +15,4 @@ docker run --rm\
         python3 python/resolve_clusters.py"
 
 psql $BUILD_ENGINE -f sql/add_remaining_n_study.sql
+psql $BUILD_ENGINE -f sql/phasing.sql
