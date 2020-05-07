@@ -1,4 +1,4 @@
-
+-- Non ZAP status
 UPDATE kpdb."2020"
 SET status = 
     (CASE 
@@ -29,3 +29,21 @@ SET status =
     WHEN source = 'Neighborhood Study Projected Development Sites' AND status = 'Projected Development' THEN 'Potential'
     WHEN source = 'Neighborhood Study Rezoning Commitments' AND status = 'Rezoning Commitment' THEN 'Potential'
     END);
+
+-- ZAP Status
+WITH
+zap_status as (select 
+	dcp_name as record_id,
+	(case
+		when dcp_publicstatus ~* 'completed' then 'DCP 4: Zoning Implemented'
+		when dcp_projectphase ~* 'project completed' then 'DCP 4: Zoning Implemented'
+		when dcp_projectphase ~* 'pre-pas|pre-cert' then 'DCP 2: Application in progress'
+		when dcp_projectphase ~* 'initiation' then 'DCP 1: Expression of interest'
+		when dcp_projectphase ~* 'public review' then 'DCP 3: Certified/Referred'
+	end) status
+from dcp_project
+where dcp_name in (Select record_id from kpdb."2020"))
+update kpdb."2020" a
+set status = b.status
+from zap_status b
+where a.record_id = b.record_id;
