@@ -1,6 +1,6 @@
 -- DOB
 UPDATE kpdb."2020"
-SET    prop_within_5_years = CASE WHEN status = 'Permit issued' OR status = 'Filed' OR status LIKE 'In progress%' THEN 1 ELSE NULL END
+SET    prop_within_5_years = CASE WHEN status ~* 'Permit issued|Filed|In progress' THEN 1 ELSE NULL END
      , prop_5_to_10_years = CASE WHEN status <> 'Withdrawn' AND inactive = '1' THEN 1 ELSE NULL END
      , phasing_known = 0
 WHERE source = 'DOB';
@@ -82,3 +82,25 @@ SET   prop_5_to_10_years = CASE WHEN record_name LIKE 'Gowanus%' THEN round(1/3:
      , prop_after_10_years = CASE WHEN record_name LIKE 'Gowanus%' THEN round(2/3::numeric,2) ELSE .5 END
      , phasing_known = 0
 WHERE source = 'Future Neighborhood Studies';
+
+-- Make sure proportions add up to 1
+UPDATE kpdb."2020"
+SET prop_within_5_years = (CASE WHEN (prop_5_to_10_years IS NULL 
+                                   AND prop_after_10_years IS NULL) THEN NULL
+                              ELSE 1-(COALESCE(prop_5_to_10_years::numeric, 0) + COALESCE(prop_after_10_years::numeric, 0))
+                              END) 
+WHERE prop_within_5_years IS NULL;
+
+UPDATE kpdb."2020"
+SET prop_5_to_10_years = (CASE WHEN (prop_within_5_years IS NULL
+                                   AND prop_after_10_years IS NULL) THEN NULL
+                              ELSE 1-(prop_within_5_years::numeric + COALESCE(prop_after_10_years::numeric,  0))
+                              END)
+WHERE prop_5_to_10_years IS NULL;
+
+UPDATE kpdb."2020"
+SET prop_after_10_years = (CASE WHEN (prop_within_5_years IS NULL
+                                   AND prop_5_to_10_years IS NULL) THEN NULL
+                              ELSE 1-(prop_within_5_years::numeric + prop_5_to_10_years::numeric)
+                              END)
+WHERE prop_after_10_years IS NULL;
