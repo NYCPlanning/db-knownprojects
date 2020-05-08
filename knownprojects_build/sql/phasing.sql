@@ -1,6 +1,6 @@
 -- DOB
 UPDATE kpdb."2020"
-SET    prop_within_5_years = CASE WHEN status ~* 'Permit issued|Filed|In progress' THEN 1 ELSE NULL END
+SET    prop_within_5_years = CASE WHEN status ~* 'Permit issued|Filed|In progress' AND inactive <> '1' THEN 1 ELSE NULL END
      , prop_5_to_10_years = CASE WHEN status <> 'Withdrawn' AND inactive = '1' THEN 1 ELSE NULL END
      , phasing_known = 0
 WHERE source = 'DOB';
