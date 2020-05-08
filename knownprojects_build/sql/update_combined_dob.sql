@@ -76,3 +76,6 @@ update kpdb_gross."2020" a
 	AND a.record_name=b.record_name;
     
 VACUUM ANALYZE kpdb_gross."2020";
+
+UPDATE kpdb_gross."2020"
+SET units_net=coalesce(units_net::integer, units_gross::integer);
