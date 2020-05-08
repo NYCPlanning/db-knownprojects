@@ -83,6 +83,16 @@ SET   prop_5_to_10_years = CASE WHEN record_name LIKE 'Gowanus%' THEN round(1/3:
      , phasing_known = 0
 WHERE source = 'Future Neighborhood Studies';
 
+-- DCP Planner-Added Projects
+UPDATE kpdb."2020" a
+SET   prop_within_5_years = b.portion_built_by_2025
+     , prop_5_to_10_years = b.portion_built_by_2035
+     , prop_after_10_years = b.portion_built_by_2055
+     , phasing_known = 1
+FROM dcp_planneradded_proj b
+WHERE a.source = 'DCP Planner-Added Projects'
+AND a.record_id= b.record_id;
+
 -- Make sure proportions add up to 1
 UPDATE kpdb."2020"
 SET prop_within_5_years = (CASE WHEN (prop_5_to_10_years IS NULL 
