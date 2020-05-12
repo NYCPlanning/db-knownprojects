@@ -29,8 +29,8 @@ filtered_dcp_housing_proj as (
     WHERE a.type <> 'Demolition'
     AND a.status <> 'Withdrawn'
     AND b.units_prop::int > 0
-    AND (a.type <> 'Alteration'
-        and a.units_gross::integer > 0)
+    AND NOT (a.type = 'Alteration'
+        and a.units_gross::integer <= 0)
 ),
 matches as (
     SELECT 
