@@ -78,6 +78,7 @@ if __name__ == "__main__":
     "source":"text",
     "record_id":"text",
     "record_name":"text",
+    "borough":"text",
     "status":"text",
     "type":"text",
     "date":"text",

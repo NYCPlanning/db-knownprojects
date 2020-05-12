@@ -23,6 +23,7 @@ def ETL():
     # spatial data
     importer.import_table(schema_name='dcp_mappluto')
     importer.import_table(schema_name='dcp_zoningmapamendments')
+    importer.import_table(schema_name='dcp_boroboundaries_wi')
 
 def data():
     importer = Importer(EDM_DATA, BUILD_ENGINE)

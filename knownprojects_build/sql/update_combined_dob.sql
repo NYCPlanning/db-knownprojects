@@ -2,7 +2,7 @@ CREATE SCHEMA IF NOT EXISTS kpdb_gross;
 DROP TABLE IF EXISTS kpdb_gross."2020";
 CREATE TABLE kpdb_gross."2020" as (
     SELECT 
-    source, record_id::text, record_name, 
+    source, record_id::text, record_name, null as borough,
     status, type, units_gross::integer, 
     date, date_type, date_filed, date_complete,
     dcp_projectcompleted, null as portion_built_by_2025, 
@@ -13,7 +13,7 @@ CREATE TABLE kpdb_gross."2020" as (
 from combined
 union
 select 
-    source, record_id::text, record_name, 
+    source, record_id::text, record_name, null as borough,
     status, type, units_gross::integer, 
     date, date_type, date_filed, date_complete,
     dcp_projectcompleted, null as portion_built_by_2025, 
