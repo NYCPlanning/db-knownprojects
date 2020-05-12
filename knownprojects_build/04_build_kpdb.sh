@@ -19,3 +19,4 @@ psql $BUILD_ENGINE -f sql/phasing.sql
 psql $BUILD_ENGINE -f sql/phasing_counts.sql
 psql $BUILD_ENGINE -f sql/normalize_status.sql
 psql $BUILD_ENGINE -f sql/assign_boolean.sql
+psql $BUILD_ENGINE -f sql/assign_boro.sql
