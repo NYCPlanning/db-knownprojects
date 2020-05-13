@@ -2,6 +2,14 @@ UPDATE kpdb_corrections
 SET old_value = nullif(old_value, ' '),
 	new_value = nullif(new_value, ' ');
 
+-- Correct project_id
+UPDATE kpdb."2020" a
+SET project_id = b.new_value
+FROM kpdb_corrections b
+WHERE b.field = 'project_id'
+AND a.record_id = b.record_id 
+AND a.project_id = b.old_value;
+
 -- Correct record_name
 UPDATE kpdb."2020" a
 SET record_name = b.new_value
