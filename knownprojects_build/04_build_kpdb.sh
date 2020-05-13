@@ -12,7 +12,7 @@ docker run --rm\
     -e CARTO_APIKEY=$CARTO_APIKEY\
     python:3.7-slim sh -c "
         pip3 install -r python/requirements.txt; 
-        python3 python/resolve_clusters.py"
+        python3 python/resolve_clusters.py kpdb_gross kpdb"
 
 psql $BUILD_ENGINE -f sql/add_remaining_n_study.sql
 psql $BUILD_ENGINE -f sql/phasing.sql
