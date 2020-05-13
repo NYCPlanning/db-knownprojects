@@ -79,3 +79,10 @@ VACUUM ANALYZE kpdb_gross."2020";
 
 UPDATE kpdb_gross."2020"
 SET units_net=coalesce(units_net::integer, units_gross::integer);
+
+UPDATE kpdb_gross."2020" a
+SET project_id=b.new_value
+FROM kpdb_corrections b
+where b.field = 'project_id'
+and a.record_id = b.record_id 
+and a.project_id=b.old_value;
