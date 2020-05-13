@@ -1,4 +1,4 @@
-INSERT INTO kpdb_gross."2020" (record_id,
+INSERT INTO kpdb."2020" (record_id,
                                 record_name,
                                 borough, 
                                 units_gross,
@@ -29,5 +29,5 @@ INSERT INTO kpdb_gross."2020" (record_id,
         assisted_living,
         inactive,
         project_id FROM planner_added
-WHERE record_id NOT IN (SELECT DISTINCT record_id FROM kpdb_gross."2020")
+WHERE record_id NOT IN (SELECT DISTINCT record_id FROM kpdb."2020")
 AND omit IS NULL);
