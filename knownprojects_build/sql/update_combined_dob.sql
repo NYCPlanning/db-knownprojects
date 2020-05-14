@@ -21,7 +21,8 @@ select
     null as project_id,
     null as units_net,
     inactive, geom
-from dcp_housing_proj);
+from dcp_housing_proj
+WHERE dcp_housing_proj.units_gross::integer <> 0);
 
 VACUUM ANALYZE kpdb_gross."2020";
 
