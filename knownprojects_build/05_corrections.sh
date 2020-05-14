@@ -14,3 +14,5 @@ docker run --rm\
     python:3.7-slim sh -c "
         pip3 install -r python/requirements.txt; 
         python3 python/resolve_clusters.py kpdb kpdb"
+
+psql $BUILD_ENGINE -f sql/phasing_counts.sql
