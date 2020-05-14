@@ -2,6 +2,12 @@ UPDATE kpdb_corrections
 SET old_value = nullif(old_value, ' '),
 	new_value = nullif(new_value, ' ');
 
+-- Remove records
+DELETE FROM kpdb."2020" a
+USING kpdb_corrections b
+WHERE b.field = 'remove'
+AND a.record_id = b.record_id;
+
 -- Correct project_id
 UPDATE kpdb."2020" a
 SET project_id = b.new_value
@@ -156,3 +162,5 @@ WHERE b.field = 'inactive'
 AND a.record_id = b.record_id 
 AND a.inactive = b.old_value
 AND (b.new_value::text IS IN ('0','1') OR b.new_value IS NULL);
+
+-- Add DOB or ZAP
