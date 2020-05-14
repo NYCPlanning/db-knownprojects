@@ -28,6 +28,7 @@ filtered_dcp_housing_proj as (
     ON a.record_id = b.job_number
     WHERE a.type <> 'Demolition'
     AND a.status <> 'Withdrawn'
+    AND a.units_gross::int <> 0
     AND b.units_prop::int > 0
     AND NOT (a.type = 'Alteration'
         and a.units_gross::integer <= 0)

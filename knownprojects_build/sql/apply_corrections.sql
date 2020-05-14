@@ -162,5 +162,3 @@ WHERE b.field = 'inactive'
 AND a.record_id = b.record_id 
 AND a.inactive = b.old_value
 AND (b.new_value::text IS IN ('0','1') OR b.new_value IS NULL);
-
--- Add DOB or ZAP
