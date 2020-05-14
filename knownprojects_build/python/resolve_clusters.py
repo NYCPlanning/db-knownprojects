@@ -3,6 +3,7 @@ from helper.exporter import exporter
 import pandas as pd
 import numpy as np
 import os
+import sys
 from cartoframes.auth import set_default_credentials
 from cartoframes import to_carto
 from shapely import wkb
@@ -67,9 +68,10 @@ def resolve_all_projects(df):
     return resolved
 
 if __name__ == "__main__":
-    resolved_table = f"kpdb.\"{year}\""
 
-    df = pd.read_sql(f'SELECT * FROM kpdb_gross."{year}"', build_engine)
+    resolved_table = f"{sys.argv[2]}.\"{year}\""
+
+    df = pd.read_sql(f'SELECT * FROM {sys.argv[1]}."{year}"', build_engine)
     df['units_gross'] = df['units_gross'].astype(float)
     df['units_net'] = df['units_net'].astype(float)
     resolved = resolve_all_projects(df)
