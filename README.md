@@ -20,7 +20,7 @@ Third automated phase:
 Third review phase: [Corrections review](https://github.com/NYCPlanning/db-knownprojects/wiki/KPDB-corrections-process:-in-depth-research)
 
 Fourth automated phase:
-+ 05_corrections (In-development)
++ [05_corrections](https://github.com/NYCPlanning/db-knownprojects/blob/master/knownprojects_build/05_corrections.sh) (In-development)
 
 
 
