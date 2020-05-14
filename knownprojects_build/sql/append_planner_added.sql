@@ -1,0 +1,33 @@
+INSERT INTO kpdb."2020" (record_id,
+                                record_name,
+                                borough, 
+                                units_gross,
+                                prop_within_5_years,
+                                prop_5_to_10_years,
+                                prop_after_10_years,
+                                phasing_rationale,
+                                phasing_known,
+                                nycha,
+                                gq,
+                                senior_housing,
+                                assisted_living,
+                                inactive,
+                                project_id
+                                )
+(SELECT record_id,
+        record_name,
+        borough, 
+        units_gross,
+        prop_within_5_years,
+        prop_5_to_10_years,
+        prop_after_10_years,
+        phasing_rationale,
+        phasing_known,
+        nycha,
+        gq,
+        senior_housing,
+        assisted_living,
+        inactive,
+        project_id FROM planner_added
+WHERE record_id NOT IN (SELECT DISTINCT record_id FROM kpdb."2020")
+AND omit IS NULL);
