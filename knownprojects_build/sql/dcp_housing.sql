@@ -77,7 +77,6 @@ CREATE TABLE dcp_housing_proj AS(
 	WITH geom_merge AS (
 		SELECT record_id, ST_UNION(geom) AS geom
 		FROM dcp_housing
-        WHERE units_gross <> '0'
 		GROUP BY record_id
 	)
 	SELECT b.source, b.record_id, b.record_name,
