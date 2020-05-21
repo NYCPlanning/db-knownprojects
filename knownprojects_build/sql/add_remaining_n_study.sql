@@ -31,6 +31,7 @@ tmp as (
 		source,
         record_id,
         record_name,
+        NULL as borough,
         status,
         type,
         date,
