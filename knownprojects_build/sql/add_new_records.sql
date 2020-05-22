@@ -10,7 +10,7 @@ INSERT INTO kpdb."2020"
         date,
         date_type,
         units_gross,
-        coalesce(units_net::integer, units_gross::integer) as units_net,
+        units_gross as units_net,
         NULL as prop_within_5_years,
         NULL as prop_5_to_10_years,
         NULL as prop_after_10_years,
@@ -106,7 +106,7 @@ tmp AS (
     FROM kpdb."2020" a, max_proj b
     WHERE a.project_id IS NULL)
 UPDATE kpdb."2020" a
-	SET project_id = b.project_id,
+	SET project_id = b.project_id
 	FROM tmp b
 	WHERE a.source = b.source
 	AND a.record_id = b.record_id
