@@ -8,6 +8,14 @@ USING kpdb_corrections b
 WHERE b.field = 'remove'
 AND a.record_id = b.record_id;
 
+-- Correct geometries
+UPDATE kpdb."2020" a
+SET geom = b.new_value
+FROM kpdb_corrections.spatial_latest b
+WHERE b.field = 'geom'
+AND a.record_id = b.record_id 
+AND a.geom = b.old_value;
+
 -- Correct project_id
 UPDATE kpdb."2020" a
 SET project_id = b.new_value
