@@ -13,7 +13,7 @@ SET status =
                 WHEN status = 'Complete (demolition)' THEN 'DOB 0: Building demolished'
                 WHEN status = 'Filed' THEN 'DOB 1: Application filed'
                 WHEN status = 'In progress' THEN 'DOB 2: Application in progress'
-                ELSE NULL
+                ELSE status
             END
     WHEN source = 'EDC Projected Projects' AND status = 'Projected' THEN 'Potential'
     WHEN source = 'Empire State Development Projected Projects' AND status = 'Projected' THEN 'Potential'
@@ -25,10 +25,11 @@ SET status =
                 WHEN status = 'RFP designated; financing closed' THEN 'HPD 4: Financing Closed'
                 WHEN status = 'RFP designated; financing not closed' THEN 'HPD 2: RFP Designated'
                 WHEN status = 'RFP issued; financing not closed' THEN 'HPD 1: RFP Issued'
-                ELSE NULL
+                ELSE status
             END
     WHEN source = 'Neighborhood Study Projected Development Sites' AND status = 'Projected Development' THEN 'Potential'
     WHEN source = 'Neighborhood Study Rezoning Commitments' AND status = 'Rezoning Commitment' THEN 'Potential'
+    ELSE status
     END);
 
 -- ZAP Status
