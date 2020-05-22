@@ -28,6 +28,6 @@ INSERT INTO kpdb."2020" (record_id,
         senior_housing,
         assisted_living,
         inactive,
-        project_id FROM planner_added
+        project_id FROM dcp_planneradded.latest
 WHERE record_id NOT IN (SELECT DISTINCT record_id FROM kpdb."2020")
 AND omit IS NULL);
