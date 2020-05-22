@@ -77,7 +77,8 @@ AND a.date_type = b.old_value;
 
 -- Correct units_gross
 UPDATE kpdb."2020" a
-SET units_gross = b.new_value::numeric
+SET units_gross = b.new_value::numeric,
+	units_net = b.new_value::numeric
 FROM kpdb_corrections.latest b
 WHERE b.field = 'units_gross'
 AND a.record_id = b.record_id 
