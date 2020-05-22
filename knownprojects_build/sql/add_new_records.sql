@@ -1,5 +1,5 @@
 -- Add previously filtered DOB based on kpdb_corrections
-INSERT INTO kpdb_gross."2020"
+INSERT INTO kpdb."2020"
 (SELECT	NULL as project_id,
 	    'DOB' as source,
         record_id,
@@ -30,7 +30,7 @@ INSERT INTO kpdb_gross."2020"
                         FROM kpdb_corrections.latest
                         WHERE field = 'add')
     AND record_id NOT IN (SELECT DISTINCT record_id
-                        FROM kpdb_gross."2020"));
+                        FROM kpdb."2020"));
 
 -- Add previously filtered ZAP based on kpdb_corrections
 with 
@@ -38,7 +38,7 @@ record_to_add as (
 	select distinct record_id 
 	from kpdb_corrections.latest
 	where field = 'add'
-	and record_id not in (select record_id from kpdb_gross."2020")),
+	and record_id not in (select record_id from kpdb."2020")),
 zap_geom as (
 	SELECT b.project_id as record_id, b.wkb_geometry as geom 
 	FROM dcp_knownprojects b 
@@ -86,7 +86,7 @@ new_zap as (
 	NULL as type
 	FROM dcp_project a
 	where dcp_name in (select record_id from record_to_add))
-INSERT INTO kpdb_gross."2020"
+INSERT INTO kpdb."2020"
 select a.*, b.geom as geom 
 from new_zap a
 left join geometry b
@@ -105,7 +105,7 @@ tmp AS (
         (ROW_NUMBER() OVER (ORDER BY record_id) + b.max_proj_number)::text||'-1' as project_id
     FROM kpdb."2020" a, max_proj b
     WHERE a.project_id IS NULL)
-UPDATE kpdb_gross."2020" a
+UPDATE kpdb."2020" a
 	SET project_id = b.project_id,
 	FROM tmp b
 	WHERE a.source = b.source
