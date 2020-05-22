@@ -77,11 +77,11 @@ AND a.date_type = b.old_value;
 
 -- Correct units_gross
 UPDATE kpdb."2020" a
-SET units_gross = b.new_value
+SET units_gross = b.new_value::numeric
 FROM kpdb_corrections.latest b
 WHERE b.field = 'units_gross'
 AND a.record_id = b.record_id 
-AND a.units_gross = b.old_value;
+AND a.units_gross::numeric = b.old_value::numeric;
 
 -- Correct prop_within_5_years, checking that new value is between zero & one
 UPDATE kpdb."2020" a
@@ -124,7 +124,7 @@ SET phasing_known = b.new_value
 FROM kpdb_corrections.latest b
 WHERE b.field = 'phasing_known'
 AND a.record_id = b.record_id 
-AND a.phasing_known = b.old_value
+AND a.phasing_known::text = b.old_value::text
 AND b.new_value::text IN ('0','1');
 
 -- Correct nycha
@@ -133,7 +133,7 @@ SET nycha = b.new_value
 FROM kpdb_corrections.latest b
 WHERE b.field = 'nycha'
 AND a.record_id = b.record_id 
-AND a.nycha = b.old_value
+AND a.nycha::text = b.old_value::text
 AND b.new_value::text IN ('0','1');
 
 -- Correct gq
@@ -142,7 +142,7 @@ SET gq = b.new_value
 FROM kpdb_corrections.latest b
 WHERE b.field = 'gq'
 AND a.record_id = b.record_id 
-AND a.gq = b.old_value
+AND a.gq::text = b.old_value::text
 AND b.new_value::text IN ('0','1');
 
 -- Correct senior_housing
@@ -151,7 +151,7 @@ SET senior_housing = b.new_value
 FROM kpdb_corrections.latest b
 WHERE b.field = 'senior_housing'
 AND a.record_id = b.record_id 
-AND a.senior_housing = b.old_value
+AND a.senior_housing::text = b.old_value::text
 AND b.new_value::text IN ('0','1');
 
 -- Correct assisted_living
@@ -160,7 +160,7 @@ SET assisted_living = b.new_value
 FROM kpdb_corrections.latest b
 WHERE b.field = 'assisted_living'
 AND a.record_id = b.record_id 
-AND a.assisted_living = b.old_value
+AND a.assisted_living::text = b.old_value::text
 AND b.new_value::text IN ('0','1');
 
 -- Correct inactive
@@ -169,5 +169,5 @@ SET inactive = b.new_value
 FROM kpdb_corrections.latest b
 WHERE b.field = 'inactive'
 AND a.record_id = b.record_id 
-AND a.inactive = b.old_value
+AND a.inactive::text = b.old_value::text
 AND (b.new_value::text IN ('0','1') OR b.new_value IS NULL);
