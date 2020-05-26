@@ -1,4 +1,5 @@
-INSERT INTO kpdb."2020" (record_id,
+INSERT INTO kpdb."2020" (source,
+                                record_id,
                                 record_name,
                                 borough, 
                                 units_gross,
@@ -14,7 +15,8 @@ INSERT INTO kpdb."2020" (record_id,
                                 inactive,
                                 project_id
                                 )
-(SELECT record_id,
+(SELECT 'DCP Planner-Added Projects' as source,
+        record_id,
         record_name,
         borough, 
         units_gross,
