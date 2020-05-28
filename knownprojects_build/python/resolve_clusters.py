@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     df = pd.read_sql(f'SELECT * FROM {sys.argv[1]}."{year}"', build_engine)
     df['units_gross'] = df['units_gross'].astype(float)
-    df['units_net'] = df['units_net'].astype(float)
+    df['units_net'] = df['units_gross'].astype(float)
     resolved = resolve_all_projects(df)
 
     DDL = {"project_id":"text",
