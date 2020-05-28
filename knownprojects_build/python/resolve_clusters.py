@@ -26,6 +26,7 @@ def subtract_units(row, group):
 
 def resolve_project(group):
     if group.shape[0] > 1:
+        group = group.sort_values('source_id')
         group = group.reset_index()
         for index, row in group.iterrows():
             group.iloc[index] = subtract_units(row, group)
@@ -73,7 +74,7 @@ if __name__ == "__main__":
 
     df = pd.read_sql(f'SELECT * FROM {sys.argv[1]}."{year}"', build_engine)
     df['units_gross'] = df['units_gross'].astype(float)
-    df['units_net'] = df['units_net'].astype(float)
+    df['units_net'] = df['units_gross'].astype(float)
     resolved = resolve_all_projects(df)
 
     DDL = {"project_id":"text",
