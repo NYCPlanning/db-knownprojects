@@ -24,7 +24,7 @@ FROM kpdb_corrections.latest b
 WHERE b.field = 'project_id'
 AND a.record_id = b.record_id 
 AND a.project_id = b.old_value
-AND SPLIT_PART(b.project_id, '-', 2) ~ '^[0-9\.]+$';
+AND SPLIT_PART(b.new_value, '-', 2) ~ '^[0-9\.]+$';
 
 -- Correct record_name
 UPDATE kpdb."2020" a
