@@ -26,6 +26,7 @@ def subtract_units(row, group):
 
 def resolve_project(group):
     if group.shape[0] > 1:
+        group = group.sort_values('source_id')
         group = group.reset_index()
         for index, row in group.iterrows():
             group.iloc[index] = subtract_units(row, group)
