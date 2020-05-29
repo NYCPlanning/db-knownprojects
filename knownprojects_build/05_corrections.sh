@@ -34,5 +34,9 @@ docker run --rm\
         pip3 install -r python/requirements.txt; 
         python3 python/resolve_clusters.py kpdb kpdb"
 
+# Overwrite automatically calculated units_net
+echo "Force-setting units_net"
+psql $BUILD_ENGINE -f sql/correct_units_net.sql
+
 echo "Calculating count phasing fields"
 psql $BUILD_ENGINE -f sql/phasing_counts.sql
