@@ -59,6 +59,7 @@ new_zap as (
 	dcp_projectname as record_name,
 	dcp_borough as borough,
 	statuscode as status,
+	null as type,
 	dcp_certifiedreferred::text as date,	
 	'Certified Referred' as date_type,
 	COALESCE(
@@ -82,8 +83,7 @@ new_zap as (
 	NULL as gq,
 	NULL as senior_housing,
 	NULL as assisted_living,
-	NULL as inactive, 
-	NULL as type
+	NULL as inactive
 	FROM dcp_project a
 	where dcp_name in (select record_id from record_to_add))
 INSERT INTO kpdb."2020"
