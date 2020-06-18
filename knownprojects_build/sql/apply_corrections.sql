@@ -14,7 +14,6 @@ SET geom = ST_SetSRID(b.new_value, 4326)
 FROM kpdb_corrections.spatial_latest b
 WHERE b.field = 'geom'
 AND a.record_id = b.record_id 
-AND ((ST_AsText(a.geom) = ST_AsText(ST_SetSRID(b.new_value, 4326))) OR (a.geom IS NULL AND b.old_value IS NULL))
 AND NOT ST_IsEmpty(b.new_value);
 
 -- Correct project_id
