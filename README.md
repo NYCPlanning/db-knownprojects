@@ -22,4 +22,17 @@ Third review phase: [Corrections review](https://github.com/NYCPlanning/db-known
 Fourth automated phase:
 + [05_corrections](https://github.com/NYCPlanning/db-knownprojects/blob/master/knownprojects_build/05_corrections.sh) 
 
+NOTE:
+For 2020 release, reruns of 05_corrections must get run on kpdb."2020_05_26":
 
+```sql
+/** APPLY NEW ROUND OF CORRECTIONS **/
+
+-- First run:
+DELETE FROM kpdb."2020";
+
+INSERT INTO kpdb."2020"
+SELECT * FROM kpdb."2020_05_26";
+
+-- Then: Rerun 05_corrections.sh
+```
