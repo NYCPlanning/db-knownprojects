@@ -20,6 +20,10 @@ psql $BUILD_ENGINE -f sql/apply_corrections.sql
 echo "Recalculating borough"
 psql $BUILD_ENGINE -f sql/assign_boro.sql
 
+# Create stand-alone project IDs for newly added projects
+echo "Create stand-alone project_ids"
+psql $BUILD_ENGINE -f sql/stand_alone_project_id.sql
+
 # Recalculate units_net & phasing counts
 echo "Deduplicating units"
 docker run --rm\
