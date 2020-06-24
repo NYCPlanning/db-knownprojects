@@ -23,7 +23,7 @@ Fourth automated phase:
 + [05_corrections](https://github.com/NYCPlanning/db-knownprojects/blob/master/knownprojects_build/05_corrections.sh) 
 
 NOTE:
-For 2020 release, reruns of 05_corrections must get run on kpdb."2020_05_26":
+For 2020 release, reruns of 05_corrections must get run on kpdb."2020_05_29":
 
 ```sql
 /** APPLY NEW ROUND OF CORRECTIONS **/
@@ -32,7 +32,9 @@ For 2020 release, reruns of 05_corrections must get run on kpdb."2020_05_26":
 DELETE FROM kpdb."2020";
 
 INSERT INTO kpdb."2020"
-SELECT * FROM kpdb."2020_05_26";
+SELECT * FROM kpdb."2020_05_29";
 
 -- Then: Rerun 05_corrections.sh
 ```
+
+See checks in [qaqcmanual.sql](https://github.com/NYCPlanning/db-knownprojects/blob/qaqcmanualreview/knownprojects_build/sql/qaqcmanual.sql)
