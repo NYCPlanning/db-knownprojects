@@ -15,7 +15,7 @@ INSERT INTO kpdb."2020" (source,
                                 inactive,
                                 project_id
                                 )
-(SELECT 'DCP Planner-Added Projects' as source,
+SELECT 'DCP Planner-Added Projects' as source,
         record_id,
         record_name,
         borough, 
@@ -32,4 +32,4 @@ INSERT INTO kpdb."2020" (source,
         inactive,
         project_id FROM dcp_planneradded.latest
 WHERE record_id NOT IN (SELECT DISTINCT record_id FROM kpdb."2020")
-AND omit IS NULL);
+AND omit IS NULL;
