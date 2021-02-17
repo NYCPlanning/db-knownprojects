@@ -15,10 +15,11 @@ def esd_projects() -> pd.DataFrame:
     df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
     return df
 
-
-def edc_projects():
-    # "2021.02.01 EDC inputs for DCP housing projections.xlsx"
-    return None
+@ETL
+def edc_projects() -> pd.DataFrame:
+    filename="2021.02.01 EDC inputs for DCP housing projections .xlsx"
+    df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
+    return df
 
 @ETL
 def dcp_n_study() -> pd.DataFrame:
@@ -39,12 +40,11 @@ def dcp_n_study_projected() -> gpd.geodataframe.GeoDataFrame:
     df = gpd.read_file(f"zip://{current_dir}/data/raw/{filename}")
     return df
 
-
-def hpd_rfp():
-    # "2021.02.08 HPD RFPs.xlsx"
-    # Previous version did not have geometry, we take geometries from BBLs here.
-    # What is "hpd_rfps_shapefile_20191008.zip," and how should we incorporate it?
-    return None
+@ETL
+def hpd_rfp() -> pd.DataFrame:
+    filename="2021.02.08 HPD RFPs.xlsx"
+    df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
+    return df
 
 
 def hpd_pc():
@@ -67,7 +67,7 @@ def edc_sca_inputs():
     return None
 
 @ETL
-def edc_dcp_inputs():
+def edc_dcp_inputs() -> gpd.geodataframe.GeoDataFrame:
     filename1="edc_shapefile_20191008.zip"
     filename2="WilletsPt_PhaseOne_Housing.zip"
     df1 = gpd.read_file(f"zip://{current_dir}/data/raw/{filename1}")
@@ -76,10 +76,11 @@ def edc_dcp_inputs():
     df = pd.concat([df1, df2])
     return df
 
-
-def dcp_rezoning():
-    # "nyc_rezonings.zip" and/or "future_nstudy_shapefile_20191008.zip" It looks like the first contains the second
-    return None
+@ETL
+def dcp_rezoning() -> gpd.geodataframe.GeoDataFrame:
+    filename="nyc_rezonings.zip" 
+    df = gpd.read_file(f"zip://{current_dir}/data/raw/{filename}")
+    return df
 
 
 if __name__ == "__main__":

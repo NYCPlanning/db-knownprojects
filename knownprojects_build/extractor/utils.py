@@ -58,7 +58,7 @@ def format_field_names(df: pd.DataFrame) -> pd.DataFrame:
     Change field name to lower case
     and replace all spaces with underscore
     """
-    format_func = lambda x: re.sub(r'\W+', '', x.lower().replace("-", "_").replace(" ", "_"))
+    format_func = lambda x: re.sub(r'\W+', '', x.lower().strip().replace("-", "_").replace(" ", "_"))
     df.columns = df.columns.map(format_func)
     return df
 
