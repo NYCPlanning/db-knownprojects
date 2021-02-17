@@ -25,10 +25,11 @@ def dcp_n_study():
     # "2021.02.09 N'hood Study Rezoning Commitments.xlsx"
     return None
 
-
-def dcp_n_study_future():
-    # "2021.02.09 Future Rezonings.xlsx"
-    return None
+@ETL
+def dcp_n_study_future() -> pd.DataFrame:
+    filename="2021.02.09 Future Rezonings.xlsx"
+    df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
+    return df
 
 
 @ETL
