@@ -2,6 +2,10 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
+from datetime import datetime
+
+# Today's date
+DATE = datetime.today().strftime("%Y-%m-%d")
 
 # Load environmental variables
 load_dotenv()

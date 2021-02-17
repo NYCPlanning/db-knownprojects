@@ -4,7 +4,7 @@ import hashlib
 import csv
 from io import StringIO
 from functools import wraps
-from . import engine
+from . import engine, DATE
 
 
 def psql_insert_copy(table, conn, keys, data_iter):
@@ -51,14 +51,40 @@ def hash_each_row(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def format_field_names(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Change field name to lower case
+    and replace all spaces with underscore
+    """
     df.columns = df.columns.map(lambda x: x.lower().replace("-", "_").replace(" ", "_"))
     return df
 
 
+def add_version_date(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adding today's date as the version of the file
+    -----
+    note that this function is not implemented yet
+    because we might want to get the file creation date
+    directly from the file instead of assigning a date
+    """
+    df["version"] = DATE
+    return df
+
+
 def ETL(func):
+    """
+    Decorator for extractor functions that does the following:
+    1. extracts data
+    2. adds md5 uid field
+    3. format field names
+    4. if geopandas dataframe, convert geometry to string type
+    5. copy table to postgres
+    6. alter geometry field type to geometry with SRID 4326 if needed
+    """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
-        name=func.__name__
+        name = func.__name__
         print(f"ingesting {name} ...")
         df = func()
 
@@ -84,13 +110,16 @@ def ETL(func):
         )
 
         if "geom" in df.columns:
-            engine.execute("""
+            engine.execute(
+                """
             BEGIN; 
             ALTER TABLE %(name)s 
             ALTER COLUMN geometry type Geometry 
                 USING ST_SetSRID(ST_GeomFromText(geometry), 4326);
             COMMIT;
-            """ % {"name":name})
+            """
+                % {"name": name}
+            )
         print("🎉 done!")
         return None
 

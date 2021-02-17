@@ -4,6 +4,7 @@ from . import current_dir, output_dir
 from .utils import hash_each_row, ETL
 import sys
 
+
 def dcp_knownprojects():
     return None
 
@@ -28,6 +29,7 @@ def dcp_n_study():
 def dcp_n_study_future():
     # "2021.02.09 Future Rezonings.xlsx"
     return None
+
 
 @ETL
 def dcp_n_study_projected() -> gpd.geodataframe.GeoDataFrame:
