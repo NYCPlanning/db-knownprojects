@@ -14,8 +14,7 @@ def psql_insert_copy(table, conn, keys, data_iter):
     ----------
     table : pandas.io.sql.SQLTable
     conn : sqlalchemy.engine.Engine or sqlalchemy.engine.Connection
-    keys : list of str
-        Column names
+    keys : list of str Column names
     data_iter : Iterable that iterates the values to be inserted
     """
     # gets a DBAPI connection that can provide a cursor
@@ -88,7 +87,7 @@ def ETL(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         name = func.__name__
-        print(f"ingesting {name} ...")
+        print(f"ingesting\t{name} ...")
         df = func()
 
         # Adding uid
@@ -103,7 +102,7 @@ def ETL(func):
         if isinstance(df, gpd.geodataframe.GeoDataFrame):
             df = pd.DataFrame(df, dtype=str)
 
-        print(f"export {name} to postgres ...")
+        print(f"export\t{name} to postgres ...")
         df.to_sql(
             name,
             con=engine,
@@ -112,7 +111,7 @@ def ETL(func):
             method=psql_insert_copy,
         )
 
-        if "geom" in df.columns:
+        if "geometry" in list(df.columns):
             engine.execute(
                 """
             BEGIN; 
