@@ -1,3 +1,3 @@
-[submodule "knownprojects_build/db-knownprojects-data"]
-	path = knownprojects_build/db-knownprojects-data
+[submodule "knownprojects_build/data"]
+	path = knownprojects_build/data
 	url = git@github.com:NYCPlanning/db-knownprojects-data.git
