@@ -66,7 +66,7 @@ def edc_sca_inputs():
     # Is this the same data as last year?
     return None
 
-
+@ETL
 def edc_dcp_inputs():
     filename1="edc_shapefile_20191008.zip"
     filename2="WilletsPt_PhaseOne_Housing.zip"
