@@ -2,6 +2,16 @@
 
 This repo contains code for creating the Known Projects Database (KPDB). The build process has multiple automated phases, separated by manual review. For detailed information on the tables created throughout the build process, see the [build environment table descriptions](https://github.com/NYCPlanning/db-knownprojects/wiki/Build-environment-tables).
 
+## Instructions: 
+1. Pulling repo for the first time and pull files from submodule
+```
+git submodule update --init --recursive
+```
+2. Updating submodule
+```
+git submodule update --remote
+```
+
 First automated phase: 
 + [01_dataloading](https://github.com/NYCPlanning/db-knownprojects/blob/master/knownprojects_build/01_dataloading.sh)
 + [02_build_source_tables](https://github.com/NYCPlanning/db-knownprojects/blob/master/knownprojects_build/02_build_source_tables.sh)
