@@ -68,8 +68,13 @@ def edc_sca_inputs():
 
 
 def edc_dcp_inputs():
-    # "edc_shapefile_20191008.zip", with "WilletsPt_PhaseOne_Housing.zip" appended
-    return None
+    filename1="edc_shapefile_20191008.zip"
+    filename2="WilletsPt_PhaseOne_Housing.zip"
+    df1 = gpd.read_file(f"zip://{current_dir}/data/raw/{filename1}")
+    df2 = gpd.read_file(f"zip://{current_dir}/data/raw/{filename2}!WilletsPt_PhaseOne_Housing/WilletsPt_PhaseOne_Housing.shp")
+    df2=df2.to_crs(epsg=4326)
+    df = pd.concat([df1, df2])
+    return df
 
 
 def dcp_rezoning():
