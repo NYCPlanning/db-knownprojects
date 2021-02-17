@@ -1,17 +1,17 @@
 import geopandas as gpd
 import pandas as pd
 from . import current_dir, output_dir
-from .utils import hash_each_row
-
+from .utils import hash_each_row, ETL
+import sys
 
 def dcp_knownprojects():
     return None
 
 
+@ETL
 def esd_projects() -> pd.DataFrame:
     filename = "2021.2.10 State Developments for Housing Pipeline.xlsx"
     df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
-    df = hash_each_row(df)
     return df
 
 
@@ -29,11 +29,10 @@ def dcp_n_study_future():
     # "2021.02.09 Future Rezonings.xlsx"
     return None
 
-
+@ETL
 def dcp_n_study_projected() -> gpd.geodataframe.GeoDataFrame:
     filename = "nstudy_rezoning_commitments_shapefile_20191008.zip"
     df = gpd.read_file(f"zip://{current_dir}/data/raw/{filename}")
-    df = hash_each_row(df)
     return df
 
 
@@ -75,5 +74,6 @@ def dcp_rezoning():
 
 
 if __name__ == "__main__":
-    # esd_projects()
-    dcp_n_study_projected()
+    name = sys.argv[1]
+    assert name in list(locals().keys()), f"{name} is invalid"
+    locals()[name]()

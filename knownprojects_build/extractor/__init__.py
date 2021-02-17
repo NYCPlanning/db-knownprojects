@@ -1,6 +1,14 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
 
+# Load environmental variables
+load_dotenv()
+BUILD_ENGINE = os.environ["BUILD_ENGINE"]
+engine = create_engine(BUILD_ENGINE)
+
+# Create temporary output directories
 current_dir = os.getcwd()
 output_dir = f"{current_dir}/.output"
 
