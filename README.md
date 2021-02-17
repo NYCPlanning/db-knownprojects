@@ -11,6 +11,10 @@ git submodule update --init --recursive
 ```
 git submodule update --remote
 ```
+3. When commiting files to submodule
+    1. cd into submodule (`db-knownprojects-data`)and add commit (`git add <file>`, `git commit -m "<message here>"`)
+    2. cd out to the superproject folder `db-knownprojects` and add commit (`git add <file>`, `git commit -m "<message here>"`)
+    3. git commit recursivly `git push --recurse-submodules=on-demand`
 
 First automated phase: 
 + [01_dataloading](https://github.com/NYCPlanning/db-knownprojects/blob/master/knownprojects_build/01_dataloading.sh)
