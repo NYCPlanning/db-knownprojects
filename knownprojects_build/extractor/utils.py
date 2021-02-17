@@ -4,7 +4,7 @@ import hashlib
 import csv
 from io import StringIO
 from functools import wraps
-from . import engine, DATE
+from . import engine, DATE, output_dir
 
 
 def psql_insert_copy(table, conn, keys, data_iter):
@@ -47,7 +47,10 @@ def hash_each_row(df: pd.DataFrame) -> pd.DataFrame:
     hash_helper = lambda x: hashlib.md5(x.encode("utf-8")).hexdigest()
     df["uid"] = df["temp_column"].apply(hash_helper)
     del df["temp_column"]
-    return df
+    cols = list(df.columns)
+    cols.remove("uid")
+    cols = ["uid"] + cols
+    return df[cols]
 
 
 def format_field_names(df: pd.DataFrame) -> pd.DataFrame:
@@ -120,6 +123,7 @@ def ETL(func):
             """
                 % {"name": name}
             )
+        df.to_csv(f'{output_dir}/{name}.csv', index=False)
         print("🎉 done!")
         return None
 
