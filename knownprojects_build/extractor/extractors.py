@@ -1,8 +1,10 @@
+import sys
+
 import geopandas as gpd
 import pandas as pd
+
 from . import current_dir, output_dir
-from .utils import hash_each_row, ETL
-import sys
+from .utils import ETL, hash_each_row
 
 
 def dcp_knownprojects():
@@ -15,21 +17,24 @@ def esd_projects() -> pd.DataFrame:
     df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
     return df
 
+
 @ETL
 def edc_projects() -> pd.DataFrame:
-    filename="2021.02.01 EDC inputs for DCP housing projections .xlsx"
+    filename = "2021.02.01 EDC inputs for DCP housing projections .xlsx"
     df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
     return df
+
 
 @ETL
 def dcp_n_study() -> pd.DataFrame:
-    filename="2021.02.09 N'hood Study Rezoning Commitments.xlsx"
+    filename = "2021.02.09 N'hood Study Rezoning Commitments.xlsx"
     df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
     return df
 
+
 @ETL
 def dcp_n_study_future() -> pd.DataFrame:
-    filename="2021.02.09 Future Rezonings.xlsx"
+    filename = "2021.02.09 Future Rezonings.xlsx"
     df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
     return df
 
@@ -40,9 +45,10 @@ def dcp_n_study_projected() -> gpd.geodataframe.GeoDataFrame:
     df = gpd.read_file(f"zip://{current_dir}/data/raw/{filename}")
     return df
 
+
 @ETL
 def hpd_rfp() -> pd.DataFrame:
-    filename="2021.02.08 HPD RFPs.xlsx"
+    filename = "2021.02.08 HPD RFPs.xlsx"
     df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
     return df
 
@@ -66,19 +72,23 @@ def edc_sca_inputs():
     # Is this the same data as last year?
     return None
 
+
 @ETL
 def edc_dcp_inputs() -> gpd.geodataframe.GeoDataFrame:
-    filename1="edc_shapefile_20191008.zip"
-    filename2="WilletsPt_PhaseOne_Housing.zip"
+    filename1 = "edc_shapefile_20191008.zip"
+    filename2 = "WilletsPt_PhaseOne_Housing.zip"
     df1 = gpd.read_file(f"zip://{current_dir}/data/raw/{filename1}")
-    df2 = gpd.read_file(f"zip://{current_dir}/data/raw/{filename2}!WilletsPt_PhaseOne_Housing/WilletsPt_PhaseOne_Housing.shp")
-    df2=df2.to_crs(epsg=4326)
+    df2 = gpd.read_file(
+        f"zip://{current_dir}/data/raw/{filename2}!WilletsPt_PhaseOne_Housing/WilletsPt_PhaseOne_Housing.shp"
+    )
+    df2 = df2.to_crs(epsg=4326)
     df = pd.concat([df1, df2])
     return df
 
+
 @ETL
 def dcp_rezoning() -> gpd.geodataframe.GeoDataFrame:
-    filename="nyc_rezonings.zip" 
+    filename = "nyc_rezonings.zip"
     df = gpd.read_file(f"zip://{current_dir}/data/raw/{filename}")
     return df
 

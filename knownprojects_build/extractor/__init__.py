@@ -1,8 +1,9 @@
 import os
+from datetime import datetime
 from pathlib import Path
+
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
-from datetime import datetime
 
 # Today's date
 DATE = datetime.today().strftime("%Y-%m-%d")

@@ -1,11 +1,13 @@
-import pandas as pd
-import geopandas as gpd
-import hashlib
 import csv
+import hashlib
 import re
-from io import StringIO
 from functools import wraps
-from . import engine, DATE, output_dir
+from io import StringIO
+
+import geopandas as gpd
+import pandas as pd
+
+from . import DATE, engine, output_dir
 
 
 def psql_insert_copy(table, conn, keys, data_iter):
@@ -58,7 +60,9 @@ def format_field_names(df: pd.DataFrame) -> pd.DataFrame:
     Change field name to lower case
     and replace all spaces with underscore
     """
-    format_func = lambda x: re.sub(r'\W+', '', x.lower().strip().replace("-", "_").replace(" ", "_"))
+    format_func = lambda x: re.sub(
+        r"\W+", "", x.lower().strip().replace("-", "_").replace(" ", "_")
+    )
     df.columns = df.columns.map(format_func)
     return df
 
@@ -124,7 +128,7 @@ def ETL(func):
             """
                 % {"name": name}
             )
-        df.to_csv(f'{output_dir}/{name}.csv', index=False)
+        df.to_csv(f"{output_dir}/{name}.csv", index=False)
         print("🎉 done!")
         return None
 
