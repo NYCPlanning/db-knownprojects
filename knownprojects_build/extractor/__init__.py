@@ -1,6 +1,16 @@
 import os
 from pathlib import Path
-cwd = os.getcwd()
 
-msg = "You are executing in the wrong directory, make sure you are in knownprojects_build"
-assert Path(cwd).name == 'knownprojects_build', msg
+current_dir = os.getcwd()
+output_dir = f"{current_dir}/.output"
+
+msg = (
+    "You are executing in the wrong directory, make sure you are in knownprojects_build"
+)
+assert Path(current_dir).name == "knownprojects_build", msg
+
+if not os.path.isdir(output_dir):
+    os.makedirs(output_dir, exist_ok=True)
+    # create .gitignore so that files in this directory aren't tracked
+    with open(f"{output_dir}/.gitignore", "w") as f:
+        f.write("*")
