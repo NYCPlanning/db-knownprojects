@@ -20,10 +20,11 @@ def edc_projects():
     # "2021.02.01 EDC inputs for DCP housing projections.xlsx"
     return None
 
-
-def dcp_n_study():
-    # "2021.02.09 N'hood Study Rezoning Commitments.xlsx"
-    return None
+@ETL
+def dcp_n_study() -> pd.DataFrame:
+    filename="2021.02.09 N'hood Study Rezoning Commitments.xlsx"
+    df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
+    return df
 
 @ETL
 def dcp_n_study_future() -> pd.DataFrame:
