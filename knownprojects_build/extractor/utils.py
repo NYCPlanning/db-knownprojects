@@ -79,7 +79,7 @@ def add_version_date(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def ETL(func):
+def ETL(func) -> callable:
     """
     Decorator for extractor functions that does the following:
     1. extracts data
@@ -91,7 +91,7 @@ def ETL(func):
     """
 
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs) -> None:
         name = func.__name__
         print(f"ingesting\t{name} ...")
         df = func()
