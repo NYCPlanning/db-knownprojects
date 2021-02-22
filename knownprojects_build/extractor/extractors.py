@@ -52,10 +52,11 @@ def hpd_rfp() -> pd.DataFrame:
     df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
     return df
 
-
-def hpd_pc():
-    # Need data still
-    return None
+@ETL
+def hpd_pc() -> pd.DataFrame:
+    filename = "2021_2_18 DCP_SCA Pipeline.xlsx"
+    df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
+    return df
 
 
 def dcp_planneradded():
