@@ -139,9 +139,9 @@ _hpd_rfp as (
     GROUP BY request_for_proposals_name, designated, 
     closed, est_units, closed_date, likely_to_be_built_by_2025
 )
-SELECT * FROM _dcp_n_study 				UNION
-SELECT * FROM _dcp_n_study_future 		UNION
-SELECT * FROM _dcp_n_study_projected 	UNION
-SELECT * FROM _esd_projects 			UNION
-SELECT * FROM _hpd_pc 					UNION
+SELECT * FROM _dcp_n_study UNION
+SELECT * FROM _dcp_n_study_future UNION
+SELECT * FROM _dcp_n_study_projected UNION
+SELECT * FROM _esd_projects UNION
+SELECT * FROM _hpd_pc UNION
 SELECT * FROM _hpd_rfp;
