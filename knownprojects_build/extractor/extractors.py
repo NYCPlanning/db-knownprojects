@@ -67,11 +67,11 @@ def dcp_housing():
     # Taken from edm-data Need to check expected schema
     return None
 
-
-def edc_sca_inputs():
-    # "edc_2018_sca_inputs_share.zip"
-    # Is this the same data as last year?
-    return None
+@ETL
+def edc_sca_inputs() -> gpd.geodataframe.GeoDataFrame:
+    filename="edc_2018_sca_inputs_share.zip"
+    df = gpd.read_file(f"zip://{current_dir}/data/raw/{filename}")
+    return df
 
 
 @ETL
