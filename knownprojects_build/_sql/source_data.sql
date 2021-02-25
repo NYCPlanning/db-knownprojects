@@ -58,6 +58,22 @@ _edc_projects as (
     ON a.uid = b.uid
     GROUP BY a.uid, project_name, total_units, build_year
 ),
+_dcp_planneradded as (
+    SELECT 
+        'DCP Planner-Added Projects' as source,
+        project_id as record_id,
+        project_na as record_name,
+        NULL as status,
+        NULL as type,
+        total_unit as units_gross,
+        NULL as date,
+        NULL as date_type,
+        portion_bu::numeric as portion_built_by_2025,
+        portion__1::numeric as portion_built_by_2035,
+        portion__2::numeric as portion_built_by_2055,
+        geom 
+    FROM dcp_planneradded
+),
 _dcp_n_study_future as (
     SELECT
         'Future Neighborhood Studies' as source, 
@@ -199,6 +215,7 @@ _hpd_rfp as (
     closed, est_units, closed_date, likely_to_be_built_by_2025
 )
 SELECT * FROM _edc_projects UNION
+SELECT * FROM _dcp_planneradded UNION
 SELECT * FROM _dcp_n_study UNION
 SELECT * FROM _dcp_n_study_future UNION
 SELECT * FROM _dcp_n_study_projected UNION
