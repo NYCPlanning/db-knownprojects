@@ -44,9 +44,8 @@ SELECT
     NULL::numeric as portion_built_by_2035,
     NULL::numeric as portion_built_by_2055,
     (CASE WHEN job_inactive = 'Inactive' THEN 1 ELSE 0 END) as inactive,
-    ST_UNION(b.wkb_geometry) as geom
+    b.wkb_geometry
 INTO dcp_housing
 FROM tmp a
 LEFT JOIN dcp_mappluto b
-ON a.bbl = b.bbl::bigint::text
-GROUP BY neighborhood_study, commitment_site;
+ON a.bbl = b.bbl::bigint::text;
