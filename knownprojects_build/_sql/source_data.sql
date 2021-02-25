@@ -44,7 +44,7 @@ _edc_projects as (
         a.uid as record_id,
         array_agg(a.uid) as record_id_input,
         project_name as record_name,
-        'Projected' as status,
+        'Potential' as status,
         NULL as type,
         total_units::numeric as units_gross,
         build_year as date,
@@ -80,7 +80,7 @@ _dcp_n_study_future as (
         a.uid as record_id,
         array_agg(a.uid) as record_id_input,
         neighborhood||' '||'Future Rezoning Development' as record_name,
-        'Projected' as status,
+        'Potential' as status,
         'Future Rezoning' as type,
         incremental_units_with_certainty_factor::numeric as units_gross,
         effective_year as date,
@@ -100,7 +100,7 @@ _dcp_n_study_projected as (
         uid as record_id,
         array(select uid from dcp_n_study_projected where uid=uid) as record_id_input,
         REPLACE(project_id, ' Projected Development Sites', '') as record_name,
-        'Projected Development' as status,
+        'Potential' as status,
         NULL AS type,
         NULL::numeric as units_gross,
     --  TO_CHAR(TO_DATE(effective_date, 'MM/DD/YYYY'), 'YYYY/MM/DD') as date,
@@ -118,7 +118,7 @@ _dcp_n_study as (
         md5(array_to_string(array_agg(a.uid), '')) as record_id,
         array_agg(a.uid) as record_id_input,
         neighborhood_study||': '||commitment_site as record_name,
-        'Rezoning Commitment' as status,
+        'Potential' as status,
         NULL as type,
         (SELECT units_gross FROM kpdb."2020_06_25" 
         	WHERE record_name = neighborhood_study||': '||commitment_site
@@ -140,7 +140,7 @@ _esd_projects as (
         md5(array_to_string(array_agg(a.uid), '')) as record_id,
         array_agg(a.uid) as record_id_input,
         a.project_name as record_name,
-        'Projected' as status,
+        'Potential' as status,
         NULL as type,
         total_units::numeric as units_gross,
         NULL as date,
@@ -160,7 +160,7 @@ _hpd_pc as (
         a.uid as record_id,
         array_agg(a.uid) as record_id_input,
         house_number||' '||street_name as record_name,
-        'Projected' as status,
+        'HPD 3: Projected Closing' as status,
         NULL as type,
         ((min_of_projected_units::INTEGER + 
             max_of_projected_units::INTEGER)/2
@@ -185,11 +185,11 @@ _hpd_rfp as (
         request_for_proposals_name AS record_name,
         (CASE 
             WHEN designated = 'Y' AND closed = 'Y' 
-                THEN 'RFP designated; financing closed'
+                THEN 'HPD 4: Financing Closed'
             WHEN designated = 'Y' AND closed = 'N' 
-                THEN 'RFP designated; financing not closed'
+                THEN 'HPD 2: RFP Designated'
             WHEN designated = 'N' AND closed = 'N' 
-                THEN 'RFP issued; financing not closed'
+                THEN 'HPD 1: RFP Issued'
         END) AS status,
         NULL AS type,
         (CASE 
