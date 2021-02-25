@@ -43,7 +43,7 @@ SELECT
     NULL::numeric as portion_built_by_2025,
     NULL::numeric as portion_built_by_2035,
     NULL::numeric as portion_built_by_2055,
-    (CASE WHEN job_inactive = 'Inactive' THEN 1 ELSE 0 END) as inactive
+    (CASE WHEN job_inactive = 'Inactive' THEN 1 ELSE 0 END) as inactive,
     ST_UNION(b.wkb_geometry) as geom
 INTO dcp_housing
 FROM tmp a
