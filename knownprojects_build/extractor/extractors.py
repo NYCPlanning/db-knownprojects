@@ -20,7 +20,7 @@ def esd_projects() -> pd.DataFrame:
 
 @ETL
 def edc_projects() -> pd.DataFrame:
-    filename = "2021.02.01 EDC inputs for DCP housing projections .xlsx"
+    filename = "2021.02.25 EDC inputs for DCP housing projections.xlsx"
     df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
     return df
 
@@ -34,7 +34,7 @@ def dcp_n_study() -> pd.DataFrame:
 
 @ETL
 def dcp_n_study_future() -> pd.DataFrame:
-    filename = "2021.02.09 Future Rezonings.xlsx"
+    filename = "2021.02.25 Future Rezonings.xlsx"
     df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
     return df
 
@@ -76,14 +76,8 @@ def edc_sca_inputs() -> gpd.geodataframe.GeoDataFrame:
 
 @ETL
 def edc_dcp_inputs() -> gpd.geodataframe.GeoDataFrame:
-    filename1 = "edc_shapefile_20191008.zip"
-    filename2 = "WilletsPt_PhaseOne_Housing.zip"
-    df1 = gpd.read_file(f"zip://{current_dir}/data/raw/{filename1}")
-    df2 = gpd.read_file(
-        f"zip://{current_dir}/data/raw/{filename2}!WilletsPt_PhaseOne_Housing/WilletsPt_PhaseOne_Housing.shp"
-    )
-    df2 = df2.to_crs(epsg=4326)
-    df = pd.concat([df1, df2])
+    filename = "edc_shapefile_20210225"
+    df = gpd.read_file(f"zip://{current_dir}/data/raw/{filename}.zip!{filename}/{filename}.shp")
     return df
 
 
