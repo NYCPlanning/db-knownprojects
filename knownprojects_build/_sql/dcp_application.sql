@@ -291,6 +291,7 @@ _dcp_application as (
 		when dcp_projectphase ~* 'public review' then 'DCP 3: Certified/Referred'
 	end) as status,
     dcp_publicstatus as publicstatus,
+    dcp_certifiedreferred,
     dcp_applicanttype as applicanttype,
     dcp_visibility as visibility,
     

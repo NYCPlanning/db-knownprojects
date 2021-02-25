@@ -1,4 +1,23 @@
+DROP TABLE IF EXISTS combined;
 WITH 
+_dcp_application as (
+    SELECT
+        source,
+        record_id,
+        NULL::text[] as record_id_input,
+        record_name,
+        status,
+        NULL as type,
+        units_gross,
+        dcp_certifiedreferred as date,	
+	    'Certified Referred' as date_type,
+        null::numeric as portion_built_by_2025,
+        null::numeric as portion_built_by_2035,
+        null::numeric as portion_built_by_2055,
+        geom
+    FROM dcp_application
+    WHERE flag_relevant=1
+),
 _edc_projects as (
     WITH
     geom_bbl as (
@@ -62,6 +81,7 @@ _dcp_planneradded as (
     SELECT 
         'DCP Planner-Added Projects' as source,
         project_id as record_id,
+        NULL::text[] as record_id_input,
         project_na as record_name,
         NULL as status,
         NULL as type,
@@ -214,11 +234,15 @@ _hpd_rfp as (
     GROUP BY request_for_proposals_name, designated, 
     closed, est_units, closed_date, likely_to_be_built_by_2025
 )
-SELECT * FROM _edc_projects UNION
-SELECT * FROM _dcp_planneradded UNION
-SELECT * FROM _dcp_n_study UNION
-SELECT * FROM _dcp_n_study_future UNION
-SELECT * FROM _dcp_n_study_projected UNION
-SELECT * FROM _esd_projects UNION
-SELECT * FROM _hpd_pc UNION
-SELECT * FROM _hpd_rfp;
+SELECT * INTO combined
+FROM(
+    SELECT * FROM _dcp_application UNION
+    SELECT * FROM _edc_projects UNION
+    SELECT * FROM _dcp_planneradded UNION
+    SELECT * FROM _dcp_n_study UNION
+    SELECT * FROM _dcp_n_study_future UNION
+    SELECT * FROM _dcp_n_study_projected UNION
+    SELECT * FROM _esd_projects UNION
+    SELECT * FROM _hpd_pc UNION
+    SELECT * FROM _hpd_rfp
+) a;
