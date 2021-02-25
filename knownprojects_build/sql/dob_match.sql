@@ -5,34 +5,6 @@
 
 drop table if exists dob_review;
 with 
-filtered_dcp_housing_proj as (
-    SELECT a.source, 
-        a.record_id::text, 
-        a.record_name, 
-        a.status, 
-        a.type,
-        a.inactive,
-        a.units_gross::integer, 
-        a.date, 
-        a.date_type,
-        a.date_filed,
-        a.date_complete,  
-        a.dcp_projectcompleted,
-        null as portion_built_by_2025, 
-        null as portion_built_by_2035, 
-        null as portion_built_by_2055, 
-        a.geom,
-        b.units_prop
-    from dcp_housing_proj a
-    LEFT JOIN dcp_housing b
-    ON a.record_id = b.job_number
-    WHERE a.type <> 'Demolition'
-    AND a.status <> 'Withdrawn'
-    AND a.units_gross::int <> 0
-    AND b.units_prop::int > 0
-    AND NOT (a.type = 'Alteration'
-        and a.units_gross::integer <= 0)
-),
 matches as (
     SELECT 
     b.source, 
@@ -58,7 +30,7 @@ matches as (
     b.inactive,
     b.geom
     FROM combined a
-    INNER JOIN filtered_dcp_housing_proj b
+    INNER JOIN dcp_housing b
     ON st_intersects(a.geom, b.geom)
     AND (case WHEN b.source = 'EDC Projected Projects' then TRUE 
         else (CASE
