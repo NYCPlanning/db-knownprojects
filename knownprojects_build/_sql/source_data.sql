@@ -71,7 +71,7 @@ _dcp_planneradded as (
         portion_bu::numeric as portion_built_by_2025,
         portion__1::numeric as portion_built_by_2035,
         portion__2::numeric as portion_built_by_2055,
-        geom 
+        wkb_geometry::geometry as geom
     FROM dcp_planneradded
 ),
 _dcp_n_study_future as (
