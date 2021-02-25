@@ -58,9 +58,11 @@ def hpd_pc() -> pd.DataFrame:
     df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
     return df
 
-
+@ETL
 def dcp_planneradded():
-    return None
+    filename = "dcp_planneradded_2020_04_03.csv"
+    df = pd.read_csv(f"{current_dir}/data/raw/{filename}", dtype=str)
+    return df
 
 
 def dcp_housing():
