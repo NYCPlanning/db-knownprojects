@@ -1,4 +1,63 @@
 WITH 
+_edc_projects as (
+    WITH
+    geom_bbl as (
+        SELECT 
+            a.uid,
+            st_union(b.wkb_geometry) as geom
+        FROM(
+            select uid,  UNNEST(string_to_array(coalesce(bbl, 'NA'), ';')) as bbl
+            from edc_projects 
+        ) a LEFT JOIN dcp_mappluto b
+        ON a.bbl = b.bbl::bigint::text
+        GROUP BY a.uid
+    ),
+    geom_borough_block as (
+        SELECT 
+            a.uid, 
+            st_union(b.wkb_geometry) as geom
+        FROM edc_projects a
+        LEFT JOIN dcp_mappluto b
+        ON a.block = b.block::text 
+        AND a.borough_code = b.borocode::text
+        GROUP BY a.uid
+    ),
+    geom_edc_dcp_inputs as (
+        SELECT 
+            a.uid,
+            b.geometry as geom 
+        FROM edc_projects a
+        LEFT JOIN edc_dcp_inputs b
+        ON a.edc_id::numeric = b.project_id::numeric
+    ),
+    geom_consolidated as (
+        SELECT a.uid,coalesce(a.geom, b.geom) as geom
+        FROM (
+            SELECT a.uid,coalesce(a.geom, b.geom) as geom
+            FROM geom_edc_dcp_inputs a LEFT JOIN geom_bbl b 
+            ON a.uid = b.uid
+            ) a LEFT JOIN geom_borough_block b 
+        ON a.uid = b.uid
+    )
+    SELECT 
+        'EDC Projected Projects' as source,
+        a.uid as record_id,
+        array_agg(a.uid) as record_id_input,
+        project_name as record_name,
+        'Projected' as status,
+        NULL as type,
+        total_units::numeric as units_gross,
+        build_year as date,
+        'Build Year' as date_type,
+        null::numeric as portion_built_by_2025,
+        null::numeric as portion_built_by_2035,
+        null::numeric as portion_built_by_2055,
+        ST_Union(b.geom) as geom
+    FROM edc_projects a 
+    LEFT JOIN geom_consolidated b
+    ON a.uid = b.uid
+    GROUP BY a.uid, project_name, total_units, build_year
+),
 _dcp_n_study_future as (
     SELECT
         'Future Neighborhood Studies' as source, 
@@ -139,6 +198,7 @@ _hpd_rfp as (
     GROUP BY request_for_proposals_name, designated, 
     closed, est_units, closed_date, likely_to_be_built_by_2025
 )
+SELECT * FROM _edc_projects UNION
 SELECT * FROM _dcp_n_study UNION
 SELECT * FROM _dcp_n_study_future UNION
 SELECT * FROM _dcp_n_study_projected UNION
