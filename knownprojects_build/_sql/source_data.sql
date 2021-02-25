@@ -65,7 +65,7 @@ _dcp_planneradded as (
         project_na as record_name,
         NULL as status,
         NULL as type,
-        total_unit as units_gross,
+        total_unit::numeric as units_gross,
         NULL as date,
         NULL as date_type,
         portion_bu::numeric as portion_built_by_2025,
