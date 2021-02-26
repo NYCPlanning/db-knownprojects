@@ -14,8 +14,12 @@ _dcp_application as (
         null::numeric as portion_built_by_2025,
         null::numeric as portion_built_by_2035,
         null::numeric as portion_built_by_2055,
-        geom
-    FROM dcp_application
+        geom,
+        flag_nycha(a::text) as nycha,
+        flag_gq(a::text) as gq,
+        flag_senior_housing(a::text) as senior_housing,
+        flag_assisted_living(a::text) as assisted_living
+    FROM dcp_application a
     WHERE flag_relevant=1
 ),
 _edc_projects as (
@@ -71,7 +75,11 @@ _edc_projects as (
         null::numeric as portion_built_by_2025,
         null::numeric as portion_built_by_2035,
         null::numeric as portion_built_by_2055,
-        ST_Union(b.geom) as geom
+        ST_Union(b.geom) as geom,
+        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
+        flag_gq(array_agg(row_to_json(a))::text) as gq,
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
     FROM edc_projects a 
     LEFT JOIN geom_consolidated b
     ON a.uid = b.uid
@@ -91,8 +99,12 @@ _dcp_planneradded as (
         portion_bu::numeric as portion_built_by_2025,
         portion__1::numeric as portion_built_by_2035,
         portion__2::numeric as portion_built_by_2055,
-        wkb_geometry::geometry as geom
-    FROM dcp_planneradded
+        wkb_geometry::geometry as geom,
+        flag_nycha(a::text) as nycha,
+        flag_gq(a::text) as gq,
+        flag_senior_housing(a::text) as senior_housing,
+        flag_assisted_living(a::text) as assisted_living
+    FROM dcp_planneradded a
 ),
 _dcp_n_study_future as (
     SELECT
@@ -108,7 +120,11 @@ _dcp_n_study_future as (
         null::numeric as portion_built_by_2025,
         null::numeric as portion_built_by_2035,
         null::numeric as portion_built_by_2055,
-        ST_Union(b.geometry) as geom
+        ST_Union(b.geometry) as geom,
+        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
+        flag_gq(array_agg(row_to_json(a))::text) as gq,
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
     FROM dcp_n_study_future a
     LEFT JOIN  dcp_rezoning b
     ON a.neighborhood = b.study
@@ -129,8 +145,12 @@ _dcp_n_study_projected as (
         portion_bu::numeric as portion_built_by_2025,
         portion__1::numeric as portion_built_by_2035,
         portion__2::numeric as portion_built_by_2055,
-        geometry as geom
-    FROM dcp_n_study_projected
+        geometry as geom,
+        flag_nycha(a::text) as nycha,
+        flag_gq(a::text) as gq,
+        flag_senior_housing(a::text) as senior_housing,
+        flag_assisted_living(a::text) as assisted_living
+    FROM dcp_n_study_projected a
 ),
 _dcp_n_study as (
     SELECT 
@@ -148,7 +168,11 @@ _dcp_n_study as (
 		NULL::numeric as portion_built_by_2025,
 		NULL::numeric as portion_built_by_2035,
 		NULL::numeric as portion_built_by_2055,
-        ST_UNION(b.wkb_geometry) as geom
+        ST_UNION(b.wkb_geometry) as geom,
+        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
+        flag_gq(array_agg(row_to_json(a))::text) as gq,
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
     FROM dcp_n_study a
     LEFT JOIN  dcp_mappluto b
     ON a.bbl = b.bbl::bigint::text
@@ -168,7 +192,11 @@ _esd_projects as (
         NULL::numeric as portion_built_by_2025,
         NULL::numeric as portion_built_by_2035,
         NULL::numeric as portion_built_by_2055,
-        ST_UNION(b.wkb_geometry) as geom
+        ST_UNION(b.wkb_geometry) as geom,
+        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
+        flag_gq(array_agg(row_to_json(a))::text) as gq,
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
     FROM esd_projects a
     LEFT JOIN dcp_mappluto b
     ON a.bbl::numeric = b.bbl::numeric
@@ -190,7 +218,11 @@ _hpd_pc as (
         null::numeric as portion_built_by_2025,
         null::numeric as portion_built_by_2035,
         null::numeric as portion_built_by_2055,
-        ST_UNION(b.wkb_geometry) as geom
+        ST_UNION(b.wkb_geometry) as geom,
+        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
+        flag_gq(array_agg(row_to_json(a))::text) as gq,
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
     FROM hpd_pc a
     LEFT JOIN dcp_mappluto b
     ON a.bbl::numeric = b.bbl::numeric
@@ -227,7 +259,11 @@ _hpd_rfp as (
             THEN 0 ELSE NULL END)::numeric AS portion_built_by_2035,
         (CASE WHEN likely_to_be_built_by_2025 = 'Y' 
             THEN 0 ELSE NULL END)::numeric AS portion_built_by_2055,
-        st_union(b.wkb_geometry) AS geom
+        st_union(b.wkb_geometry) AS geom,
+        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
+        flag_gq(array_agg(row_to_json(a))::text) as gq,
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
     FROM hpd_rfp a
     LEFT JOIN dcp_mappluto b
     ON a.bbl::numeric = b.bbl::numeric
