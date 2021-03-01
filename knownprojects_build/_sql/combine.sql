@@ -189,7 +189,7 @@ _dcp_n_study_projected as (
     SELECT 
         'Neighborhood Study Projected Development Sites' as source,
         uid as record_id,
-        array(select uid from dcp_n_study_projected where uid=uid) as record_id_input,
+        array_append(array[]::text[], a.uid) as record_id_input,
         REPLACE(project_id, ' Projected Development Sites', '') as record_name,
         'Potential' as status,
         NULL AS type,
@@ -267,7 +267,7 @@ _hpd_pc as (
     SELECT 
         'HPD Projected Closings' as source,
         a.uid as record_id,
-        array_agg(a.uid) as record_id_input,
+        array_append(array[]::text[], a.uid) as record_id_input,
         house_number||' '||street_name as record_name,
         'HPD 3: Projected Closing' as status,
         NULL as type,
@@ -297,18 +297,16 @@ _hpd_pc as (
         END)::numeric as prop_after_10_years,
         1 as phasing_known,
 
-        ST_UNION(b.wkb_geometry) as geom,
+        b.wkb_geometry as geom,
 
         -- flags
-        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
-        flag_gq(array_agg(row_to_json(a))::text) as gq,
-        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
-        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
+        flag_nycha(a::text) as nycha,
+        flag_gq(a::text) as gq,
+        flag_senior_housing(a::text) as senior_housing,
+        flag_assisted_living(a::text) as assisted_living
     FROM hpd_pc a
     LEFT JOIN dcp_mappluto b
     ON a.bbl::numeric = b.bbl::numeric
-    GROUP BY uid, house_number, street_name, projected_fiscal_year_range,
-    min_of_projected_units, max_of_projected_units
 ),
 _hpd_rfp as (
     SELECT 
