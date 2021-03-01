@@ -150,25 +150,31 @@ _dcp_n_study_future as (
     SELECT
         'Future Neighborhood Studies' as source, 
         a.uid as record_id,
-        array_agg(a.uid) as record_id_input,
+        array_append(array[]::text[], a.uid) as record_id_input,
         neighborhood||' '||'Future Rezoning Development' as record_name,
         'Potential' as status,
         'Future Rezoning' as type,
         incremental_units_with_certainty_factor::numeric as units_gross,
         effective_year as date,
         'Effective Year' as date_type,
-        null::numeric as portion_built_by_2025,
-        null::numeric as portion_built_by_2035,
-        null::numeric as portion_built_by_2055,
-        ST_Union(b.geometry) as geom,
-        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
-        flag_gq(array_agg(row_to_json(a))::text) as gq,
-        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
-        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
+        0 as prop_within_5_years,
+       	(CASE 
+       		WHEN neighborhood LIKE 'Gowanus%' 
+       		THEN round(1/3::numeric,2) ELSE .5 
+       	END) as prop_5_to_10_years,
+       	(CASE 
+       		WHEN neighborhood LIKE 'Gowanus%' 
+       		THEN round(2/3::numeric,2) ELSE .5 
+       	END) as prop_after_10_years,
+        0 as phasing_known, 
+        b.geometry as geom,
+        flag_nycha(a::text) as nycha,
+        flag_gq(a::text) as gq,
+        flag_senior_housing(a::text) as senior_housing,
+        flag_assisted_living(a::text) as assisted_living
     FROM dcp_n_study_future a
     LEFT JOIN  dcp_rezoning b
     ON a.neighborhood = b.study
-    GROUP BY a.uid, neighborhood, effective_year, incremental_units_with_certainty_factor
 ),
 _dcp_n_study_projected as (
     SELECT 
