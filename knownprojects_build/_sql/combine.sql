@@ -43,9 +43,12 @@ _dcp_application as (
         dcp_certifiedreferred as date,  
         'Certified Referred' as date_type,
         0 as prop_within_5_years,
-        1 as prop_5_to_10_years,
+        (CASE 
+            WHEN status = 'Record Closed'
+            THEN 0 ELSE 1
+        END) as prop_5_to_10_years,
         0 as prop_after_10_years, 
-     	  0 as phasing_known,
+     	0 as phasing_known,
         geom,
         flag_nycha(a::text) as nycha,
         flag_gq(a::text) as gq,
