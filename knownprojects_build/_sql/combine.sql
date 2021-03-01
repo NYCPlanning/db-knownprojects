@@ -1,3 +1,6 @@
+/*
+FLAG FUNCTIONS
+*/
 CREATE OR REPLACE FUNCTION flag_assisted_living(stringy varchar) 
 RETURNS integer AS $$
 	SELECT (stringy ~* 
@@ -23,13 +26,16 @@ RETURNS integer AS $$
     'NYCHA|BTP|HOUSING AUTHORITY|NEXT GEN|NEXT-GEN|NEXTGEN|NEXTGEN')::integer;
 $$ LANGUAGE sql;
 
+/*
+SOURCE TABLE MAPPING
+*/
 DROP TABLE IF EXISTS combined;
 WITH 
 _dcp_application as (
      SELECT
         source,
         record_id,
-        NULL::text[] as record_id_input,
+        array_append(array[]::text[], a.record_id) as record_id_input,
         record_name,
         status,
         NULL as type,
@@ -91,7 +97,7 @@ _edc_projects as (
     SELECT 
         'EDC Projected Projects' as source,
         a.uid as record_id,
-        array_agg(a.uid) as record_id_input,
+        array_append(array[]::text[], a.uid) as record_id_input,
         project_name as record_name,
         'Potential' as status,
         NULL as type,
@@ -115,30 +121,30 @@ _edc_projects as (
         END) as prop_after_10_years,
         1 as phasing_known,
 
-        ST_Union(b.geom) as geom,
-        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
-        flag_gq(array_agg(row_to_json(a))::text) as gq,
-        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
-        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
-    FROM edc_projects a 
+        b.geom as geom,
+        flag_nycha(a::text) as nycha,
+        flag_gq(a::text) as gq,
+        flag_senior_housing(a::text) as senior_housing,
+        flag_assisted_living(a::text) as assisted_living
+    FROM edc_projects a
     LEFT JOIN geom_consolidated b
     ON a.uid = b.uid
-    GROUP BY a.uid, project_name, total_units, build_year
 ),
 _dcp_planneradded as (
     SELECT 
         'DCP Planner-Added Projects' as source,
-        project_id as record_id,
-        NULL::text[] as record_id_input,
+        uid as record_id,
+        array_append(array[]::text[], a.uid) as record_id_input,
         project_na as record_name,
         NULL as status,
         NULL as type,
         total_unit::numeric as units_gross,
         NULL as date,
         NULL as date_type,
-        portion_bu::numeric as portion_built_by_2025,
-        portion__1::numeric as portion_built_by_2035,
-        portion__2::numeric as portion_built_by_2055,
+        portion_bu::numeric as prop_within_5_years,
+        portion__1::numeric as prop_5_to_10_years,
+        portion__2::numeric as prop_after_10_years,
+        1 as phasing_known,
         wkb_geometry::geometry as geom,
         flag_nycha(a::text) as nycha,
         flag_gq(a::text) as gq,
@@ -185,12 +191,16 @@ _dcp_n_study_projected as (
         'Potential' as status,
         NULL AS type,
         NULL::numeric as units_gross,
-    --  TO_CHAR(TO_DATE(effective_date, 'MM/DD/YYYY'), 'YYYY/MM/DD') as date,
+        -- TO_CHAR(TO_DATE(effective_date, 'MM/DD/YYYY'), 'YYYY/MM/DD') as date,
         NULL as date,
         'Effective Date' as date_type,
-        portion_bu::numeric as portion_built_by_2025,
-        portion__1::numeric as portion_built_by_2035,
-        portion__2::numeric as portion_built_by_2055,
+        -- portion_bu::numeric as portion_built_by_2025,
+        -- portion__1::numeric as portion_built_by_2035,
+        -- portion__2::numeric as portion_built_by_2055,
+        portion_bu::numeric as prop_within_5_years,
+        portion__1::numeric as prop_5_to_10_years,
+        portion__2::numeric as prop_after_10_years, 
+        1 as phasing_known,
         geometry as geom,
         flag_nycha(a::text) as nycha,
         flag_gq(a::text) as gq,
@@ -211,9 +221,10 @@ _dcp_n_study as (
         )::numeric as units_gross,
         NULL as date,
         NULL as date_type,
-		NULL::numeric as portion_built_by_2025,
-		NULL::numeric as portion_built_by_2035,
-		NULL::numeric as portion_built_by_2055,
+        NULL::numeric as prop_within_5_years,
+        NULL::numeric as prop_5_to_10_years,
+        NULL::numeric as prop_after_10_years, 
+        0 as phasing_known,
         ST_UNION(b.wkb_geometry) as geom,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_gq(array_agg(row_to_json(a))::text) as gq,
@@ -235,9 +246,10 @@ _esd_projects as (
         total_units::numeric as units_gross,
         NULL as date,
         NULL as date_type,
-        NULL::numeric as portion_built_by_2025,
-        NULL::numeric as portion_built_by_2035,
-        NULL::numeric as portion_built_by_2055,
+        NULL::numeric as prop_within_5_years,
+        NULL::numeric as prop_5_to_10_years,
+        NULL::numeric as prop_after_10_years, 
+        0 as phasing_known,
         ST_UNION(b.wkb_geometry) as geom,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_gq(array_agg(row_to_json(a))::text) as gq,
