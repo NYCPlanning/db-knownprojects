@@ -43,6 +43,14 @@ zap_translated as (
 	    	WHEN dcp_publicstatus::numeric = 717170002 THEN 'Completed'
 	    	WHEN dcp_publicstatus::numeric = 717170005 THEN 'Noticed'
 	    END) as dcp_publicstatus,
+        (CASE 
+            WHEN dcp_projectphase::numeric = 717170000 THEN 'Study'
+	    	WHEN dcp_projectphase::numeric = 717170001 THEN 'Pre-Pas'
+	    	WHEN dcp_projectphase::numeric = 717170002 THEN 'Pre-Cert'
+            WHEN dcp_projectphase::numeric = 717170003 THEN 'Public Review'
+            WHEN dcp_projectphase::numeric = 717170004 THEN 'Public Completed'
+	    	WHEN dcp_projectphase::numeric = 717170005 THEN 'Initiation'
+        END) as dcp_projectphase,
 	    (CASE WHEN dcp_projectcompleted IS NULL THEN NULL
 	        ELSE TO_CHAR(dcp_projectcompleted::timestamp, 'YYYY/MM/DD') 
 	    END)  as dcp_projectcompleted,
@@ -275,8 +283,15 @@ _dcp_application as (
     dcp_projectbrief, 
     dcp_projectdescription,
     dcp_borough as borough,
-    statuscode as status,
+    statuscode,
+    (case
+		when dcp_projectphase ~* 'project completed' then 'DCP 4: Zoning Implemented'
+		when dcp_projectphase ~* 'pre-pas|pre-cert' then 'DCP 2: Application in progress'
+		when dcp_projectphase ~* 'initiation' then 'DCP 1: Expression of interest'
+		when dcp_projectphase ~* 'public review' then 'DCP 3: Certified/Referred'
+	end) as status,
     dcp_publicstatus as publicstatus,
+    dcp_certifiedreferred,
     dcp_applicanttype as applicanttype,
     dcp_visibility as visibility,
     
@@ -295,8 +310,8 @@ _dcp_application as (
         nullif(dcp_mihdushighernumber+ 
             dcp_noofvoluntaryaffordabledus,0),
         nullif(dcp_mihduslowernumber+ 
-            dcp_noofvoluntaryaffordabledus,0))
-    as units_gross,
+            dcp_noofvoluntaryaffordabledus,0)
+    )::numeric as units_gross,
     
 	--identify unit source
     COALESCE(

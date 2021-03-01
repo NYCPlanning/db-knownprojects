@@ -1,4 +1,52 @@
+CREATE OR REPLACE FUNCTION flag_assisted_living(stringy varchar) 
+RETURNS integer AS $$
+	SELECT (stringy ~* 
+    'ASSISTED LIVING')::integer;
+$$ LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION flag_senior_housing(stringy varchar) 
+RETURNS integer AS $$
+	SELECT (stringy ~* 
+    'SENIOR|ELDERLY| AIRS |A.I.R.S|CONTINUING CARE|NURSING| SARA |S.A.R.A')::integer;
+$$ LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION flag_gq(stringy varchar) 
+RETURNS integer AS $$
+	SELECT (stringy ~* 
+    'CORRECTIONAL|NURSING| MENTAL|DORMITOR|MILITARY|GROUP HOME|BARRACK')::integer;
+$$ LANGUAGE sql;
+
+
+CREATE OR REPLACE FUNCTION flag_nycha(stringy varchar) 
+RETURNS integer AS $$
+	SELECT (stringy ~* 
+    'NYCHA|BTP|HOUSING AUTHORITY|NEXT GEN|NEXT-GEN|NEXTGEN|NEXTGEN')::integer;
+$$ LANGUAGE sql;
+
+DROP TABLE IF EXISTS combined;
 WITH 
+_dcp_application as (
+    SELECT
+        source,
+        record_id,
+        NULL::text[] as record_id_input,
+        record_name,
+        status,
+        NULL as type,
+        units_gross,
+        dcp_certifiedreferred as date,	
+	    'Certified Referred' as date_type,
+        null::numeric as portion_built_by_2025,
+        null::numeric as portion_built_by_2035,
+        null::numeric as portion_built_by_2055,
+        geom,
+        flag_nycha(a::text) as nycha,
+        flag_gq(a::text) as gq,
+        flag_senior_housing(a::text) as senior_housing,
+        flag_assisted_living(a::text) as assisted_living
+    FROM dcp_application a
+    WHERE flag_relevant=1
+),
 _edc_projects as (
     WITH
     geom_bbl as (
@@ -44,7 +92,7 @@ _edc_projects as (
         a.uid as record_id,
         array_agg(a.uid) as record_id_input,
         project_name as record_name,
-        'Projected' as status,
+        'Potential' as status,
         NULL as type,
         total_units::numeric as units_gross,
         build_year as date,
@@ -52,7 +100,11 @@ _edc_projects as (
         null::numeric as portion_built_by_2025,
         null::numeric as portion_built_by_2035,
         null::numeric as portion_built_by_2055,
-        ST_Union(b.geom) as geom
+        ST_Union(b.geom) as geom,
+        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
+        flag_gq(array_agg(row_to_json(a))::text) as gq,
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
     FROM edc_projects a 
     LEFT JOIN geom_consolidated b
     ON a.uid = b.uid
@@ -62,6 +114,7 @@ _dcp_planneradded as (
     SELECT 
         'DCP Planner-Added Projects' as source,
         project_id as record_id,
+        NULL::text[] as record_id_input,
         project_na as record_name,
         NULL as status,
         NULL as type,
@@ -71,8 +124,12 @@ _dcp_planneradded as (
         portion_bu::numeric as portion_built_by_2025,
         portion__1::numeric as portion_built_by_2035,
         portion__2::numeric as portion_built_by_2055,
-        wkb_geometry::geometry as geom
-    FROM dcp_planneradded
+        wkb_geometry::geometry as geom,
+        flag_nycha(a::text) as nycha,
+        flag_gq(a::text) as gq,
+        flag_senior_housing(a::text) as senior_housing,
+        flag_assisted_living(a::text) as assisted_living
+    FROM dcp_planneradded a
 ),
 _dcp_n_study_future as (
     SELECT
@@ -80,7 +137,7 @@ _dcp_n_study_future as (
         a.uid as record_id,
         array_agg(a.uid) as record_id_input,
         neighborhood||' '||'Future Rezoning Development' as record_name,
-        'Projected' as status,
+        'Potential' as status,
         'Future Rezoning' as type,
         incremental_units_with_certainty_factor::numeric as units_gross,
         effective_year as date,
@@ -88,7 +145,11 @@ _dcp_n_study_future as (
         null::numeric as portion_built_by_2025,
         null::numeric as portion_built_by_2035,
         null::numeric as portion_built_by_2055,
-        ST_Union(b.geometry) as geom
+        ST_Union(b.geometry) as geom,
+        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
+        flag_gq(array_agg(row_to_json(a))::text) as gq,
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
     FROM dcp_n_study_future a
     LEFT JOIN  dcp_rezoning b
     ON a.neighborhood = b.study
@@ -100,7 +161,7 @@ _dcp_n_study_projected as (
         uid as record_id,
         array(select uid from dcp_n_study_projected where uid=uid) as record_id_input,
         REPLACE(project_id, ' Projected Development Sites', '') as record_name,
-        'Projected Development' as status,
+        'Potential' as status,
         NULL AS type,
         NULL::numeric as units_gross,
     --  TO_CHAR(TO_DATE(effective_date, 'MM/DD/YYYY'), 'YYYY/MM/DD') as date,
@@ -109,8 +170,12 @@ _dcp_n_study_projected as (
         portion_bu::numeric as portion_built_by_2025,
         portion__1::numeric as portion_built_by_2035,
         portion__2::numeric as portion_built_by_2055,
-        geometry as geom
-    FROM dcp_n_study_projected
+        geometry as geom,
+        flag_nycha(a::text) as nycha,
+        flag_gq(a::text) as gq,
+        flag_senior_housing(a::text) as senior_housing,
+        flag_assisted_living(a::text) as assisted_living
+    FROM dcp_n_study_projected a
 ),
 _dcp_n_study as (
     SELECT 
@@ -118,7 +183,7 @@ _dcp_n_study as (
         md5(array_to_string(array_agg(a.uid), '')) as record_id,
         array_agg(a.uid) as record_id_input,
         neighborhood_study||': '||commitment_site as record_name,
-        'Rezoning Commitment' as status,
+        'Potential' as status,
         NULL as type,
         (SELECT units_gross FROM kpdb."2020_06_25" 
         	WHERE record_name = neighborhood_study||': '||commitment_site
@@ -128,7 +193,11 @@ _dcp_n_study as (
 		NULL::numeric as portion_built_by_2025,
 		NULL::numeric as portion_built_by_2035,
 		NULL::numeric as portion_built_by_2055,
-        ST_UNION(b.wkb_geometry) as geom
+        ST_UNION(b.wkb_geometry) as geom,
+        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
+        flag_gq(array_agg(row_to_json(a))::text) as gq,
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
     FROM dcp_n_study a
     LEFT JOIN  dcp_mappluto b
     ON a.bbl = b.bbl::bigint::text
@@ -140,7 +209,7 @@ _esd_projects as (
         md5(array_to_string(array_agg(a.uid), '')) as record_id,
         array_agg(a.uid) as record_id_input,
         a.project_name as record_name,
-        'Projected' as status,
+        'Potential' as status,
         NULL as type,
         total_units::numeric as units_gross,
         NULL as date,
@@ -148,7 +217,11 @@ _esd_projects as (
         NULL::numeric as portion_built_by_2025,
         NULL::numeric as portion_built_by_2035,
         NULL::numeric as portion_built_by_2055,
-        ST_UNION(b.wkb_geometry) as geom
+        ST_UNION(b.wkb_geometry) as geom,
+        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
+        flag_gq(array_agg(row_to_json(a))::text) as gq,
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
     FROM esd_projects a
     LEFT JOIN dcp_mappluto b
     ON a.bbl::numeric = b.bbl::numeric
@@ -160,7 +233,7 @@ _hpd_pc as (
         a.uid as record_id,
         array_agg(a.uid) as record_id_input,
         house_number||' '||street_name as record_name,
-        'Projected' as status,
+        'HPD 3: Projected Closing' as status,
         NULL as type,
         ((min_of_projected_units::INTEGER + 
             max_of_projected_units::INTEGER)/2
@@ -170,7 +243,11 @@ _hpd_pc as (
         null::numeric as portion_built_by_2025,
         null::numeric as portion_built_by_2035,
         null::numeric as portion_built_by_2055,
-        ST_UNION(b.wkb_geometry) as geom
+        ST_UNION(b.wkb_geometry) as geom,
+        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
+        flag_gq(array_agg(row_to_json(a))::text) as gq,
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
     FROM hpd_pc a
     LEFT JOIN dcp_mappluto b
     ON a.bbl::numeric = b.bbl::numeric
@@ -185,11 +262,11 @@ _hpd_rfp as (
         request_for_proposals_name AS record_name,
         (CASE 
             WHEN designated = 'Y' AND closed = 'Y' 
-                THEN 'RFP designated; financing closed'
+                THEN 'HPD 4: Financing Closed'
             WHEN designated = 'Y' AND closed = 'N' 
-                THEN 'RFP designated; financing not closed'
+                THEN 'HPD 2: RFP Designated'
             WHEN designated = 'N' AND closed = 'N' 
-                THEN 'RFP issued; financing not closed'
+                THEN 'HPD 1: RFP Issued'
         END) AS status,
         NULL AS type,
         (CASE 
@@ -207,18 +284,26 @@ _hpd_rfp as (
             THEN 0 ELSE NULL END)::numeric AS portion_built_by_2035,
         (CASE WHEN likely_to_be_built_by_2025 = 'Y' 
             THEN 0 ELSE NULL END)::numeric AS portion_built_by_2055,
-        st_union(b.wkb_geometry) AS geom
+        st_union(b.wkb_geometry) AS geom,
+        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
+        flag_gq(array_agg(row_to_json(a))::text) as gq,
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
     FROM hpd_rfp a
     LEFT JOIN dcp_mappluto b
     ON a.bbl::numeric = b.bbl::numeric
     GROUP BY request_for_proposals_name, designated, 
     closed, est_units, closed_date, likely_to_be_built_by_2025
 )
-SELECT * FROM _edc_projects UNION
-SELECT * FROM _dcp_planneradded UNION
-SELECT * FROM _dcp_n_study UNION
-SELECT * FROM _dcp_n_study_future UNION
-SELECT * FROM _dcp_n_study_projected UNION
-SELECT * FROM _esd_projects UNION
-SELECT * FROM _hpd_pc UNION
-SELECT * FROM _hpd_rfp;
+SELECT * INTO combined
+FROM(
+    SELECT * FROM _dcp_application UNION
+    SELECT * FROM _edc_projects UNION
+    SELECT * FROM _dcp_planneradded UNION
+    SELECT * FROM _dcp_n_study UNION
+    SELECT * FROM _dcp_n_study_future UNION
+    SELECT * FROM _dcp_n_study_projected UNION
+    SELECT * FROM _esd_projects UNION
+    SELECT * FROM _hpd_pc UNION
+    SELECT * FROM _hpd_rfp
+) a;
