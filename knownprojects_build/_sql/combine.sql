@@ -26,7 +26,7 @@ $$ LANGUAGE sql;
 DROP TABLE IF EXISTS combined;
 WITH 
 _dcp_application as (
-    SELECT
+     SELECT
         source,
         record_id,
         NULL::text[] as record_id_input,
@@ -34,18 +34,19 @@ _dcp_application as (
         status,
         NULL as type,
         units_gross,
-        dcp_certifiedreferred as date,	
-	    'Certified Referred' as date_type,
-        null::numeric as portion_built_by_2025,
-        null::numeric as portion_built_by_2035,
-        null::numeric as portion_built_by_2055,
+        dcp_certifiedreferred as date,  
+        'Certified Referred' as date_type,
+        0 as prop_within_5_years,
+        1 as prop_5_to_10_years,
+        0 as prop_after_10_years, 
+     	0 as phasing_known,
         geom,
         flag_nycha(a::text) as nycha,
         flag_gq(a::text) as gq,
         flag_senior_housing(a::text) as senior_housing,
         flag_assisted_living(a::text) as assisted_living
-    FROM dcp_application a
-    WHERE flag_relevant=1
+	FROM dcp_application a
+	WHERE flag_relevant=1
 ),
 _edc_projects as (
     WITH
@@ -97,9 +98,23 @@ _edc_projects as (
         total_units::numeric as units_gross,
         build_year as date,
         'Build Year' as date_type,
-        null::numeric as portion_built_by_2025,
-        null::numeric as portion_built_by_2035,
-        null::numeric as portion_built_by_2055,
+     
+        -- phasing
+        (CASE 
+            WHEN build_year::numeric <= date_part('year', CURRENT_DATE)+5 
+            THEN 1 ELSE 0 
+        END) as prop_within_5_years,
+        (CASE 
+            WHEN build_year::numeric > date_part('year', CURRENT_DATE)+5 
+            AND build_year::numeric <= date_part('year', CURRENT_DATE)+10 
+            THEN 1 ELSE 0 
+        END)as prop_5_to_10_years,
+        (CASE 
+            WHEN build_year::numeric > date_part('year', CURRENT_DATE)+10 
+            THEN 1 ELSE 0 
+        END) as prop_after_10_years,
+        1 as phasing_known,
+
         ST_Union(b.geom) as geom,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_gq(array_agg(row_to_json(a))::text) as gq,
@@ -229,30 +244,50 @@ _esd_projects as (
 ),
 _hpd_pc as (
     SELECT 
-        'HPD Projected Closings' as source,
-        a.uid as record_id,
-        array_agg(a.uid) as record_id_input,
-        house_number||' '||street_name as record_name,
-        'HPD 3: Projected Closing' as status,
-        NULL as type,
-        ((min_of_projected_units::INTEGER + 
-            max_of_projected_units::INTEGER)/2
-        )::integer as units_gross,
-        NULL as date,
-        NULL as date_type,
-        null::numeric as portion_built_by_2025,
-        null::numeric as portion_built_by_2035,
-        null::numeric as portion_built_by_2055,
-        ST_UNION(b.wkb_geometry) as geom,
-        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
-        flag_gq(array_agg(row_to_json(a))::text) as gq,
-        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
-        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
-    FROM hpd_pc a
-    LEFT JOIN dcp_mappluto b
-    ON a.bbl::numeric = b.bbl::numeric
-    GROUP BY uid, house_number, street_name, 
-    min_of_projected_units, max_of_projected_units
+    'HPD Projected Closings' as source,
+    a.uid as record_id,
+    array_agg(a.uid) as record_id_input,
+    house_number||' '||street_name as record_name,
+    'HPD 3: Projected Closing' as status,
+    NULL as type,
+    ((min_of_projected_units::INTEGER + 
+        max_of_projected_units::INTEGER)/2
+    )::integer as units_gross,
+
+    -- dates
+    projected_fiscal_year_range as date,
+    'Projected Fiscal Year Range' as date_type,
+
+    -- phasing
+    (CASE 
+    	WHEN date_part('year', age(to_date((CONCAT(RIGHT(projected_fiscal_year_range,4)::numeric+3, '-06-30')),'YYYY-MM-DD'),CURRENT_DATE)) <= 5 
+   		THEN 1 ELSE 0 
+   	END)::numeric as prop_within_5_years,
+   		
+    (CASE 
+    	WHEN date_part('year',age(to_date((CONCAT(RIGHT(projected_fiscal_year_range,4)::numeric+3,'-06-30')),'YYYY-MM-DD'),CURRENT_DATE)) > 5 
+    	AND date_part('year',age(to_date((CONCAT(RIGHT(projected_fiscal_year_range,4)::numeric+3,'-06-30')),'YYYY-MM-DD'),CURRENT_DATE)) <= 10 THEN 1 
+    	ELSE 0 
+    END)::numeric as prop_5_to_10_years,
+    
+    (CASE 
+    	WHEN date_part('year',age(to_date((CONCAT(RIGHT(projected_fiscal_year_range,4)::numeric+3,'-06-30')),'YYYY-MM-DD'),CURRENT_DATE)) > 10 
+    	THEN 1 ELSE 0 
+    END)::numeric as prop_after_10_years,
+    1 as phasing_known,
+    
+    ST_UNION(b.wkb_geometry) as geom,
+
+    -- flags
+    flag_nycha(array_agg(row_to_json(a))::text) as nycha,
+    flag_gq(array_agg(row_to_json(a))::text) as gq,
+    flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+    flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
+FROM hpd_pc a
+LEFT JOIN dcp_mappluto b
+ON a.bbl::numeric = b.bbl::numeric
+GROUP BY uid, house_number, street_name, projected_fiscal_year_range,
+min_of_projected_units, max_of_projected_units
 ),
 _hpd_rfp as (
     SELECT 
@@ -278,12 +313,10 @@ _hpd_rfp as (
             ELSE TO_CHAR(closed_date::date, 'YYYY/MM') 
         END) AS date,
         'Month Closed' AS date_type,
-        (CASE WHEN likely_to_be_built_by_2025 = 'Y' 
-            THEN 1 ELSE 0 END)::numeric AS portion_built_by_2025,
-        (CASE WHEN likely_to_be_built_by_2025 = 'Y' 
-            THEN 0 ELSE NULL END)::numeric AS portion_built_by_2035,
-        (CASE WHEN likely_to_be_built_by_2025 = 'Y' 
-            THEN 0 ELSE NULL END)::numeric AS portion_built_by_2055,
+        1 as prop_within_5_years,
+        0 as prop_5_to_10_years,
+        0 as prop_after_10_years,
+        1 as phasing_known,
         st_union(b.wkb_geometry) AS geom,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_gq(array_agg(row_to_json(a))::text) as gq,
