@@ -361,3 +361,27 @@ FROM(
     SELECT * FROM _hpd_pc UNION
     SELECT * FROM _hpd_rfp
 ) a;
+
+/*
+PHASING: Make sure proportions add up to 1
+*/
+UPDATE combined
+SET prop_within_5_years = (CASE WHEN (prop_5_to_10_years IS NULL 
+                                   AND prop_after_10_years IS NULL) THEN NULL
+                              ELSE 1-(COALESCE(prop_5_to_10_years::numeric, 0) + COALESCE(prop_after_10_years::numeric, 0))
+                              END) 
+WHERE prop_within_5_years IS NULL;
+
+UPDATE combined
+SET prop_5_to_10_years = (CASE WHEN (prop_within_5_years IS NULL
+                                   AND prop_after_10_years IS NULL) THEN NULL
+                              ELSE 1-(prop_within_5_years::numeric + COALESCE(prop_after_10_years::numeric,  0))
+                              END)
+WHERE prop_5_to_10_years IS NULL;
+
+UPDATE combined
+SET prop_after_10_years = (CASE WHEN (prop_within_5_years IS NULL
+                                   AND prop_5_to_10_years IS NULL) THEN NULL
+                              ELSE 1-(prop_within_5_years::numeric + prop_5_to_10_years::numeric)
+                              END)
+WHERE prop_after_10_years IS NULL;
