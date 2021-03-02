@@ -58,7 +58,7 @@ _geom AS (
 
 SELECT 
 	'DOB' as source,
-	a.job_number as record_id,
+	a.job_number::text as record_id,
 	NULL as record_id_input,
 	a.address as record_name,
 	'DOB '||a.job_status as status,
@@ -81,7 +81,7 @@ SELECT
         WHEN a.job_inactive = 'Inactive' THEN 1 
         ELSE NULL
     END) as prop_5_to_10_years,
-    NULL as prop_after_10_years,
+    NULL::numeric as prop_after_10_years,
     0 as phasing_known,
     flag_nycha(a::text) as nycha,
     flag_gq(a::text) as gq,

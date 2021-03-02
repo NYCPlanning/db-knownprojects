@@ -29,7 +29,7 @@ $$ LANGUAGE sql;
 /*
 SOURCE TABLE MAPPING
 */
-DROP TABLE IF EXISTS combined;
+DROP TABLE IF EXISTS _combined;
 WITH 
 _dcp_application as (
     SELECT
@@ -51,6 +51,7 @@ _dcp_application as (
         NULL as phasing_rationale,
      	0 as phasing_known,
         geom,
+        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_gq(a::text) as gq,
         flag_senior_housing(a::text) as senior_housing,
@@ -126,6 +127,7 @@ _edc_projects as (
         NULL as phasing_rationale,
         1 as phasing_known,
         b.geom as geom,
+        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_gq(a::text) as gq,
         flag_senior_housing(a::text) as senior_housing,
@@ -151,6 +153,7 @@ _dcp_planneradded as (
         NULL as phasing_rationale,
         1 as phasing_known,
         wkb_geometry::geometry as geom,
+        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_gq(a::text) as gq,
         flag_senior_housing(a::text) as senior_housing,
@@ -180,6 +183,7 @@ _dcp_n_study_future as (
         NULL as phasing_rationale,
         0 as phasing_known, 
         b.geometry as geom,
+        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_gq(a::text) as gq,
         flag_senior_housing(a::text) as senior_housing,
@@ -206,6 +210,7 @@ _dcp_n_study_projected as (
         NULL as phasing_rationale,
         1 as phasing_known,
         geometry as geom,
+        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_gq(a::text) as gq,
         flag_senior_housing(a::text) as senior_housing,
@@ -231,6 +236,7 @@ _dcp_n_study as (
         NULL as phasing_rationale,
         0 as phasing_known,
         ST_UNION(b.wkb_geometry) as geom,
+        NULL::numeric as inactive,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_gq(array_agg(row_to_json(a))::text) as gq,
         flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
@@ -257,6 +263,7 @@ _esd_projects as (
         NULL as phasing_rationale,
         0 as phasing_known,
         ST_UNION(b.wkb_geometry) as geom,
+        NULL::numeric as inactive,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_gq(array_agg(row_to_json(a))::text) as gq,
         flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
@@ -304,6 +311,7 @@ _hpd_pc as (
         b.wkb_geometry as geom,
 
         -- flags
+        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_gq(a::text) as gq,
         flag_senior_housing(a::text) as senior_housing,
@@ -342,6 +350,7 @@ _hpd_rfp as (
         NULL as phasing_rationale,
         1 as phasing_known,
         st_union(b.wkb_geometry) AS geom,
+        NULL::numeric as inactive,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_gq(array_agg(row_to_json(a))::text) as gq,
         flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
@@ -356,7 +365,7 @@ _dcp_housing AS (
     SELECT
         source,
         record_id,
-        record_id_input,
+        array_append(array[]::text[], record_id) as record_id_input,
         record_name,
         status,
         type,
@@ -369,6 +378,7 @@ _dcp_housing AS (
         NULL as phasing_rationale,
         phasing_known,
         geom,
+        inactive,
         nycha,
         gq,
         senior_housing,
