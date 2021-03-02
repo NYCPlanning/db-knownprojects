@@ -66,7 +66,7 @@ SELECT
 	a.address as record_name,
 	'DOB '||a.job_status as status,
 	a.job_type as type,
-	a.classa_net as units_net,
+	a.classa_net as units_gross,
 	(CASE
 	    WHEN a.date_permittd LIKE '%-%' THEN TO_CHAR(TO_DATE(a.date_permittd, 'YYYY-MM-DD'), 'YYYY/MM/DD')
 	    ELSE NULL
