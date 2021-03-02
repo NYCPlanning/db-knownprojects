@@ -46,10 +46,7 @@ spatial_join AS(
 _geom AS (
 	SELECT a.job_number,
 		a.bbl,
-		(CASE
-			WHEN a.bbl_join_geom IS NULL THEN b.spatial_join_geom
-			ELSE a.bbl_join_geom
-		END) as geom,
+		COALESCE(a.bbl_join_geom, b.spatial_join_geom) as geom,
 		(CASE
 			WHEN a.bbl_join_geom IS NULL THEN 'Spatial'
 			ELSE 'BBL'
@@ -67,23 +64,11 @@ SELECT
 	'DOB '||a.job_status as status,
 	a.job_type as type,
 	a.classa_net as units_gross,
-	(CASE
-	    WHEN a.date_permittd LIKE '%-%' THEN TO_CHAR(TO_DATE(a.date_permittd, 'YYYY-MM-DD'), 'YYYY/MM/DD')
-	    ELSE NULL
-	END) as date,
+	TO_CHAR(TO_DATE(a.date_permittd, 'YYYY-MM-DD'), 'YYYY/MM/DD') as date,
 	'Date Permitted' as date_type,
-	(CASE
-	    WHEN a.date_filed LIKE '%-%' THEN TO_CHAR(TO_DATE(a.date_filed, 'YYYY-MM-DD'), 'YYYY/MM/DD')
-	    ELSE NULL
-	END) as date_filed,
-	(CASE
-	    WHEN a.date_lastupdt LIKE '%-%' THEN TO_CHAR(TO_DATE(a.date_lastupdt, 'YYYY-MM-DD'), 'YYYY/MM/DD')
-	    ELSE NULL
-	END) as date_lastupdt,
-	(CASE
-	    WHEN a.date_complete LIKE '%-%' THEN TO_CHAR(TO_DATE(a.date_complete, 'YYYY-MM-DD'), 'YYYY/MM/DD')
-	    ELSE NULL
-	END) as date_complete,
+	TO_CHAR(TO_DATE(a.date_filed, 'YYYY-MM-DD'), 'YYYY/MM/DD') as date_filed,
+	TO_CHAR(TO_DATE(a.date_lastupdt, 'YYYY-MM-DD'), 'YYYY/MM/DD') as date_lastupdt,
+	TO_CHAR(TO_DATE(a.date_complete, 'YYYY-MM-DD'), 'YYYY/MM/DD') as date_complete,
 	(CASE WHEN a.job_inactive = 'Inactive' THEN 1 ELSE 0 END) as inactive,
 
     -- Phasing
