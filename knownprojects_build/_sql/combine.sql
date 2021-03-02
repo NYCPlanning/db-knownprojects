@@ -49,7 +49,7 @@ _dcp_application as (
         END) as prop_5_to_10_years,
         0 as prop_after_10_years, 
         NULL as phasing_rationale,
-     	0 as phasing_known,
+      	0 as phasing_known,
         geom,
         NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
@@ -307,10 +307,7 @@ _hpd_pc as (
         END)::numeric as prop_after_10_years,
         NULL as phasing_rationale,
         1 as phasing_known,
-
         b.wkb_geometry as geom,
-
-        -- flags
         NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_gq(a::text) as gq,
