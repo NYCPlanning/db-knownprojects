@@ -7,10 +7,6 @@ from . import current_dir, output_dir
 from .utils import ETL, hash_each_row
 
 
-def dcp_knownprojects():
-    return None
-
-
 @ETL
 def esd_projects() -> pd.DataFrame:
     filename = "2021.2.10 State Developments for Housing Pipeline.xlsx"
@@ -58,21 +54,11 @@ def hpd_pc() -> pd.DataFrame:
     df = pd.read_excel(f"{current_dir}/data/raw/{filename}", dtype=str)
     return df
 
+
 @ETL
 def dcp_planneradded():
     filename = "dcp_planneradded_2020_04_03.csv"
     df = pd.read_csv(f"{current_dir}/data/raw/{filename}", dtype=str)
-    return df
-
-
-def dcp_housing():
-    # Taken from edm-data Need to check expected schema
-    return None
-
-@ETL
-def edc_sca_inputs() -> gpd.geodataframe.GeoDataFrame:
-    filename="edc_2018_sca_inputs_share.zip"
-    df = gpd.read_file(f"zip://{current_dir}/data/raw/{filename}")
     return df
 
 
