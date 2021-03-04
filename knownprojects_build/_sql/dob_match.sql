@@ -1,10 +1,19 @@
 /*
 DESCRIPTION:
-
+    Identies dcp_housing records that spatially overlap with 
+    and are within a few years of non-DOB records.
 INPUTS: 
+    _combined(
 
+    )
+
+    dcp_housing_poly(
+
+    )
 OUTPUTS: 
-
+    dob_review(
+        
+    )
 */
 DROP TABLE IF EXISTS dob_review;
 WITH 
@@ -15,7 +24,7 @@ projects AS (
 		a.*
 	FROM _combined a
 	INNER JOIN _project_inputs b
-ON a.record_id=any(b.record_ids)),
+ON a.record_id=any(b.project_inputs)),
 /* 
 Identify records that intersect with DOB jobs. This excludes records from EDC 
 Projected Projects, and has a time constraint. Need to review how this

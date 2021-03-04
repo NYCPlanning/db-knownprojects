@@ -1,3 +1,26 @@
+/*
+DESCRIPTION:
+	Filters dcp_housing records to non-demolitions, non-withdrawn,
+	non-zero net unit change, and positive proposed units. Only alterations
+	with positive net unit chage are included.
+
+	Maps fields from the dcp_housing schema to the KPDB schema.
+
+	Uses record BBL to get lot-level polygon geometry from mappluto
+
+INPUTS:
+	dcp_housing(
+
+	)
+	dcp_mappluto(
+
+	)
+OUTPUTS: 
+	dcp_housing_poly(
+		
+	)
+*/
+
 DROP TABLE IF EXISTS dcp_housing_poly;
 WITH 
 /* Prior to geom steps, filter to relevant DOB jobs:
