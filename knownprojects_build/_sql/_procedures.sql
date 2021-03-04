@@ -1,10 +1,11 @@
-/* Procedure to match non-DOB records based on spatial overlap,
-forming arrays of individual record_ids which will get called
+/* 
+Procedure to match non-DOB records based on spatial overlap,
+forming arrays of individual record_ids which get called
 project_inputs. Two of the neighborhood study sources are not
 included, as units from these sources do not deduplicate
 with other sources.
 
-These project_inputs will get reviewed.
+These project_inputs will get reviewed prior to unit deduplication.
 */
 CREATE OR REPLACE PROCEDURE non_dob_match(
 ) AS
@@ -106,5 +107,35 @@ BEGIN
 		SELECT string_to_array(REPLACE(record_id, ' ', ''), ',') INTO _record_id_array;
 		CALL reassign_multiple_records(_record_id_array, record_id_match);
 	END IF;
+END
+$$ LANGUAGE plpgsql;
+
+/*
+Combines all record_ids from two distinct projects into a single project.
+*/
+CREATE OR REPLACE PROCEDURE apply_combine(
+	record_id text, 
+	record_id_match text
+) AS $$
+DECLARE
+    new_record_ids text[];
+BEGIN
+	
+	SELECT 
+		array_agg(rid) AS record_ids
+	INTO new_record_ids
+	FROM (
+		SELECT 1 as col, unnest(b.project_inputs) as rid
+		FROM _project_inputs b 
+		WHERE record_id = any(b.project_inputs)
+		OR record_id_match = any(b.project_inputs)
+	) a GROUP BY col;
+	
+	DELETE FROM _project_inputs
+	WHERE record_id_match=any(project_inputs);
+
+	UPDATE _project_inputs
+	SET project_inputs = new_record_ids
+	WHERE record_id = any(project_inputs);
 END
 $$ LANGUAGE plpgsql;
