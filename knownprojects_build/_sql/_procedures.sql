@@ -34,10 +34,10 @@ DECLARE
     new_project boolean;
 BEGIN
 	SELECT record_id_match IS NULL INTO new_project;
-
+	
 	-- Remove record_id from its existing project
 	UPDATE _project_inputs
-	SET record_ids = array_remove(project_inputs, record_id)
+	SET project_inputs = array_remove(project_inputs, record_id)
 	WHERE record_id=any(project_inputs);
 		
 	IF NOT new_project THEN
@@ -49,8 +49,7 @@ BEGIN
 	ELSE
 		-- Add record_id to a new project
 		INSERT INTO _project_inputs(project_inputs)
-		VALUES(record_id); 
+		VALUES(array_append(array[]::text[], record_id)); 
 	END IF;
 END
 $$ LANGUAGE plpgsql;
-
