@@ -13,6 +13,5 @@ psql $BUILD_ENGINE -1 -f _sql/combine.sql
 # Find and correct matches between non-DOB sources
 psql $BUILD_ENGINE -1 -f _sql/_project_inputs.sql
 
-# Find and correct matches between DOB and non-DOB sources
+# Find matches between DOB and non-DOB sources
 psql $BUILD_ENGINE -1 -f _sql/dob_match.sql
-psql $BUILD_ENGINE -1 -f _sql/project_inputs.sql
