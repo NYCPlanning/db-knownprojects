@@ -139,3 +139,30 @@ BEGIN
 	WHERE record_id = any(project_inputs);
 END
 $$ LANGUAGE plpgsql;
+
+/* 
+Loop through entire project_input_corrections table and
+apply the appropriate correction. If action = 'combine', calls
+apply_combine. If action = 'reassign', calls apply_reassign.
+*/
+CREATE OR REPLACE PROCEDURE correct_project_inputs() AS 
+$$
+DECLARE 
+    _record_id text;
+    _record_id_match text;
+
+BEGIN
+	<<reassign>>
+	FOR _record_id, _record_id_match IN (SELECT record_id, record_id_match FROM project_input_corrections WHERE action='reassign') LOOP
+	    CALL apply_reassign(_record_id, _record_id_match);
+	END LOOP reassign;
+	
+	<<combine>>
+	FOR _record_id, _record_id_match IN (SELECT record_id, record_id_match FROM project_input_corrections WHERE action='combine') LOOP
+	    CALL apply_combine(_record_id, _record_id_match);
+	END LOOP combine;
+
+    DELETE FROM _project_inputs
+    WHERE project_inputs = '{}';
+END;
+$$ LANGUAGE plpgsql;
