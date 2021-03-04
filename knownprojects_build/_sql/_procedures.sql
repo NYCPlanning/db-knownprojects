@@ -53,3 +53,58 @@ BEGIN
 	END IF;
 END
 $$ LANGUAGE plpgsql;
+
+/*
+Procedure to reassign a multiple record_ids to a different or new project.
+Works by calling reassign_single_record on the first in an array of record_ids
+to reassign, then assigns subsequent record_ids to the same project as that
+first record.
+*/
+CREATE OR REPLACE PROCEDURE reassign_multiple_records(
+	record_id_array text array,
+	record_id_match text
+) AS $$
+DECLARE
+	_record_id text;
+	_first_record_id text;
+BEGIN
+	SELECT record_id_array[1] INTO _first_record_id;
+	
+	-- Move first record_id, either to existing project or new project
+	CALL reassign_single_record(_first_record_id, record_id_match);
+	
+	-- Remove first record_id from array, then loop through the remaining record_ids	
+	record_id_array = array_remove(record_id_array, _first_record_id);
+	
+	<<reassign_remaining>>
+	FOREACH _record_id IN ARRAY record_id_array LOOP
+	    -- Add record_id to cluster containing record_id_match
+		CALL reassign_single_record(_record_id, _first_record_id);
+	END LOOP reassign_remaining;
+	
+END
+$$ LANGUAGE plpgsql;
+
+/*
+Calls the above reassign functions, depending on whether the input for records
+to reassign is a single record_id or a comma-separated list.
+*/
+CREATE OR REPLACE PROCEDURE apply_reassign(
+	record_id text,
+	record_id_match text
+) AS $$
+DECLARE
+	_is_multiple boolean;
+	_record_id_array text array;
+BEGIN
+	SELECT record_id LIKE '%,%' INTO _is_multiple;
+	
+	IF NOT _is_multiple THEN
+		CALL reassign_single_record(record_id, record_id_match);
+
+	ELSE
+		SELECT string_to_array(REPLACE(record_id, ' ', ''), ',') INTO _record_id_array;
+		CALL reassign_multiple_records(_record_id_array, record_id_match);
+	END IF;
+END
+$$ LANGUAGE plpgsql;
