@@ -1,28 +1,24 @@
-/* 
-Procedure to match non-DOB records based on spatial overlap,
-forming arrays of individual record_ids which get called
-project_record_ids. Two of the neighborhood study sources are not
-included, as units from these sources do not deduplicate
-with other sources.
+/*
+DESCRIPTION:
+	Apply corrections contained in corrections_project to assign records_ids to different or
+	new project_record_ids.
 
-These project_record_ids will get reviewed prior to unit deduplication.
+	Uses stored procedures assist in row-by-row operations and looping through 
+	the corrections file.
+	
+INPUTS:
+	_project_record_ids(
+
+	)
+	corrections_project(
+
+	)
+OUTPUTS: 
+	_project_record_ids(
+		
+	)
 */
-CREATE OR REPLACE PROCEDURE non_dob_match(
-) AS
-$$
-DROP TABLE IF EXISTS _project_record_ids;
-SELECT
-    array_agg(record_id) as project_record_ids
-INTO _project_record_ids
-FROM(
-    SELECT record_id, 
-    ST_ClusterDBSCAN(geom, 0, 1) OVER() AS id
-    FROM  _combined
-    WHERE source NOT IN ('DOB', 'Neighborhood Study Rezoning Commitments', 'Future Neighborhood Studies')
-) a
-WHERE id IS NOT NULL
-GROUP BY id;
-$$ LANGUAGE sql;
+
 
 /*
 Procedure to reassign a single record_id to a different or new project
@@ -166,3 +162,5 @@ BEGIN
     WHERE project_record_ids = '{}';
 END;
 $$ LANGUAGE plpgsql;
+
+CALL correct_project_record_ids();
