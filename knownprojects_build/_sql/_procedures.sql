@@ -1,19 +1,19 @@
 /* 
 Procedure to match non-DOB records based on spatial overlap,
 forming arrays of individual record_ids which get called
-project_inputs. Two of the neighborhood study sources are not
+project_record_ids. Two of the neighborhood study sources are not
 included, as units from these sources do not deduplicate
 with other sources.
 
-These project_inputs will get reviewed prior to unit deduplication.
+These project_record_ids will get reviewed prior to unit deduplication.
 */
 CREATE OR REPLACE PROCEDURE non_dob_match(
 ) AS
 $$
-DROP TABLE IF EXISTS _project_inputs;
+DROP TABLE IF EXISTS _project_record_ids;
 SELECT
-    array_agg(record_id) as project_inputs
-INTO _project_inputs
+    array_agg(record_id) as project_record_ids
+INTO _project_record_ids
 FROM(
     SELECT record_id, 
     ST_ClusterDBSCAN(geom, 0, 1) OVER() AS id
@@ -37,19 +37,19 @@ BEGIN
 	SELECT record_id_match IS NULL INTO new_project;
 	
 	-- Remove record_id from its existing project
-	UPDATE _project_inputs
-	SET project_inputs = array_remove(project_inputs, record_id)
-	WHERE record_id=any(project_inputs);
+	UPDATE _project_record_ids
+	SET project_record_ids = array_remove(project_record_ids, record_id)
+	WHERE record_id=any(project_record_ids);
 		
 	IF NOT new_project THEN
 		-- Add record_id to the project containing record_id_match
-		UPDATE _project_inputs
-		SET project_inputs = array_append(project_inputs, record_id) 
-		WHERE record_id_match=any(project_inputs);
+		UPDATE _project_record_ids
+		SET project_record_ids = array_append(project_record_ids, record_id) 
+		WHERE record_id_match=any(project_record_ids);
 		
 	ELSE
 		-- Add record_id to a new project
-		INSERT INTO _project_inputs(project_inputs)
+		INSERT INTO _project_record_ids(project_record_ids)
 		VALUES(array_append(array[]::text[], record_id)); 
 	END IF;
 END
@@ -125,27 +125,27 @@ BEGIN
 		array_agg(rid) AS record_ids
 	INTO new_record_ids
 	FROM (
-		SELECT 1 as col, unnest(b.project_inputs) as rid
-		FROM _project_inputs b 
-		WHERE record_id = any(b.project_inputs)
-		OR record_id_match = any(b.project_inputs)
+		SELECT 1 as col, unnest(b.project_record_ids) as rid
+		FROM _project_record_ids b 
+		WHERE record_id = any(b.project_record_ids)
+		OR record_id_match = any(b.project_record_ids)
 	) a GROUP BY col;
 	
-	DELETE FROM _project_inputs
-	WHERE record_id_match=any(project_inputs);
+	DELETE FROM _project_record_ids
+	WHERE record_id_match=any(project_record_ids);
 
-	UPDATE _project_inputs
-	SET project_inputs = new_record_ids
-	WHERE record_id = any(project_inputs);
+	UPDATE _project_record_ids
+	SET project_record_ids = new_record_ids
+	WHERE record_id = any(project_record_ids);
 END
 $$ LANGUAGE plpgsql;
 
 /* 
-Loop through entire project_input_corrections table and
+Loop through entire correction_project table and
 apply the appropriate correction. If action = 'combine', calls
 apply_combine. If action = 'reassign', calls apply_reassign.
 */
-CREATE OR REPLACE PROCEDURE correct_project_inputs() AS 
+CREATE OR REPLACE PROCEDURE correct_project_record_ids() AS 
 $$
 DECLARE 
     _record_id text;
@@ -153,16 +153,16 @@ DECLARE
 
 BEGIN
 	<<reassign>>
-	FOR _record_id, _record_id_match IN (SELECT record_id, record_id_match FROM project_input_corrections WHERE action='reassign') LOOP
+	FOR _record_id, _record_id_match IN (SELECT record_id, record_id_match FROM correction_project WHERE action='reassign') LOOP
 	    CALL apply_reassign(_record_id, _record_id_match);
 	END LOOP reassign;
 	
 	<<combine>>
-	FOR _record_id, _record_id_match IN (SELECT record_id, record_id_match FROM project_input_corrections WHERE action='combine') LOOP
+	FOR _record_id, _record_id_match IN (SELECT record_id, record_id_match FROM correction_project WHERE action='combine') LOOP
 	    CALL apply_combine(_record_id, _record_id_match);
 	END LOOP combine;
 
-    DELETE FROM _project_inputs
-    WHERE project_inputs = '{}';
+    DELETE FROM _project_record_ids
+    WHERE project_record_ids = '{}';
 END;
 $$ LANGUAGE plpgsql;
