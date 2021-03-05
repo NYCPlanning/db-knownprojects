@@ -12,7 +12,7 @@ INPUTS:
 
 	)
 
-    POST-REVIEW: correction_project(
+    POST-REVIEW: corrections_project(
 
     )
 OUTPUTS: 
@@ -38,10 +38,10 @@ GROUP BY id;
 /* 
 Apply corrections to the project_record_ids table.
 If this is the first run and there are no corrections,
-create an empty correction_project so no corrections
+create an empty corrections_project so no corrections
 get applied.
 */
-CREATE TABLE IF NOT EXISTS correction_project(
+CREATE TABLE IF NOT EXISTS corrections_project(
     record_id text,
     action text,
     record_id_match text
