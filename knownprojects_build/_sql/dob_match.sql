@@ -17,14 +17,14 @@ OUTPUTS:
 */
 DROP TABLE IF EXISTS dob_review;
 WITH 
--- This will mimic the project_inputs as corrected after round 1
+-- This will mimic the project_record_ids as corrected after round 1
 projects AS (
 	SELECT
-		b.project_inputs,
+		b.project_record_ids,
 		a.*
 	FROM _combined a
-	INNER JOIN _project_inputs b
-ON a.record_id=any(b.project_inputs)),
+	INNER JOIN _project_record_ids b
+ON a.record_id=any(b.project_record_ids)),
 /* 
 Identify records that intersect with DOB jobs. This excludes records from EDC 
 Projected Projects, and has a time constraint. Need to review how this
@@ -35,7 +35,7 @@ matches as (
     	b.*,
     	a.record_id as match_record_id,
     	a.record_id_input as match_record_id_input,
-    	a.project_inputs
+    	a.project_record_ids
     FROM projects a
     INNER JOIN _combined b
     ON st_intersects(a.geom, b.geom)
@@ -57,14 +57,14 @@ multimatch AS (
     SELECT DISTINCT record_id
     FROM matches
     GROUP BY record_id
-    HAVING count(DISTINCT(project_inputs)) > 1
+    HAVING count(DISTINCT(project_record_ids)) > 1
 ),
 /* 
 Find all projects where a DOB job matched with it, and that
 DOB job matched with more than one project.
 */
 multimatchproject as (
-    SELECT project_inputs
+    SELECT project_record_ids
     FROM matches
     WHERE record_id IN (SELECT record_id FROM multimatch)
 ),
@@ -80,7 +80,7 @@ combined_dob as (
 		date,
 		date_type,
 		inactive,
-		project_inputs
+		project_record_ids
 	FROM matches
     UNION
     SELECT 
@@ -93,7 +93,7 @@ combined_dob as (
 		date,
 		date_type,
 		inactive,
-		project_inputs
+		project_record_ids
 	FROM projects)
 -- Assign flags for review and append extra DOB date information
 SELECT a.*,
@@ -105,7 +105,7 @@ SELECT a.*,
 	        ELSE 0
 	     END) as dob_multimatch,
 	    (CASE 
-	    	WHEN a.project_inputs IN (SELECT project_inputs FROM multimatchproject) THEN 1 
+	    	WHEN a.project_record_ids IN (SELECT project_record_ids FROM multimatchproject) THEN 1 
 	    	ELSE 0 
 	    END) as project_has_dob_multi
 INTO dob_review
@@ -114,5 +114,5 @@ LEFT JOIN dcp_housing_poly b
 ON a.record_id = b.record_id
 -- Only output matched DOB jobs and the records associated with them for review
 WHERE a.record_id IN (SELECT record_id FROM matches) 
-OR a.record_id IN (SELECT UNNEST(project_inputs) FROM matches)
-ORDER BY project_inputs;
+OR a.record_id IN (SELECT UNNEST(project_record_ids) FROM matches)
+ORDER BY project_record_ids;
