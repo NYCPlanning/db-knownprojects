@@ -2,10 +2,16 @@ import sys
 
 import geopandas as gpd
 import pandas as pd
+import shapely
 
 from . import current_dir, output_dir
 from .utils import ETL, hash_each_row
 
+@ETL
+def dcp_knownprojects() -> pd.DataFrame:
+    filename = "kpdb_2020_09_24_vF.csv"
+    df = pd.read_csv(f"{current_dir}/data/raw/{filename}", dtype=str)
+    return df
 
 @ETL
 def esd_projects() -> pd.DataFrame:
