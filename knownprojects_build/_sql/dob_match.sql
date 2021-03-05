@@ -17,7 +17,7 @@ OUTPUTS:
 */
 DROP TABLE IF EXISTS dob_review;
 WITH 
--- This will mimic the project_record_ids as corrected after round 1
+-- Join project_record_ids to the combined source data
 projects AS (
 	SELECT
 		b.project_record_ids,
