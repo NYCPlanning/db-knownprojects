@@ -14,7 +14,7 @@ INPUTS:
     dob_review(
 
     )
-	POST-REVIEW: dob_match_corrections(
+	POST-REVIEW: corrections_dob_match(
 
 	)
     _project_record_ids(
@@ -51,7 +51,7 @@ matches_to_remove AS(
 		a.record_id, 
 		a.project_record_ids
 	FROM dob_matches a
-	JOIN dob_match_corrections b
+	JOIN corrections_dob_match b
 	ON a.record_id = b.record_id_dob
 	AND b.record_id = any(a.project_record_ids)
 	AND b.action = 'remove'
@@ -60,7 +60,7 @@ matches_to_add AS(
 	SELECT 
 		record_id_dob as record_id,
 		record_id as record_id_match
-	FROM dob_match_corrections
+	FROM corrections_dob_match
 	WHERE action='add'
 ),
 verified_matches AS (
