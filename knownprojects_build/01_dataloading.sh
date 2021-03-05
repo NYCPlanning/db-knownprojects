@@ -15,3 +15,8 @@ import_private dcp_projectbbls
 
 # Load other tables
 import_public dcp_mappluto_wi
+import_public dcp_boroboundaries_wi
+import_public dcp_housing
+import_public dcp_zoningmapamendments
+
+
