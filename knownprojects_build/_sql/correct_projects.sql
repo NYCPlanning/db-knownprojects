@@ -137,7 +137,7 @@ END
 $$ LANGUAGE plpgsql;
 
 /* 
-Loop through entire correction_project table and
+Loop through entire corrections_project table and
 apply the appropriate correction. If action = 'combine', calls
 apply_combine. If action = 'reassign', calls apply_reassign.
 */
@@ -149,12 +149,12 @@ DECLARE
 
 BEGIN
 	<<reassign>>
-	FOR _record_id, _record_id_match IN (SELECT record_id, record_id_match FROM correction_project WHERE action='reassign') LOOP
+	FOR _record_id, _record_id_match IN (SELECT record_id, record_id_match FROM corrections_project WHERE action='reassign') LOOP
 	    CALL apply_reassign(_record_id, _record_id_match);
 	END LOOP reassign;
 	
 	<<combine>>
-	FOR _record_id, _record_id_match IN (SELECT record_id, record_id_match FROM correction_project WHERE action='combine') LOOP
+	FOR _record_id, _record_id_match IN (SELECT record_id, record_id_match FROM corrections_project WHERE action='combine') LOOP
 	    CALL apply_combine(_record_id, _record_id_match);
 	END LOOP combine;
 
