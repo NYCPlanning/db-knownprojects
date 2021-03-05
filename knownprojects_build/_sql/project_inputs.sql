@@ -52,13 +52,13 @@ matches_to_remove AS(
 		a.project_record_ids
 	FROM dob_matches a
 	JOIN dob_match_corrections b
-	ON a.record_id = b.dob_id
+	ON a.record_id = b.record_id_dob
 	AND b.record_id = any(a.project_record_ids)
 	AND b.action = 'remove'
 ),
 matches_to_add AS(
 	SELECT 
-		dob_id as record_id,
+		record_id_dob as record_id,
 		record_id as record_id_match
 	FROM dob_match_corrections
 	WHERE action='add'
