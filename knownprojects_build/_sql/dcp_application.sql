@@ -1,3 +1,34 @@
+/*
+DESCRIPTION:
+	
+
+INPUTS:
+	dcp_projects(
+
+	)
+	dcp_projectactions(
+
+	)
+    dcp_project_bbls(
+        
+    )
+    kpdb.<last_version>(
+
+    )
+    kpdb_<last_version>.dcp_project(
+
+    )
+    kpdb_corrections.<last_version>(
+
+    )
+    dcp_mappluto(
+
+    )
+OUTPUTS: 
+	dcp_application(
+		
+	)
+*/
 DROP TABLE IF EXISTS dcp_application;
 WITH 
 zap_translated as (
