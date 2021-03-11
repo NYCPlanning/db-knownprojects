@@ -63,7 +63,7 @@ _dcp_application as (
     SELECT
         source,
         record_id,
-        array_append(array[]::text[], a.record_id) as record_id_input,
+        array_append(array[]::text[], a.record_id::text) as record_id_input,
         record_name,
         status,
         NULL as type,
