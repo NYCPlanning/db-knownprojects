@@ -80,7 +80,8 @@ combined_dob as (
 		date,
 		date_type,
 		inactive,
-		project_record_ids
+		project_record_ids,
+		geom
 	FROM matches
     UNION
     SELECT 
@@ -93,10 +94,15 @@ combined_dob as (
 		date,
 		date_type,
 		inactive,
-		project_record_ids
+		project_record_ids,
+		geom
 	FROM projects)
--- Assign flags for review and append extra DOB date information
+-- Assign flags for review and append contextual DOB date and unit information
 SELECT a.*,
+		b.classa_init,
+		b.classa_prop,
+		b.otherb_init,
+		b.otherb_prop,
 		b.date_filed,
 		b.date_lastupdt,
 		b.date_complete,
