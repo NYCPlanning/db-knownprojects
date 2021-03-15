@@ -25,3 +25,11 @@ RETURNS integer AS $$
 	SELECT (stringy ~* 
     'NYCHA|BTP|HOUSING AUTHORITY|NEXT GEN|NEXT-GEN|NEXTGEN|NEXTGEN')::integer;
 $$ LANGUAGE sql;
+
+
+CREATE OR REPLACE FUNCTION get_boro(_geom geometry) 
+RETURNS varchar AS $$
+    SELECT b.borocode::varchar
+    FROM dcp_boroboundaries_wi b
+    WHERE ST_Within(_geom, b.wkb_geometry)
+$$ LANGUAGE sql;

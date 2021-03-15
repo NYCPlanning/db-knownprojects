@@ -35,7 +35,7 @@ _dcp_application as (
     SELECT
         source,
         record_id,
-        array_append(array[]::text[], a.record_id) as record_id_input,
+        array_append(array[]::text[], a.record_id::text) as record_id_input,
         record_name,
         status,
         NULL as type,
@@ -361,12 +361,12 @@ _hpd_rfp as (
 _dcp_housing AS (
     SELECT
         source,
-        record_id,
-        array_append(array[]::text[], record_id) as record_id_input,
+        record_id::text,
+        array_append(array[]::text[], record_id::text) as record_id_input,
         record_name,
         status,
         type,
-        units_gross,
+        units_gross::integer,
         date,
         date_type,
         prop_within_5_years,
@@ -382,7 +382,7 @@ _dcp_housing AS (
         assisted_living
     FROM dcp_housing_poly
 )
-SELECT * INTO _combined
+SELECT *, get_boro(geom) as borough INTO _combined
 FROM(
     SELECT * FROM _dcp_application UNION
     SELECT * FROM _edc_projects UNION
