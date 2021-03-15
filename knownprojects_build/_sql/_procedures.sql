@@ -71,10 +71,14 @@ DECLARE
     _field text;
     _old_value text;
     _new_value text;
+    _valid_fields text[];
 BEGIN
+    SELECT array_agg(column_name) FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = _table INTO _valid_fields;
+
     FOR _record_id, _field, _old_value, _new_value IN 
-        SELECT record_id, field, old_value, new_value FROM corrections_main
-        WHERE field NOT IN ('add', 'remove', 'project_id', 'units_net')
+        SELECT record_id, field, old_value, new_value 
+        FROM corrections_main WHERE field=any(_valid_fields)
     LOOP
         CALL correction(_table, _record_id, _field, _old_value, _new_value);
     END LOOP;
