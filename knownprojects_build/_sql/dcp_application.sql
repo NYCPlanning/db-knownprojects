@@ -7,9 +7,9 @@ INPUTS:
 	dcp_projectactions
     dcp_project_bbls
     dcp_mappluto_wi
-    DEPRECATING: kpdb.<last_version>
+    dcp_knownprojects
+    corrections_main
     DEPRECATING: kpdb_<last_version>.dcp_project
-    DEPRECATING: kpdb_corrections.<last_version>
 OUTPUTS: 
 	dcp_application
 */
@@ -231,17 +231,9 @@ applicanttype_filter as (
 	FROM zap_translated
 	WHERE dcp_applicanttype = 'DCP'
 ),
-relevant_projects as (
-    SELECT distinct dcp_name 
-    FROM consolidated_filter
-    WHERE dcp_name in (SELECT dcp_name FROM year_filter)
-    and dcp_name not in (SELECT dcp_name FROM school_seat_filter)
-    and dcp_name not in (SELECT dcp_name FROM status_filter)
-    and dcp_name not in (SELECT dcp_name FROM applicanttype_filter)
-),
 records_last_kpdb as (
 	SELECT record_id 
-	FROM kpdb."2020_06_25" 
+	FROM dcp_knownprojects
 	WHERE source = 'DCP Application'
 ),
 records_last_dcp_project as (
@@ -250,13 +242,25 @@ records_last_dcp_project as (
 ),
 records_corr_remove as (
 	SELECT record_id 
-	FROM kpdb_corrections."2020_06_26"
+	FROM corrections_main
 	WHERE field = 'remove'
 ),
 records_corr_add as (
 	SELECT record_id 
-	FROM kpdb_corrections."2020_06_26"
+	FROM corrections_main
 	WHERE field = 'add'
+),
+relevant_projects as (
+    SELECT distinct dcp_name 
+    FROM consolidated_filter
+    WHERE (
+        dcp_name in (SELECT dcp_name FROM year_filter) OR 
+        dcp_name in (SELECT record_id FROM records_corr_add)
+    )
+    and dcp_name not in (SELECT dcp_name FROM school_seat_filter)
+    and dcp_name not in (SELECT dcp_name FROM status_filter)
+    and dcp_name not in (SELECT dcp_name FROM applicanttype_filter)
+    and dcp_name not in (SELECT record_id FROM records_corr_remove)
 ),
 _dcp_application as (
     SELECT distinct 
@@ -362,9 +366,9 @@ geom_pluto as (
 geom_kpdb as (
 	SELECT 
 		a.record_id,
-		nullif(a.geom, b.geom) as geom
+		nullif(a.geom, b.the_geom) as geom
 	FROM geom_pluto a
-	LEFT JOIN kpdb."2020_06_25" b
+	LEFT JOIN dcp_knownprojects b
 	ON a.record_id = b.record_id
 ),
 -- Assigning Geometry Using Zoning Map Amendments
