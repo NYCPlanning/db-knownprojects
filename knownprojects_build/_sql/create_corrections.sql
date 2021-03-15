@@ -10,7 +10,7 @@ CREATE TABLE corrections_project(
 
 -- second round of corrections -> dob to project
 DROP TABLE IF EXISTS corrections_dob;
-CREATE TABLE corrections_project(
+CREATE TABLE corrections_dob(
     record_id text,
     action text,
     record_id_match text
