@@ -1,33 +1,61 @@
 /*
-FLAG FUNCTIONS
-*/
-CREATE OR REPLACE FUNCTION flag_assisted_living(stringy varchar) 
-RETURNS integer AS $$
-	SELECT (stringy ~* 
-    'ASSISTED LIVING')::integer;
-$$ LANGUAGE sql;
+DESCRIPTION:
+    Combines input data into a single table with a shared schema. For several 
+    data sources, this involves joining on BBL with dcp_mappluto to get lot-level
+    polygon geometry. For some input datasets, a rows get collapsed to the level of
+    a project. In these cases, the unique IDs for input data rows get stored in 
+    the field record_id_input as an array. If no collapsing was necessary (i.e. 
+    each project a single record in the a given source data table), the record_id_input
+    array only contains the record_id. In cases where there is no unique project-level
+    ID, the record_id gets assigned from a hash of the uids in record_id_input.
 
-CREATE OR REPLACE FUNCTION flag_senior_housing(stringy varchar) 
-RETURNS integer AS $$
-	SELECT (stringy ~* 
-    'SENIOR|ELDERLY| AIRS |A.I.R.S|CONTINUING CARE|NURSING| SARA |S.A.R.A')::integer;
-$$ LANGUAGE sql;
+    This script also includes standardization of statuses, initial phasing assumptions,
+    and calls to various string parsing functions to set flags.
 
-CREATE OR REPLACE FUNCTION flag_gq(stringy varchar) 
-RETURNS integer AS $$
-	SELECT (stringy ~* 
-    'CORRECTIONAL|NURSING| MENTAL|DORMITOR|MILITARY|GROUP HOME|BARRACK')::integer;
-$$ LANGUAGE sql;
+INPUTS: 
+    dcp_mappluto(
 
+    )
+    dcp_application(
 
-CREATE OR REPLACE FUNCTION flag_nycha(stringy varchar) 
-RETURNS integer AS $$
-	SELECT (stringy ~* 
-    'NYCHA|BTP|HOUSING AUTHORITY|NEXT GEN|NEXT-GEN|NEXTGEN|NEXTGEN')::integer;
-$$ LANGUAGE sql;
+    )
+    edc_projects(
 
-/*
-SOURCE TABLE MAPPING
+    )
+    edc_dcp_inputs(
+
+    )
+    dcp_planner_added(
+
+    )
+    dcp_n_study_future(
+
+    )
+    dcp_rezoning(
+
+    )
+    dcp_n_study_projected(
+
+    )
+    dcp_n_study(
+
+    )
+    esd_projects(
+
+    )
+    hpd_pc(
+
+    )
+    hpd_rfp(
+
+    )
+    dcp_housing_poly(
+        
+    )
+OUTPUTS: 
+    _combined(
+
+    )
 */
 DROP TABLE IF EXISTS _combined;
 WITH 
