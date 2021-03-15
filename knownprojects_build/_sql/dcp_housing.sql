@@ -113,9 +113,11 @@ SELECT
     NULL::numeric as prop_after_10_years,
     0 as phasing_known,
     flag_nycha(a::text) as nycha,
-    flag_gq(a::text) as gq,
+	(CASE
+		WHEN a.otherb_init::integer > 0 OR a.otherb_prop::integer > 0 THEN '1' 
+		ELSE 0
+	END) as classb,
     flag_senior_housing(a::text) as senior_housing,
-    flag_assisted_living(a::text) as assisted_living,
 	b.geom,
 	b.geom_source
 INTO dcp_housing_poly
