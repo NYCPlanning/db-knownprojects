@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS corrections_dob;
 CREATE TABLE corrections_dob(
     record_id text,
     action text,
-    record_id_match text
+    record_id_dob text
 );
 
 \COPY corrections_dob FROM 'data/corrections/corrections_dob.csv' DELIMITER ',' CSV HEADER;
