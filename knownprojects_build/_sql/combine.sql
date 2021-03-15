@@ -1,7 +1,7 @@
 /*
 DESCRIPTION:
     Combines input data into a single table with a shared schema. For several 
-    data sources, this involves joining on BBL with dcp_mappluto to get lot-level
+    data sources, this involves joining on BBL with dcp_mappluto_wi to get lot-level
     polygon geometry. For some input datasets, a rows get collapsed to the level of
     a project. In these cases, the unique IDs for input data rows get stored in 
     the field record_id_input as an array. If no collapsing was necessary (i.e. 
@@ -13,49 +13,21 @@ DESCRIPTION:
     and calls to various string parsing functions to set flags.
 
 INPUTS: 
-    dcp_mappluto(
-
-    )
-    dcp_application(
-
-    )
-    edc_projects(
-
-    )
-    edc_dcp_inputs(
-
-    )
-    dcp_planner_added(
-
-    )
-    dcp_n_study_future(
-
-    )
-    dcp_rezoning(
-
-    )
-    dcp_n_study_projected(
-
-    )
-    dcp_n_study(
-
-    )
-    esd_projects(
-
-    )
-    hpd_pc(
-
-    )
-    hpd_rfp(
-
-    )
-    dcp_housing_poly(
-        
-    )
+    dcp_mappluto_wi
+    dcp_application
+    edc_projects
+    edc_dcp_inputs
+    dcp_planner_added
+    dcp_n_study_future
+    dcp_rezoning
+    dcp_n_study_projected
+    dcp_n_study
+    esd_projects
+    hpd_pc
+    hpd_rfp
+    dcp_housing_poly
 OUTPUTS: 
-    _combined(
-
-    )
+    _combined
 */
 DROP TABLE IF EXISTS _combined;
 WITH 
@@ -96,7 +68,7 @@ _edc_projects as (
         FROM(
             select uid,  UNNEST(string_to_array(coalesce(bbl, 'NA'), ';')) as bbl
             from edc_projects 
-        ) a LEFT JOIN dcp_mappluto b
+        ) a LEFT JOIN dcp_mappluto_wi b
         ON a.bbl = b.bbl::bigint::text
         GROUP BY a.uid
     ),
@@ -105,7 +77,7 @@ _edc_projects as (
             a.uid, 
             st_union(b.wkb_geometry) as geom
         FROM edc_projects a
-        LEFT JOIN dcp_mappluto b
+        LEFT JOIN dcp_mappluto_wi b
         ON a.block = b.block::text 
         AND a.borough_code = b.borocode::text
         GROUP BY a.uid
@@ -270,7 +242,7 @@ _dcp_n_study as (
         flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
         flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
     FROM dcp_n_study a
-    LEFT JOIN  dcp_mappluto b
+    LEFT JOIN  dcp_mappluto_wi b
     ON a.bbl = b.bbl::bigint::text
     GROUP BY neighborhood_study, commitment_site
 ),
@@ -297,7 +269,7 @@ _esd_projects as (
         flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
         flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
     FROM esd_projects a
-    LEFT JOIN dcp_mappluto b
+    LEFT JOIN dcp_mappluto_wi b
     ON a.bbl::numeric = b.bbl::numeric
     GROUP BY project_name, total_units
 ),
@@ -342,7 +314,7 @@ _hpd_pc as (
         flag_senior_housing(a::text) as senior_housing,
         flag_assisted_living(a::text) as assisted_living
     FROM hpd_pc a
-    LEFT JOIN dcp_mappluto b
+    LEFT JOIN dcp_mappluto_wi b
     ON a.bbl::numeric = b.bbl::numeric
 ),
 _hpd_rfp as (
@@ -381,7 +353,7 @@ _hpd_rfp as (
         flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
         flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
     FROM hpd_rfp a
-    LEFT JOIN dcp_mappluto b
+    LEFT JOIN dcp_mappluto_wi b
     ON a.bbl::numeric = b.bbl::numeric
     GROUP BY request_for_proposals_name, designated, 
     closed, est_units, closed_date, likely_to_be_built_by_2025

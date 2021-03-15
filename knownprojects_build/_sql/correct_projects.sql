@@ -7,16 +7,10 @@ DESCRIPTION:
 	the corrections file.
 	
 INPUTS:
-	_project_record_ids(
-
-	)
-	corrections_project(
-
-	)
+	_project_record_ids
+	corrections_project
 OUTPUTS: 
-	_project_record_ids(
-		
-	)
+	_project_record_ids
 */
 
 

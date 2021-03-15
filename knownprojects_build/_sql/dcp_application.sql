@@ -3,31 +3,15 @@ DESCRIPTION:
 	
 
 INPUTS:
-	dcp_projects(
-
-	)
-	dcp_projectactions(
-
-	)
-    dcp_project_bbls(
-        
-    )
-    kpdb.<last_version>(
-
-    )
-    kpdb_<last_version>.dcp_project(
-
-    )
-    kpdb_corrections.<last_version>(
-
-    )
-    dcp_mappluto(
-
-    )
+	dcp_projects
+	dcp_projectactions
+    dcp_project_bbls
+    dcp_mappluto_wi
+    DEPRECATING: kpdb.<last_version>
+    DEPRECATING: kpdb_<last_version>.dcp_project
+    DEPRECATING: kpdb_corrections.<last_version>
 OUTPUTS: 
-	dcp_application(
-		
-	)
+	dcp_application
 */
 DROP TABLE IF EXISTS dcp_application;
 WITH 
@@ -370,7 +354,7 @@ geom_pluto as (
 		from _dcp_application a
 		LEFT JOIN dcp_projectbbls b
 		ON a.record_id = trim(split_part(b.dcp_name, '-', 1))
-	) a LEFT JOIN dcp_mappluto b
+	) a LEFT JOIN dcp_mappluto_wi b
 	ON a.bbl::numeric = b.bbl::numeric
 	GROUP BY a.record_id
 ),

@@ -20,6 +20,9 @@ import_public dcp_housing &
 import_public dcp_zoningmapamendments &
 wait
 
+# Load corrections tables
+psql $BUILD_ENGINE -f _sql/create_corrections.sql
+
 echo
 echo "data loading complate"
 echo

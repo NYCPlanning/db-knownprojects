@@ -3,17 +3,10 @@ DESCRIPTION:
     Identies dcp_housing records that spatially overlap with 
     and are within a few years of non-DOB records.
 INPUTS: 
-    _combined(
-
-    )
-
-    dcp_housing_poly(
-
-    )
+    _combined
+    dcp_housing_poly
 OUTPUTS: 
-    dob_review(
-        
-    )
+    dob_review
 */
 DROP TABLE IF EXISTS dob_review;
 WITH 
