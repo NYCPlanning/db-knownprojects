@@ -79,3 +79,16 @@ FROM (
 	SELECT record_id::text from _combined
 ) a
 WHERE record_id NOT IN (SELECT UNNEST(project_record_ids) FROM project_record_ids);
+
+CREATE TEMP TABLE tmp AS (
+	SELECT
+		a.source,
+		a.record_id,
+		a.units_gross,
+		md5(array_to_string(b.project_record_ids, '')) as project_id
+	FROM _combined a
+	JOIN project_record_ids b
+	ON a.record_id = any(b.project_record_ids)
+);
+
+\COPY tmp TO PSTDOUT DELIMITER ',' CSV HEADER;
