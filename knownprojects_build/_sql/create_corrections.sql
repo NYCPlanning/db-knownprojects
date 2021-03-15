@@ -1,9 +1,4 @@
-/* 
-Apply corrections to the project_record_ids table.
-If this is the first run and there are no corrections,
-create an empty corrections_project so no corrections
-get applied.
-*/
+-- first round of corrections -> project to project
 DROP TABLE IF EXISTS corrections_project;
 CREATE TABLE corrections_project(
     record_id text,
@@ -12,3 +7,28 @@ CREATE TABLE corrections_project(
 );
 
 \COPY corrections_project FROM 'data/corrections/corrections_project.csv' DELIMITER ',' CSV HEADER;
+
+-- second round of corrections -> dob to project
+DROP TABLE IF EXISTS corrections_dob;
+CREATE TABLE corrections_project(
+    record_id text,
+    action text,
+    record_id_match text
+);
+
+\COPY corrections_dob FROM 'data/corrections/corrections_dob.csv' DELIMITER ',' CSV HEADER;
+
+-- main corrections table -> all other fields
+DROP TABLE IF EXISTS corrections_main;
+CREATE TABLE corrections_main(
+    record_id text,
+    field text,
+    old_value text,
+    new_value text,
+    editor text,
+    date text,
+    record_name text,
+    notes text
+);
+
+\COPY corrections_main FROM 'data/corrections/corrections_main.csv' DELIMITER ',' CSV HEADER;
