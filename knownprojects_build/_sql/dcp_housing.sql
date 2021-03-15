@@ -15,23 +15,34 @@ OUTPUTS:
 DROP TABLE IF EXISTS dcp_housing_poly;
 WITH 
 /* Prior to geom steps, filter to relevant DOB jobs:
-Excludes demolitions, withdrawn jobs, jobs with
-no residential unit change, alterations removing units,
-and jobs where the proposed residential units are 0.
+	- Excludes demolitions and withdrawn jobs.
+	- For class A, exludes jobs with no residential unit change, 
+alterations removing units, and jobs where the proposed 
+residential units are 0.
+	- For class B, and record with positive initial or proposed
+units are included. These records only provide context for DOB
+match review, and get excluded from the final KPDB output.
 */
 dcp_housing_filtered AS (
 	SELECT *
     FROM dcp_housing a
-    WHERE job_type <> 'Demolition'
+    WHERE a.job_type <> 'Demolition'
     AND a.job_status <> '9. Withdrawn'
-    AND a.classa_net::integer <> 0
-    AND a.classa_prop::integer > 0
-    AND NOT (a.job_type = 'Alteration'
-        AND a.classa_net::integer <= 0)
+	AND (
+			(
+				a.classa_net::integer <> 0
+    			AND a.classa_prop::integer > 0
+    			AND NOT (a.job_type = 'Alteration'
+        		AND a.classa_net::integer <= 0)
+			)
+		OR 
+			(
+				a.otherb_prop::integer > 0
+				OR a.otherb_init::integer > 0
+			)
+		)
 ),
-/*Join with mappluto on BBL to get polygon geom. 
-Mappluto has invalid geoms, so some are fixed.
-*/
+--Join with mappluto on BBL to get polygon geom. 
 bbl_join AS (
 	SELECT 
 		a.job_number,
@@ -44,7 +55,7 @@ bbl_join AS (
 ),
 /* Spatial join with mappluto to get polygon geom where bbl geom failed
 This happens as a separate step to limit the number of records needing
-a spatial join. Mappluto has invalid geoms, so some are fixed. */
+a spatial join. */
 spatial_join AS(
 	SELECT 
 		a.job_number,
@@ -78,6 +89,10 @@ SELECT
 	'DOB '||a.job_status as status,
 	a.job_type as type,
 	a.classa_net as units_gross,
+	a.classa_init,
+	a.classa_prop,
+	a.otherb_init,
+	a.otherb_prop,
 	TO_CHAR(TO_DATE(a.date_permittd, 'YYYY-MM-DD'), 'YYYY/MM/DD') as date,
 	'Date Permitted' as date_type,
 	TO_CHAR(TO_DATE(a.date_filed, 'YYYY-MM-DD'), 'YYYY/MM/DD') as date_filed,
