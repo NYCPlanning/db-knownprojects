@@ -33,6 +33,10 @@ dob_matches AS(
 		project_record_ids
 	FROM dob_review
 	WHERE source = 'DOB'
+	AND units_gross::integer <> 0
+    AND classa_prop::integer > 0
+    AND NOT (type = 'Alteration'
+        AND units_gross::integer <= 0)
 ),
 matches_to_remove AS(
 	SELECT 
