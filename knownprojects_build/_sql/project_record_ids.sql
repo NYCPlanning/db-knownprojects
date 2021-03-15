@@ -21,8 +21,9 @@ OUTPUTS:
 */
 
 -- Copy pre-DOB match _project_record_ids into project_record_ids;
-SELECT * 
-INTO project_record_ids FROM _project_record_ids;
+DROP TABLE IF EXISTS project_record_ids;
+SELECT * INTO project_record_ids 
+FROM _project_record_ids;
 
 /* Use correction_dob_match to identify which DOB record_ids need
 to get added to projects in the project_record_ids table. */	
@@ -65,18 +66,16 @@ verified_matches AS (
 	UNION
 	SELECT * FROM matches_to_add)
 UPDATE project_record_ids a
-	SET project_record_ids = array_append(a.project_record_ids, b.record_id) 
+	SET project_record_ids = a.project_record_ids||b.record_id
 	FROM verified_matches b
 	WHERE b.record_id_match=any(a.project_record_ids);
 
 /* Add stand-alone projects. This includes unmatched DOB projects, as well as projects
 from sources that were excluded from the non-DOB match process. */
 INSERT INTO project_record_ids
-SELECT array_append(array[]::text[], record_id::text) as project_record_ids
-FROM dcp_housing_poly
-WHERE record_id NOT IN (SELECT UNNEST(project_record_ids) FROM project_record_ids);
-
-INSERT INTO project_record_ids
-SELECT array_append(array[]::text[], record_id::text) as project_record_ids
-FROM _combined
+SELECT array[]::text[]||record_id as project_record_ids
+FROM (
+	SELECT record_id::text from dcp_housing_poly UNION
+	SELECT record_id::text from _combined
+) a
 WHERE record_id NOT IN (SELECT UNNEST(project_record_ids) FROM project_record_ids);
