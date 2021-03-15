@@ -8,17 +8,10 @@ DESCRIPTION:
     with other sources.
 
 INPUTS: 
-	_combined(
-
-	)
-
-    POST-REVIEW: corrections_project(
-
-    )
+	_combined
+    corrections_project (POST-REVIEW)
 OUTPUTS: 
-    _project_record_ids(
-        
-    )
+    _project_record_ids
 */
 
 -- Identify spatially overlapping non-DOB records
@@ -34,15 +27,3 @@ FROM(
 ) a
 WHERE id IS NOT NULL
 GROUP BY id;
-
-/* 
-Apply corrections to the project_record_ids table.
-If this is the first run and there are no corrections,
-create an empty corrections_project so no corrections
-get applied.
-*/
-CREATE TABLE IF NOT EXISTS corrections_project(
-    record_id text,
-    action text,
-    record_id_match text
-);

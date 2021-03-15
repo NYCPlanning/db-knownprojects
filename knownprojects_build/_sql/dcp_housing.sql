@@ -1,24 +1,15 @@
 /*
 DESCRIPTION:
-	Filters dcp_housing records to non-demolitions, non-withdrawn,
-	non-zero net unit change, and positive proposed units. Only alterations
-	with positive net unit chage are included.
-
-	Maps fields from the dcp_housing schema to the KPDB schema.
-
-	Uses record BBL to get lot-level polygon geometry from mappluto
-
+	1. Filters dcp_housing records to non-demolitions, non-withdrawn,
+		non-zero net unit change, and positive proposed units. Only alterations
+		with positive net unit chage are included.
+	2. Maps fields from the dcp_housing schema to the KPDB schema.
+	3. Uses record BBL to get lot-level polygon geometry from mappluto
 INPUTS:
-	dcp_housing(
-
-	)
-	dcp_mappluto(
-
-	)
+	dcp_housing
+	dcp_mappluto_wi
 OUTPUTS: 
-	dcp_housing_poly(
-		
-	)
+	dcp_housing_poly
 */
 
 DROP TABLE IF EXISTS dcp_housing_poly;
@@ -48,7 +39,7 @@ bbl_join AS (
 		a.wkb_geometry as point_geom,
 		b.wkb_geometry as bbl_join_geom
 	FROM dcp_housing_filtered a
-	LEFT JOIN dcp_mappluto b
+	LEFT JOIN dcp_mappluto_wi b
     ON a.bbl = b.bbl::bigint::text
 ),
 /* Spatial join with mappluto to get polygon geom where bbl geom failed
@@ -61,7 +52,7 @@ spatial_join AS(
 		a.point_geom,
 		b.wkb_geometry as spatial_join_geom
 	FROM bbl_join a
-	JOIN dcp_mappluto b
+	JOIN dcp_mappluto_wi b
 	ON ST_Intersects(a.point_geom, b.wkb_geometry)
 	WHERE a.bbl_join_geom IS NULL AND a.point_geom IS NOT NULL
 ),

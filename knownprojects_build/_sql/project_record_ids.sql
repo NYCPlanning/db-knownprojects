@@ -11,25 +11,13 @@ DESCRIPTION:
 	two stages of identifying spatial overlaps.
 
 INPUTS: 
-    dob_review(
-
-    )
-	POST-REVIEW: corrections_dob_match(
-
-	)
-    _project_record_ids(
-
-    )
-	dcp_housing_poly(
-
-	)
-	_combined(
-
-	)
-OUTPUTS: 
-    project_record_ids(
-        
-    )
+    dob_review
+	corrections_dob_match (POST-REVIEW)
+    _project_record_ids
+	dcp_housing_poly
+	_combined
+OUTPUTS:
+    project_record_ids
 */
 
 -- Copy pre-DOB match _project_record_ids into project_record_ids;
