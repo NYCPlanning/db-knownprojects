@@ -53,9 +53,8 @@ _dcp_application as (
         geom,
         NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
-        flag_gq(a::text) as gq,
-        flag_senior_housing(a::text) as senior_housing,
-        flag_assisted_living(a::text) as assisted_living
+        flag_classb(a::text) as classb,
+        flag_senior_housing(a::text) as senior_housing
     FROM dcp_application a
     WHERE flag_relevant=1
 ),
@@ -129,9 +128,8 @@ _edc_projects as (
         b.geom as geom,
         NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
-        flag_gq(a::text) as gq,
-        flag_senior_housing(a::text) as senior_housing,
-        flag_assisted_living(a::text) as assisted_living
+        flag_classb(a::text) as classb,
+        flag_senior_housing(a::text) as senior_housing
     FROM edc_projects a
     LEFT JOIN geom_consolidated b
     ON a.uid = b.uid
@@ -155,9 +153,8 @@ _dcp_planneradded as (
         wkb_geometry::geometry as geom,
         NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
-        flag_gq(a::text) as gq,
-        flag_senior_housing(a::text) as senior_housing,
-        flag_assisted_living(a::text) as assisted_living
+        flag_classb(a::text) as classb,
+        flag_senior_housing(a::text) as senior_housing
     FROM dcp_planneradded a
 ),
 _dcp_n_study_future as (
@@ -185,9 +182,8 @@ _dcp_n_study_future as (
         b.geometry as geom,
         NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
-        flag_gq(a::text) as gq,
-        flag_senior_housing(a::text) as senior_housing,
-        flag_assisted_living(a::text) as assisted_living
+        flag_classb(a::text) as classb,
+        flag_senior_housing(a::text) as senior_housing
     FROM dcp_n_study_future a
     LEFT JOIN  dcp_rezoning b
     ON a.neighborhood = b.study
@@ -212,9 +208,8 @@ _dcp_n_study_projected as (
         geometry as geom,
         NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
-        flag_gq(a::text) as gq,
-        flag_senior_housing(a::text) as senior_housing,
-        flag_assisted_living(a::text) as assisted_living
+        flag_classb(a::text) as classb,
+        flag_senior_housing(a::text) as senior_housing
     FROM dcp_n_study_projected a
 ),
 _dcp_n_study as (
@@ -238,9 +233,8 @@ _dcp_n_study as (
         ST_UNION(b.wkb_geometry) as geom,
         NULL::numeric as inactive,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
-        flag_gq(array_agg(row_to_json(a))::text) as gq,
-        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
-        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
+        flag_classb(array_agg(row_to_json(a))::text) as classb,
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing
     FROM dcp_n_study a
     LEFT JOIN  dcp_mappluto_wi b
     ON a.bbl = b.bbl::bigint::text
@@ -265,9 +259,8 @@ _esd_projects as (
         ST_UNION(b.wkb_geometry) as geom,
         NULL::numeric as inactive,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
-        flag_gq(array_agg(row_to_json(a))::text) as gq,
-        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
-        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
+        flag_classb(array_agg(row_to_json(a))::text) as classb,
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing
     FROM esd_projects a
     LEFT JOIN dcp_mappluto_wi b
     ON a.bbl::numeric = b.bbl::numeric
@@ -310,9 +303,8 @@ _hpd_pc as (
         b.wkb_geometry as geom,
         NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
-        flag_gq(a::text) as gq,
-        flag_senior_housing(a::text) as senior_housing,
-        flag_assisted_living(a::text) as assisted_living
+        flag_classb(a::text) as classb,
+        flag_senior_housing(a::text) as senior_housing
     FROM hpd_pc a
     LEFT JOIN dcp_mappluto_wi b
     ON a.bbl::numeric = b.bbl::numeric
@@ -349,9 +341,8 @@ _hpd_rfp as (
         st_union(b.wkb_geometry) AS geom,
         NULL::numeric as inactive,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
-        flag_gq(array_agg(row_to_json(a))::text) as gq,
-        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
-        flag_assisted_living(array_agg(row_to_json(a))::text) as assisted_living
+        flag_classb(array_agg(row_to_json(a))::text) as classb,
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing
     FROM hpd_rfp a
     LEFT JOIN dcp_mappluto_wi b
     ON a.bbl::numeric = b.bbl::numeric
@@ -377,9 +368,8 @@ _dcp_housing AS (
         geom,
         inactive,
         nycha,
-        gq,
-        senior_housing,
-        assisted_living
+        classb,
+        senior_housing
     FROM dcp_housing_poly
 )
 SELECT *, get_boro(geom) as borough INTO _combined
