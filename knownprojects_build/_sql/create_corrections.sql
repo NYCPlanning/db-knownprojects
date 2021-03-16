@@ -9,14 +9,14 @@ CREATE TABLE corrections_project(
 \COPY corrections_project FROM 'data/corrections/corrections_project.csv' DELIMITER ',' CSV HEADER;
 
 -- second round of corrections -> dob to project
-DROP TABLE IF EXISTS corrections_dob;
-CREATE TABLE corrections_dob(
+DROP TABLE IF EXISTS corrections_dob_match;
+CREATE TABLE corrections_dob_match(
     record_id text,
     action text,
     record_id_dob text
 );
 
-\COPY corrections_dob FROM 'data/corrections/corrections_dob.csv' DELIMITER ',' CSV HEADER;
+\COPY corrections_dob_match FROM 'data/corrections/corrections_dob.csv' DELIMITER ',' CSV HEADER;
 
 -- main corrections table -> all other fields
 DROP TABLE IF EXISTS corrections_main;
