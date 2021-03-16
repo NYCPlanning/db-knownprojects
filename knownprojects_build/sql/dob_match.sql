@@ -73,6 +73,7 @@ combined_dob as (
 		date,
 		date_type,
 		inactive,
+		no_classa,
 		project_record_ids,
 		geom
 	FROM matches
@@ -87,6 +88,7 @@ combined_dob as (
 		date,
 		date_type,
 		inactive,
+		no_classa,
 		project_record_ids,
 		geom
 	FROM projects)
