@@ -54,7 +54,8 @@ _dcp_application as (
         NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
-        flag_senior_housing(a::text) as senior_housing
+        flag_senior_housing(a::text) as senior_housing,
+        NULL::numeric as no_classa
     FROM dcp_application a
     WHERE flag_relevant=1
 ),
@@ -129,7 +130,8 @@ _edc_projects as (
         NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
-        flag_senior_housing(a::text) as senior_housing
+        flag_senior_housing(a::text) as senior_housing,
+        NULL::numeric as no_classa
     FROM edc_projects a
     LEFT JOIN geom_consolidated b
     ON a.uid = b.uid
@@ -154,7 +156,8 @@ _dcp_planneradded as (
         NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
-        flag_senior_housing(a::text) as senior_housing
+        flag_senior_housing(a::text) as senior_housing,
+        NULL::numeric as no_classa
     FROM dcp_planneradded a
 ),
 _dcp_n_study_future as (
@@ -183,7 +186,8 @@ _dcp_n_study_future as (
         NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
-        flag_senior_housing(a::text) as senior_housing
+        flag_senior_housing(a::text) as senior_housing,
+        NULL::numeric as no_classa
     FROM dcp_n_study_future a
     LEFT JOIN  dcp_rezoning b
     ON a.neighborhood = b.study
@@ -209,7 +213,8 @@ _dcp_n_study_projected as (
         NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
-        flag_senior_housing(a::text) as senior_housing
+        flag_senior_housing(a::text) as senior_housing,
+        NULL::numeric as no_classa
     FROM dcp_n_study_projected a
 ),
 _dcp_n_study as (
@@ -234,7 +239,8 @@ _dcp_n_study as (
         NULL::numeric as inactive,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_classb(array_agg(row_to_json(a))::text) as classb,
-        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+        NULL::numeric as no_classa
     FROM dcp_n_study a
     LEFT JOIN  dcp_mappluto_wi b
     ON a.bbl = b.bbl::bigint::text
@@ -260,7 +266,8 @@ _esd_projects as (
         NULL::numeric as inactive,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_classb(array_agg(row_to_json(a))::text) as classb,
-        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+        NULL::numeric as no_classa
     FROM esd_projects a
     LEFT JOIN dcp_mappluto_wi b
     ON a.bbl::numeric = b.bbl::numeric
@@ -304,7 +311,8 @@ _hpd_pc as (
         NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
-        flag_senior_housing(a::text) as senior_housing
+        flag_senior_housing(a::text) as senior_housing,
+        NULL::numeric as no_classa
     FROM hpd_pc a
     LEFT JOIN dcp_mappluto_wi b
     ON a.bbl::numeric = b.bbl::numeric
@@ -342,13 +350,16 @@ _hpd_rfp as (
         NULL::numeric as inactive,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_classb(array_agg(row_to_json(a))::text) as classb,
-        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
+        NULL::numeric as no_classa
     FROM hpd_rfp a
     LEFT JOIN dcp_mappluto_wi b
     ON a.bbl::numeric = b.bbl::numeric
     GROUP BY request_for_proposals_name, designated, 
     closed, est_units, closed_date, likely_to_be_built_by_2025
 ),
+/* Housing data, as mapped in _sql/dcp_housing.sql
+    NOTE: this still includes contextual class B records */
 _dcp_housing AS (
     SELECT
         source,
@@ -369,7 +380,8 @@ _dcp_housing AS (
         inactive,
         nycha,
         classb,
-        senior_housing
+        senior_housing,
+        no_classa
     FROM dcp_housing_poly
 )
 SELECT * INTO _combined
@@ -383,6 +395,5 @@ FROM(
     SELECT * FROM _esd_projects UNION
     SELECT * FROM _hpd_pc UNION
     SELECT * FROM _hpd_rfp UNION
-    -- Housing data, as mapped in _sql/dcp_housing.sql
     SELECT * FROM _dcp_housing
 ) a;

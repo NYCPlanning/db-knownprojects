@@ -9,4 +9,5 @@ SELECT
 INTO _kpdb
 FROM _combined a
 LEFT JOIN deduped_units b
-ON a.record_id = b.record_id;
+ON a.record_id = b.record_id
+WHERE a.no_classa <> '1';
