@@ -34,7 +34,7 @@ dob_matches AS(
 		project_record_ids
 	FROM dob_review
 	WHERE source = 'DOB'
-	AND no_classa = '0')
+	AND no_classa = '0'
 ),
 matches_to_remove AS(
 	SELECT 
