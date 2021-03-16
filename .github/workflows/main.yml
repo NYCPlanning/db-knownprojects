@@ -5,18 +5,35 @@ on:
   
 jobs: 
   build:
-    if: contains(github.event.head_commit.message, '[build]')
+    if: >- 
+      contains(github.event.head_commit.message, '[build]') ||
+      github.event_name == 'workflow_dispatch'
     name: Building ...
     runs-on: ubuntu-20.04
+    services:
+      postgres:
+        image: postgis/postgis:12-3.0-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     env:
-      RECIPE_ENGINE: ${{ secrets.RECIPE_ENGINE }}
-      BUILD_ENGINE: ${{ secrets.BUILD_ENGINE }}
-      EDM_DATA: ${{ secrets.EDM_DATA }}
+      BUILD_ENGINE: postgresql://postgres:postgres@localhost:5432/postgres
       AWS_S3_ENDPOINT: ${{ secrets.DO_S3_ENDPOINT }}
       AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
     steps:
       - uses: actions/checkout@v2
+        with: 
+            submodules: true
+            ssh-key: ${{ secrets.SSH_KEY }}
+            persist-credentials: true
+            
       - name: install dependencies ...
         run: |
           curl -O https://dl.min.io/client/mc/release/linux-amd64/mc
@@ -32,6 +49,4 @@ jobs:
         working-directory: knownprojects_build
         run: ./02_build.sh
 
-    #   - name: 3. cluster ...
-    #     working-directory: knownprojects_build
-    #     run: ./03.1_clusters.sh
+   
