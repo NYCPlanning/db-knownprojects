@@ -220,7 +220,7 @@ _dcp_n_study as (
         neighborhood_study||': '||commitment_site as record_name,
         'Potential' as status,
         NULL as type,
-        (SELECT units_gross FROM kpdb."2020_06_25" 
+        (SELECT units_gross FROM dcp_knownprojects 
         	WHERE record_name = neighborhood_study||': '||commitment_site
         )::numeric as units_gross,
         NULL as date,
