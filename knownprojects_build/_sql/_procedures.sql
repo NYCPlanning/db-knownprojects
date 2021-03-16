@@ -16,7 +16,7 @@ CREATE TABLE corrections_not_applied (
 	new_value 		text
 );
 
-DROP PROCEDURE correction;
+DROP PROCEDURE IF EXISTS correction;
 CREATE OR REPLACE PROCEDURE correction (
     _table text,
     _record_id text,
@@ -64,7 +64,7 @@ END
 $BODY$ LANGUAGE plpgsql;
 
 
-DROP PROCEDURE apply_correction;
+DROP PROCEDURE IF EXISTS apply_correction;
 CREATE OR REPLACE PROCEDURE apply_correction (
     _table text, 
     _corrections text
