@@ -39,3 +39,30 @@ function import_public {
   psql $BUILD_ENGINE -f $name.sql
   rm $name.sql
 }
+
+function CSV_export {
+  psql $BUILD_ENGINE  -c "\COPY (
+    SELECT * FROM $@
+  ) TO STDOUT DELIMITER ',' CSV HEADER;" > $@.csv
+}
+
+function SHP_export {
+  urlparse $1
+  mkdir -p $4 &&
+    (
+      cd $4
+      ogr2ogr -progress -f "ESRI Shapefile" $4.shp \
+          PG:"host=$BUILD_HOST user=$BUILD_USER port=$BUILD_PORT dbname=$BUILD_DB password=$BUILD_PWD" \
+          -nlt $3 $2
+        rm -f $4.zip
+        zip -9 $4.zip *
+        ls | grep -v $4.zip | xargs rm
+      )
+  mv $4/$4.zip $4.zip
+  rm -rf $4
+}
+
+function Upload {
+  mc rm -r --force spaces/edm-publishing/db-knownprojects/$@/
+  mc cp -r output spaces/edm-publishing/db-knownprojects/$@
+}

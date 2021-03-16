@@ -40,7 +40,8 @@ def resolve_all_projects(df):
     # Subtract units within cluster based on hierarchy
     print("Subtracting units within projcts based on source hierarchy...")
     resolved = df.groupby(["project_id"], as_index=False).apply(resolve_project)
-    resolved = resolved[["source", "units_gross", "units_net", "record_id"]]
+    resolved = resolved[["project_id", "source", "units_gross", "units_net", "record_id"]]
+    print(resolved.head())
     return resolved
 
 
