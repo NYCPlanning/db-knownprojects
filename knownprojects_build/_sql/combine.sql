@@ -51,11 +51,9 @@ _dcp_application as (
         NULL as phasing_rationale,
       	0 as phasing_known,
         geom,
-        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
-        flag_senior_housing(a::text) as senior_housing,
-        NULL::numeric as no_classa
+        flag_senior_housing(a::text) as senior_housing
     FROM dcp_application a
     WHERE flag_relevant=1
 ),
@@ -127,11 +125,9 @@ _edc_projects as (
         NULL as phasing_rationale,
         1 as phasing_known,
         b.geom as geom,
-        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
-        flag_senior_housing(a::text) as senior_housing,
-        NULL::numeric as no_classa
+        flag_senior_housing(a::text) as senior_housing
     FROM edc_projects a
     LEFT JOIN geom_consolidated b
     ON a.uid = b.uid
@@ -153,11 +149,9 @@ _dcp_planneradded as (
         NULL as phasing_rationale,
         1 as phasing_known,
         wkb_geometry::geometry as geom,
-        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
-        flag_senior_housing(a::text) as senior_housing,
-        NULL::numeric as no_classa
+        flag_senior_housing(a::text) as senior_housing
     FROM dcp_planneradded a
 ),
 _dcp_n_study_future as (
@@ -183,11 +177,9 @@ _dcp_n_study_future as (
         NULL as phasing_rationale,
         0 as phasing_known, 
         b.geometry as geom,
-        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
-        flag_senior_housing(a::text) as senior_housing,
-        NULL::numeric as no_classa
+        flag_senior_housing(a::text) as senior_housing
     FROM dcp_n_study_future a
     LEFT JOIN  dcp_rezoning b
     ON a.neighborhood = b.study
@@ -210,11 +202,9 @@ _dcp_n_study_projected as (
         NULL as phasing_rationale,
         1 as phasing_known,
         geometry as geom,
-        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
-        flag_senior_housing(a::text) as senior_housing,
-        NULL::numeric as no_classa
+        flag_senior_housing(a::text) as senior_housing
     FROM dcp_n_study_projected a
 ),
 _dcp_n_study as (
@@ -236,11 +226,9 @@ _dcp_n_study as (
         NULL as phasing_rationale,
         0 as phasing_known,
         ST_UNION(b.wkb_geometry) as geom,
-        NULL::numeric as inactive,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_classb(array_agg(row_to_json(a))::text) as classb,
-        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
-        NULL::numeric as no_classa
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing
     FROM dcp_n_study a
     LEFT JOIN  dcp_mappluto_wi b
     ON a.bbl = b.bbl::bigint::text
@@ -263,11 +251,9 @@ _esd_projects as (
         NULL as phasing_rationale,
         0 as phasing_known,
         ST_UNION(b.wkb_geometry) as geom,
-        NULL::numeric as inactive,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_classb(array_agg(row_to_json(a))::text) as classb,
-        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
-        NULL::numeric as no_classa
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing
     FROM esd_projects a
     LEFT JOIN dcp_mappluto_wi b
     ON a.bbl::numeric = b.bbl::numeric
@@ -308,11 +294,9 @@ _hpd_pc as (
         NULL as phasing_rationale,
         1 as phasing_known,
         b.wkb_geometry as geom,
-        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
-        flag_senior_housing(a::text) as senior_housing,
-        NULL::numeric as no_classa
+        flag_senior_housing(a::text) as senior_housing
     FROM hpd_pc a
     LEFT JOIN dcp_mappluto_wi b
     ON a.bbl::numeric = b.bbl::numeric
@@ -347,11 +331,9 @@ _hpd_rfp as (
         NULL as phasing_rationale,
         1 as phasing_known,
         st_union(b.wkb_geometry) AS geom,
-        NULL::numeric as inactive,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_classb(array_agg(row_to_json(a))::text) as classb,
-        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing,
-        NULL::numeric as no_classa
+        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing
     FROM hpd_rfp a
     LEFT JOIN dcp_mappluto_wi b
     ON a.bbl::numeric = b.bbl::numeric
@@ -377,14 +359,18 @@ _dcp_housing AS (
         NULL as phasing_rationale,
         phasing_known,
         geom,
-        inactive,
         nycha,
         classb,
         senior_housing,
+        inactive,
         no_classa
     FROM dcp_housing_poly
 )
-SELECT * INTO _combined
+SELECT 
+    *,  
+    NULL::numeric as inactive,
+    NULL as no_classa
+INTO _combined
 FROM(
     SELECT * FROM _dcp_application UNION
     SELECT * FROM _edc_projects UNION
@@ -394,6 +380,6 @@ FROM(
     SELECT * FROM _dcp_n_study_projected UNION
     SELECT * FROM _esd_projects UNION
     SELECT * FROM _hpd_pc UNION
-    SELECT * FROM _hpd_rfp UNION
-    SELECT * FROM _dcp_housing
-) a;
+    SELECT * FROM _hpd_rfp
+) a
+UNION SELECT * FROM _dcp_housing;
