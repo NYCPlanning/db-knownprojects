@@ -117,6 +117,13 @@ SELECT
 		WHEN a.otherb_init::integer > 0 OR a.otherb_prop::integer > 0 THEN '1' 
 		ELSE 0
 	END) as classb,
+	(CASE
+		WHEN a.classa_net::integer <> 0
+    		AND a.classa_prop::integer > 0
+    		AND NOT (a.job_type = 'Alteration'
+        		AND a.classa_net::integer <= 0) THEN '0'
+		ELSE '1'
+	END) as no_classa,
     flag_senior_housing(a::text) as senior_housing,
 	b.geom,
 	b.geom_source

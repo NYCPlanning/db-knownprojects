@@ -48,10 +48,8 @@ _dcp_application as (
             THEN 0 ELSE 1
         END) as prop_5_to_10_years,
         0 as prop_after_10_years, 
-        NULL as phasing_rationale,
       	0 as phasing_known,
         geom,
-        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
         flag_senior_housing(a::text) as senior_housing
@@ -123,10 +121,8 @@ _edc_projects as (
             WHEN build_year::numeric > date_part('year', CURRENT_DATE)+10 
             THEN 1 ELSE 0 
         END) as prop_after_10_years,
-        NULL as phasing_rationale,
         1 as phasing_known,
         b.geom as geom,
-        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
         flag_senior_housing(a::text) as senior_housing
@@ -148,10 +144,8 @@ _dcp_planneradded as (
         portion_bu::numeric as prop_within_5_years,
         portion__1::numeric as prop_5_to_10_years,
         portion__2::numeric as prop_after_10_years,
-        NULL as phasing_rationale,
         1 as phasing_known,
         wkb_geometry::geometry as geom,
-        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
         flag_senior_housing(a::text) as senior_housing
@@ -177,10 +171,8 @@ _dcp_n_study_future as (
        		WHEN neighborhood LIKE 'Gowanus%' 
        		THEN round(2/3::numeric,2) ELSE .5 
        	END) as prop_after_10_years,
-        NULL as phasing_rationale,
         0 as phasing_known, 
         b.geometry as geom,
-        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
         flag_senior_housing(a::text) as senior_housing
@@ -203,10 +195,8 @@ _dcp_n_study_projected as (
         portion_bu::numeric as prop_within_5_years,
         portion__1::numeric as prop_5_to_10_years,
         portion__2::numeric as prop_after_10_years, 
-        NULL as phasing_rationale,
         1 as phasing_known,
         geometry as geom,
-        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
         flag_senior_housing(a::text) as senior_housing
@@ -228,10 +218,8 @@ _dcp_n_study as (
         NULL::numeric as prop_within_5_years,
         NULL::numeric as prop_5_to_10_years,
         NULL::numeric as prop_after_10_years, 
-        NULL as phasing_rationale,
         0 as phasing_known,
         ST_UNION(b.wkb_geometry) as geom,
-        NULL::numeric as inactive,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_classb(array_agg(row_to_json(a))::text) as classb,
         flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing
@@ -254,10 +242,8 @@ _esd_projects as (
         NULL::numeric as prop_within_5_years,
         NULL::numeric as prop_5_to_10_years,
         NULL::numeric as prop_after_10_years, 
-        NULL as phasing_rationale,
         0 as phasing_known,
         ST_UNION(b.wkb_geometry) as geom,
-        NULL::numeric as inactive,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_classb(array_agg(row_to_json(a))::text) as classb,
         flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing
@@ -298,10 +284,8 @@ _hpd_pc as (
         WHEN date_part('year',age(to_date((CONCAT(RIGHT(projected_fiscal_year_range,4)::numeric+3,'-06-30')),'YYYY-MM-DD'),CURRENT_DATE)) > 10 
         THEN 1 ELSE 0 
         END)::numeric as prop_after_10_years,
-        NULL as phasing_rationale,
         1 as phasing_known,
         b.wkb_geometry as geom,
-        NULL::numeric as inactive,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
         flag_senior_housing(a::text) as senior_housing
@@ -336,10 +320,8 @@ _hpd_rfp as (
         1 as prop_within_5_years,
         0 as prop_5_to_10_years,
         0 as prop_after_10_years,
-        NULL as phasing_rationale,
         1 as phasing_known,
         st_union(b.wkb_geometry) AS geom,
-        NULL::numeric as inactive,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
         flag_classb(array_agg(row_to_json(a))::text) as classb,
         flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing
@@ -349,6 +331,8 @@ _hpd_rfp as (
     GROUP BY request_for_proposals_name, designated, 
     closed, est_units, closed_date, likely_to_be_built_by_2025
 ),
+/* Housing data, as mapped in _sql/dcp_housing.sql
+    NOTE: this still includes contextual class B records */
 _dcp_housing AS (
     SELECT
         source,
@@ -363,26 +347,34 @@ _dcp_housing AS (
         prop_within_5_years,
         prop_5_to_10_years,
         prop_after_10_years,
-        NULL as phasing_rationale,
         phasing_known,
         geom,
-        inactive,
         nycha,
         classb,
-        senior_housing
+        senior_housing,
+        inactive,
+        no_classa
     FROM dcp_housing_poly
 )
-SELECT * INTO _combined
+SELECT
+    *,
+    NULL::text as phasing_rationale
+INTO _combined
 FROM(
-    SELECT * FROM _dcp_application UNION
-    SELECT * FROM _edc_projects UNION
-    SELECT * FROM _dcp_planneradded UNION
-    SELECT * FROM _dcp_n_study UNION
-    SELECT * FROM _dcp_n_study_future UNION
-    SELECT * FROM _dcp_n_study_projected UNION
-    SELECT * FROM _esd_projects UNION
-    SELECT * FROM _hpd_pc UNION
-    SELECT * FROM _hpd_rfp UNION
-    -- Housing data, as mapped in _sql/dcp_housing.sql
-    SELECT * FROM _dcp_housing
+    SELECT 
+        *, 
+        NULL::numeric as inactive,
+        NULL::text as no_classa
+    FROM (
+        SELECT * FROM _dcp_application UNION
+        SELECT * FROM _edc_projects UNION
+        SELECT * FROM _dcp_planneradded UNION
+        SELECT * FROM _dcp_n_study UNION
+        SELECT * FROM _dcp_n_study_future UNION
+        SELECT * FROM _dcp_n_study_projected UNION
+        SELECT * FROM _esd_projects UNION
+        SELECT * FROM _hpd_pc UNION
+        SELECT * FROM _hpd_rfp
+    ) a
+    UNION SELECT * FROM _dcp_housing
 ) a;

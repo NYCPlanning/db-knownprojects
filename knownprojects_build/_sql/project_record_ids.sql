@@ -34,10 +34,7 @@ dob_matches AS(
 		project_record_ids
 	FROM dob_review
 	WHERE source = 'DOB'
-	AND units_gross::integer <> 0
-    AND classa_prop::integer > 0
-    AND NOT (type = 'Alteration'
-        AND units_gross::integer <= 0)
+	AND no_classa = '0'
 ),
 matches_to_remove AS(
 	SELECT 
@@ -54,7 +51,7 @@ matches_to_add AS(
 		record_id_dob as record_id,
 		record_id as record_id_match
 	FROM corrections_dob_match
-	WHERE action='add'
+	WHERE action = 'add'
 ),
 verified_matches AS (
 	SELECT 
@@ -70,12 +67,13 @@ UPDATE project_record_ids a
 	FROM verified_matches b
 	WHERE b.record_id_match=any(a.project_record_ids);
 
-/* Add stand-alone projects. This includes unmatched DOB projects, as well as projects
-from sources that were excluded from the non-DOB match process. */
+/* Add stand-alone projects. This includes unmatched residential DOB projects, 
+as well as projects from sources that were excluded 
+from the non-DOB match process. */
 INSERT INTO project_record_ids
 SELECT array[]::text[]||record_id as project_record_ids
 FROM (
-	SELECT record_id::text from dcp_housing_poly UNION
 	SELECT record_id::text from _combined
+	WHERE no_classa <> '1'
 ) a
 WHERE record_id NOT IN (SELECT UNNEST(project_record_ids) FROM project_record_ids);
