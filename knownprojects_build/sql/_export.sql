@@ -10,6 +10,7 @@ OUTPUTS:
 */
 DROP TABLE IF EXISTS kpdb;
 SELECT
+    project_id,
     source,
     record_id,
     record_name,
