@@ -10,11 +10,8 @@ OUTPUTS:
 */
 DROP TABLE IF EXISTS kpdb;
 SELECT
-    project_id,
-    project_record_ids,
     source,
     record_id,
-    record_id_inputs,
     record_name,
     borough,
     status,
