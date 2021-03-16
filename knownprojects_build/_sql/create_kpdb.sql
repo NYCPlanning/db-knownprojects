@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS _kpdb;
 SELECT
     a.*,
+    get_boro(a.geom) as borough,
     b.units_net,
     ROUND(COALESCE(a.prop_within_5_years::decimal,0) * b.units_net::decimal) as within_5_years,
     ROUND(COALESCE(a.prop_5_to_10_years::decimal,0) * b.units_net::decimal) as from_5_to_10_years,
