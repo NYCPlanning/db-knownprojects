@@ -27,7 +27,7 @@ psql $BUILD_ENGINE -1 -f sql/project_record_ids.sql
 psql $BUILD_ENGINE -c "VACUUM ANALYZE project_record_ids;"
 
 # Dedup units
-python3 -m _python.dedup_units
+python3 -m python.dedup_units
 psql $BUILD_ENGINE -1 -c "CALL apply_correction('deduped_units', 'corrections_main');"
 psql $BUILD_ENGINE -c "VACUUM ANALYZE deduped_units;"
 
