@@ -65,7 +65,10 @@ $BODY$ LANGUAGE plpgsql;
 
 
 DROP PROCEDURE apply_correction;
-CREATE OR REPLACE PROCEDURE apply_correction (_table text) AS $BODY$
+CREATE OR REPLACE PROCEDURE apply_correction (
+    _table text, 
+    _corrections text
+) AS $BODY$
 DECLARE 
     _record_id text;
     _field text;
@@ -77,8 +80,11 @@ BEGIN
     WHERE table_schema = 'public' AND table_name = _table INTO _valid_fields;
 
     FOR _record_id, _field, _old_value, _new_value IN 
-        SELECT record_id, field, old_value, new_value 
-        FROM corrections_main WHERE field=any(_valid_fields)
+        EXECUTE FORMAT($n$
+            SELECT record_id, field, old_value, new_value 
+            FROM %1$s
+            WHERE field = any(%2$L)
+        $n$, _corrections, _valid_fields)
     LOOP
         CALL correction(_table, _record_id, _field, _old_value, _new_value);
     END LOOP;
