@@ -22,5 +22,14 @@ psql $BUILD_ENGINE -c "VACUUM ANALYZE _project_record_ids;"
 # Find matches between DOB and non-DOB sources
 psql $BUILD_ENGINE -1 -f _sql/dob_match.sql
 
-psql $BUILD_ENGINE -1 -f _sql/project_record_ids.sql
+# Create project IDs and deduplicate units
+psql $BUILD_ENGINE -1 -f _sql/project_record_ids.sql 
 psql $BUILD_ENGINE -c "VACUUM ANALYZE project_record_ids;"
+
+# Dedup units
+python3 -m _python.dedup_units
+psql $BUILD_ENGINE -1 -c "CALL apply_correction('dedup_units');"
+psql $BUILD_ENGINE -c "VACUUM ANALYZE dedup_units;"
+
+# Create KPDB
+psql $BUILD_ENGINE -1 -f _sql/create_kpdb.sql
