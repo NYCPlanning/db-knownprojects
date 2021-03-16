@@ -28,8 +28,8 @@ psql $BUILD_ENGINE -c "VACUUM ANALYZE project_record_ids;"
 
 # Dedup units
 python3 -m python.dedup_units
-psql $BUILD_ENGINE -1 -c "CALL apply_correction('dedup_units', 'corrections_main');"
-psql $BUILD_ENGINE -c "VACUUM ANALYZE dedup_units;"
+psql $BUILD_ENGINE -1 -c "CALL apply_correction('deduped_units', 'corrections_main');"
+psql $BUILD_ENGINE -c "VACUUM ANALYZE deduped_units;"
 
 # Create KPDB
 psql $BUILD_ENGINE -1 -f sql/create_kpdb.sql
