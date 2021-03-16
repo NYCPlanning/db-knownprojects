@@ -236,10 +236,10 @@ records_last_kpdb as (
 	FROM dcp_knownprojects
 	WHERE source = 'DCP Application'
 ),
-records_last_dcp_project as (
-	SELECT dcp_name as record_id
-	FROM kpdb_2020.dcp_project
-),
+-- records_last_dcp_project as (
+-- 	SELECT dcp_name as record_id
+-- 	FROM kpdb_2020.dcp_project
+-- ),
 records_corr_remove as (
 	SELECT record_id 
 	FROM corrections_main
@@ -295,8 +295,8 @@ _dcp_application as (
 		WHEN dcp_name in (select record_id from records_corr_remove) THEN 'remove' 
 		WHEN dcp_name in (select record_id from records_corr_add) THEN 'add' 
 	END) as flag_corrected,
-	(CASE WHEN dcp_name not in (select record_id from records_last_dcp_project) 
-		THEN 1 ELSE 0 END) as flag_new_in_zap,
+	-- (CASE WHEN dcp_name not in (select record_id from records_last_dcp_project) 
+	-- 	THEN 1 ELSE 0 END) as flag_new_in_zap,
     dcp_name as record_id,
     dcp_projectname as record_name,
     dcp_projectbrief, 
