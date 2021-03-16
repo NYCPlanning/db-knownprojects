@@ -372,7 +372,7 @@ _dcp_housing AS (
         senior_housing
     FROM dcp_housing_poly
 )
-SELECT *, get_boro(geom) as borough INTO _combined
+SELECT * INTO _combined
 FROM(
     SELECT * FROM _dcp_application UNION
     SELECT * FROM _edc_projects UNION
