@@ -19,6 +19,7 @@ mkdir -p output
         zip -9 combined.zip combined.csv
         rm combined.csv
 
+        CSV_export project_review
         CSV_export dob_review
         CSV_export corrections_applied
         CSV_export corrections_not_applied
