@@ -1,12 +1,24 @@
 DROP TABLE IF EXISTS review_project;
 SELECT
-    a.*,
+    source,
+    a.record_id,
+    record_name,
+    status,
+    type,
+    units_gross,
+    date,
+    date_type,
+    prop_within_5_years,
+    prop_5_to_10_years,
+    prop_after_10_years,
+    phasing_known,
+    nycha,
+    classb,
+    senior_housing,
     b.project_record_ids,
-    (CASE
-        WHEN cardinality(b.project_record_ids) > 1 THEN '1'
-        ELSE '0'
-    END) as multirecord_project,
-    b.project_id
+    (cardinality(b.project_record_ids) > 1)::integer as multirecord_project,
+    b.project_id,
+    a.geom
 INTO review_project
 FROM _combined a
 LEFT JOIN (
