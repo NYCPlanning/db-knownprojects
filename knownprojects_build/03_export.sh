@@ -19,8 +19,8 @@ mkdir -p output
         zip -9 combined.zip combined.csv
         rm combined.csv
 
-        CSV_export project_review
-        CSV_export dob_review
+        CSV_export review_project
+        CSV_export review_dob
         CSV_export corrections_applied
         CSV_export corrections_not_applied
         CSV_export corrections_dob_match
@@ -28,7 +28,8 @@ mkdir -p output
         CSV_export corrections_main
 
         SHP_export combined MULTIPOLYGON
-        SHP_export dob_review MULTIPOLYGON
+        SHP_export review_project MULTIPOLYGON
+        SHP_export review_dob MULTIPOLYGON
     )
 
     echo "Exporting output tables"
