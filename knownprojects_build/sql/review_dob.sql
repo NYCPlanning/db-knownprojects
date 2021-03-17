@@ -6,9 +6,9 @@ INPUTS:
     _combined
     dcp_housing_poly
 OUTPUTS: 
-    dob_review
+    review_dob
 */
-DROP TABLE IF EXISTS dob_review;
+DROP TABLE IF EXISTS review_dob;
 WITH 
 -- Join project_record_ids to the combined source data
 projects AS (
@@ -109,7 +109,7 @@ SELECT a.*,
 	    	WHEN a.project_record_ids IN (SELECT project_record_ids FROM multimatchproject) THEN 1 
 	    	ELSE 0 
 	    END) as project_has_dob_multi
-INTO dob_review
+INTO review_dob
 FROM combined_dob a
 LEFT JOIN dcp_housing_poly b
 ON a.record_id = b.record_id
