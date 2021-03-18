@@ -8,7 +8,7 @@ SELECT
     ROUND(COALESCE(a.prop_5_to_10_years::decimal,0) * b.units_net::decimal) as from_5_to_10_years,
     ROUND(COALESCE(a.prop_after_10_years::decimal,0) * b.units_net::decimal) as after_10_years
 INTO _kpdb
-FROM _combined a
+FROM combined a
 LEFT JOIN deduped_units b
 ON a.record_id = b.record_id
 WHERE a.no_classa <> '1';

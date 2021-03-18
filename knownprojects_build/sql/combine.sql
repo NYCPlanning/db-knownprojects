@@ -27,9 +27,9 @@ INPUTS:
     hpd_rfp
     dcp_housing_poly
 OUTPUTS: 
-    _combined
+    combined
 */
-DROP TABLE IF EXISTS _combined;
+DROP TABLE IF EXISTS combined;
 WITH 
 _dcp_application as (
     SELECT
@@ -359,7 +359,7 @@ _dcp_housing AS (
 SELECT
     *,
     NULL::text as phasing_rationale
-INTO _combined
+INTO combined
 FROM(
     SELECT 
         *, 

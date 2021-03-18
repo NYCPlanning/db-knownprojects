@@ -20,7 +20,7 @@ SELECT
     b.project_id,
     a.geom
 INTO review_project
-FROM _combined a
+FROM combined a
 LEFT JOIN (
         SELECT 
             project_record_ids,
