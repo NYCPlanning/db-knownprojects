@@ -8,7 +8,7 @@ DESCRIPTION:
     with other sources.
 
 INPUTS: 
-	_combined
+	combined
     corrections_project (POST-REVIEW)
 OUTPUTS: 
     _project_record_ids
@@ -22,7 +22,7 @@ INTO _project_record_ids
 FROM(
     SELECT record_id, 
     ST_ClusterDBSCAN(geom, 0, 1) OVER() AS id
-    FROM  _combined
+    FROM  combined
     WHERE source NOT IN ('DOB', 'Neighborhood Study Rezoning Commitments', 'Future Neighborhood Studies')
 ) a
 WHERE id IS NOT NULL
