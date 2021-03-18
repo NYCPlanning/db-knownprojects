@@ -7,7 +7,7 @@ DESCRIPTION:
 	Adds additional DOB to non-DOB matches identified in the correction_dob_match table.
 
 	Finally, creates stand-alone projects in the project_record_ids table. This includes
-	dcp_housing records and _combined records that did not match with other records in the
+	dcp_housing records and combined records that did not match with other records in the
 	two stages of identifying spatial overlaps.
 
 INPUTS: 
@@ -15,7 +15,7 @@ INPUTS:
 	corrections_dob_match (POST-REVIEW)
     _project_record_ids
 	dcp_housing_poly
-	_combined
+	combined
 OUTPUTS:
     project_record_ids
 */
@@ -73,7 +73,7 @@ from the non-DOB match process. */
 INSERT INTO project_record_ids
 SELECT array[]::text[]||record_id as project_record_ids
 FROM (
-	SELECT record_id::text from _combined
+	SELECT record_id::text from combined
 	WHERE no_classa <> '1'
 ) a
 WHERE record_id NOT IN (SELECT UNNEST(project_record_ids) FROM project_record_ids);

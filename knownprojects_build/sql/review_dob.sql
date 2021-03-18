@@ -3,7 +3,7 @@ DESCRIPTION:
     Identies dcp_housing records that spatially overlap with 
     and are within a few years of non-DOB records.
 INPUTS: 
-    _combined
+    combined
     dcp_housing_poly
 OUTPUTS: 
     review_dob
@@ -15,7 +15,7 @@ projects AS (
 	SELECT
 		b.project_record_ids,
 		a.*
-	FROM _combined a
+	FROM combined a
 	INNER JOIN _project_record_ids b
 ON a.record_id=any(b.project_record_ids)),
 /* 
@@ -30,7 +30,7 @@ matches as (
     	a.record_id_input as match_record_id_input,
     	a.project_record_ids
     FROM projects a
-    INNER JOIN _combined b
+    INNER JOIN combined b
     ON st_intersects(a.geom, b.geom)
     AND (CASE 
     		WHEN b.source = 'EDC Projected Projects' THEN TRUE 
