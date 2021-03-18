@@ -54,7 +54,7 @@ def import_table() -> pd.DataFrame:
         a.units_gross::double precision as units_gross,
         a.units_gross::double precision as units_net,
         b.project_id
-    FROM _combined a LEFT JOIN (
+    FROM combined a LEFT JOIN (
         SELECT unnest(project_record_ids) as record_id, 
         ROW_NUMBER() OVER(ORDER BY project_record_ids) as project_id
         FROM project_record_ids
