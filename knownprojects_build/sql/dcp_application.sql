@@ -32,7 +32,6 @@ zap_translated as (
 	    	WHEN dcp_visibility::numeric = 717170003 THEN 'General Public'
 	    	WHEN dcp_visibility::numeric = 717170000 THEN 'Internal DCP Only'
 	    	WHEN dcp_visibility::numeric = 717170004 THEN 'LUP'
-
 	    END) as dcp_visibility,
 	    (CASE 
 	    	WHEN dcp_borough::numeric = 717170000 then 'Bronx'
@@ -50,7 +49,6 @@ zap_translated as (
 	    	WHEN statuscode::numeric = 707070002 THEN 'Terminated'
 	    	WHEN statuscode::numeric = 707070001 THEN 'Withdrawn-Applicant Unresponsive'
 	    	WHEN statuscode::numeric = 717170001 THEN 'Withdrawn-Other'
-
 	    END) as statuscode,
 	    (CASE 
 	    	WHEN dcp_publicstatus::numeric = 717170000 THEN 'Filed'
@@ -80,65 +78,13 @@ zap_translated as (
 	    COALESCE(dcp_residentialsqft::numeric, 0) as dcp_residentialsqft
 	FROM dcp_projects
 ),
-cm_renewal as (
-	select dcp_name as project_id 
-	from dcp_projects
-	where _dcp_leadaction_value in (
-	select dcp_projectactionid 
-	from dcp_projectactions
-	where dcp_name ~* 'CM')
-	
-	UNION
-	select split_part(dcp_dmsourceid, '_', 1) as project_id
-	from dcp_projectactions
-	where dcp_name ~* 'CM' and dcp_dmsourceid is not null
-	
-	UNION
-	select dcp_name as project_id 
-	from dcp_projects where dcp_projectid in (
-	select _dcp_project_value from dcp_projectactions
-	where dcp_name ~* 'CM')
-),
-text_renewal as (
-    select dcp_name as project_id 
-    from dcp_projects
-    where regexp_replace(
-        array_to_string(
-            ARRAY[dcp_projectbrief,
-                dcp_projectdescription,
-                dcp_projectname], 
-            ' '),
-        '[^a-zA-Z0-9]+', ' ','g'
-        ) ~* 'renewal'
-),
-school_seat_filter as (
-    SELECT dcp_name
-    FROM dcp_projects
-    WHERE dcp_sischoolseat::boolean is TRUE
-    or regexp_replace(
-        array_to_string(
-            ARRAY[dcp_projectbrief,
-                dcp_projectdescription,
-                dcp_projectname], 
-            ' '),
-        '[^a-zA-Z0-9]+', ' ','g'
-        ) like 'SS%'
-    or regexp_replace(
-        array_to_string(
-            ARRAY[dcp_projectbrief,
-                dcp_projectdescription,
-                dcp_projectname], 
-            ' '),
-        '[^a-zA-Z0-9]+', ' ','g'
-        ) ~* 'school seat|schools seat'
-),
 -- we exclude projects that have record closed, terminated or withdrawn as status
 status_filter as (
     SELECT dcp_name
     FROM zap_translated
-    WHERE statuscode ~* 'Record Closed|Terminated|Withdrawn'
+    WHERE statuscode !~* 'Record Closed|Terminated|Withdrawn'
 ),
-
+-- we include projects have any clear indication of residential components
 resid_units_filter as (
     SELECT dcp_name
     FROM zap_translated
@@ -149,7 +95,6 @@ resid_units_filter as (
     or dcp_numberofnewdwellingunits > 0
     or dcp_noofvoluntaryaffordabledus >0
 ),
-
 --all projects that are after 2010, and NULLs included
 year_filter as (
     SELECT dcp_name
@@ -158,143 +103,73 @@ year_filter as (
     or extract(year FROM dcp_certifiedreferred::date) >= 2010
     or (dcp_projectcompleted is NULL and dcp_certifiedreferred is NULL))
 ),
-
---all projects that have text pattern matched to be residential
-text_filter as (
-    SELECT dcp_name
-    FROM dcp_projects
-    WHERE (regexp_replace(
-        array_to_string(
-            ARRAY[dcp_projectbrief,
-                dcp_projectdescription,
-                dcp_projectname], 
-            ' '),
-        '[^a-zA-Z0-9]+', ' ','g'
-        ) like '%DUs%'
-        or regexp_replace(
-            array_to_string(
-                ARRAY[dcp_projectbrief,
-                    dcp_projectdescription,
-                    dcp_projectname], 
-                ' '),
-            '[^a-zA-Z0-9]+', ' ','g'
-            ) like '%MIH%'
-        or regexp_replace(
-            array_to_string(
-                ARRAY[dcp_projectbrief,
-                    dcp_projectdescription,
-                    dcp_projectname], 
-                ' '),
-            '[^a-zA-Z0-9]+', ' ','g'
-        ) ~* 
-        array_to_string(ARRAY[
-            'HUDSON YARDS',
-            'home','family','resid',
-            'appartment','apt','affordable', 
-            'mix-','mixed-', 'dwelling',
-            'living', 'housi'], '|')
-    )
-    AND regexp_replace(
-        array_to_string(
-            ARRAY[dcp_projectbrief,
-                dcp_projectdescription,
-                dcp_projectname],
-            ' '),
-        '[^a-zA-Z0-9]+', ' ','g'
-    ) !~* 
-        array_to_string(ARRAY[
-        'RESIDENTIAL TO COMMERCIAL', 
-        'SINGLE-FAMILY', 'SINGLE FAMILY', 
-        '1-FAMILY', 'ONE FAMILY', 
-        'ONE-FAMILY', '1 FAMILY',
-        'FLOATING', 'TRANSITIONAL', 'FOSTER', 
-        'ILLUMIN', 'RESIDENCE DISTRICT', 
-        'LANDMARKS PRESERVATION COMMISSION',
-        'EXISTING HOME', 'EXISTING HOUSE', 
-        'NUMBER OF BEDS', 'EATING AND DRINKING', 
-        'NO INCREASE', 'ENLARGEMENT', 'NON-RESIDENTIAL', 
-        'LIVINGSTON', 'AMBULATORY', 
-        'APPLICATION FOR PARKING',
-        'CHAIRPERSON CERTIFICATION',
-        'Chair Cert',
-        'ROOFTOP'], '|')
-),
-consolidated_filter as (
-    SELECT dcp_name 
-    FROM text_filter
-    union
-    SELECT dcp_name 
-    FROM resid_units_filter
-),
-applicanttype_filter as (
-	SELECT dcp_name 
-	FROM zap_translated
-	WHERE dcp_applicanttype = 'DCP'
-),
 records_last_kpdb as (
-	SELECT record_id 
+	SELECT record_id as dcp_name
 	FROM dcp_knownprojects
 	WHERE source = 'DCP Application'
 ),
--- records_last_dcp_project as (
--- 	SELECT dcp_name as record_id
--- 	FROM kpdb_2020.dcp_project
--- ),
 records_corr_remove as (
-	SELECT record_id 
+	SELECT record_id as dcp_name
 	FROM corrections_main
 	WHERE field = 'remove'
 ),
 records_corr_add as (
-	SELECT record_id 
+	SELECT record_id as dcp_name
 	FROM corrections_main
 	WHERE field = 'add'
 ),
+consolidated_add_filter as (
+    SELECT distinct dcp_name FROM (SELECT dcp_name FROM resid_units_filter) a
+    WHERE dcp_name IN (SELECT dcp_name FROM status_filter)
+    AND dcp_name IN (SELECT dcp_name FROM year_filter)
+    UNION SELECT dcp_name FROM records_corr_add 
+),
+consolidated_remove_filter as (
+    SELECT dcp_name as dcp_name FROM records_corr_remove
+    WHERE dcp_name NOT IN (SELECT dcp_name FROM consolidated_add_filter)
+),
 relevant_projects as (
-    SELECT distinct dcp_name 
-    FROM consolidated_filter
-    WHERE (
-        dcp_name in (SELECT dcp_name FROM year_filter) OR 
-        dcp_name in (SELECT record_id FROM records_corr_add)
-    )
-    and dcp_name not in (SELECT dcp_name FROM school_seat_filter)
-    and dcp_name not in (SELECT dcp_name FROM status_filter)
-    and dcp_name not in (SELECT dcp_name FROM applicanttype_filter)
-    and dcp_name not in (SELECT record_id FROM records_corr_remove)
+    SELECT DISTINCT dcp_name 
+    FROM consolidated_add_filter
+    WHERE dcp_name not in (SELECT dcp_name FROM consolidated_remove_filter)
 ),
 _dcp_application as (
     SELECT distinct 
 	--descriptor fields
     'DCP Application' as source,
-    (case when dcp_name in (
-        select project_id from cm_renewal
-        union 
-        select project_id from text_renewal) 
-        then 1 else 0 end) as renewal,
     (CASE WHEN dcp_name in (
     	select distinct dcp_name 
     	from relevant_projects) then 1
     	else 0 end) as flag_relevant,
+
     (CASE WHEN dcp_name in (
     	select distinct dcp_name 
     	from year_filter) then 1
     	else 0 end) as flag_year,
+
     (CASE WHEN dcp_name in (
     	select distinct dcp_name 
-    	from school_seat_filter) then 1
-    	else 0 end) as flag_school_seat,
+    	from status_filter) then 1
+    	else 0 end) as flag_status,
+    
     (CASE WHEN dcp_name in (
     	select distinct dcp_name 
-    	from text_filter) then 1
-    	else 0 end) as flag_resid_text,
-    (CASE WHEN dcp_name in (select record_id from records_last_kpdb)
-    	 THEN 1 ELSE 0 END) as flag_in_last_kpdb,
-	(CASE WHEN dcp_name not in (select record_id from records_last_kpdb) 
+    	from resid_units_filter) then 1
+    	else 0 end) as flag_resid_units,
+
+    (CASE WHEN dcp_name in (
+        select dcp_name from records_last_kpdb)
+    	THEN 1 ELSE 0 END) as flag_in_last_kpdb,
+
+	(CASE WHEN dcp_name not in (
+        select dcp_name from records_last_kpdb) 
 		THEN 1 ELSE 0 END) as flag_not_in_last_kpdb,
+
 	(CASE 
-		WHEN dcp_name in (select record_id from records_corr_remove) THEN 'remove' 
-		WHEN dcp_name in (select record_id from records_corr_add) THEN 'add' 
+		WHEN dcp_name in (select dcp_name from records_corr_remove) THEN 'remove' 
+		WHEN dcp_name in (select dcp_name from records_corr_add) THEN 'add' 
 	END) as flag_corrected,
+
 	-- (CASE WHEN dcp_name not in (select record_id from records_last_dcp_project) 
 	-- 	THEN 1 ELSE 0 END) as flag_new_in_zap,
     dcp_name as record_id,
