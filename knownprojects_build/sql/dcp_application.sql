@@ -119,19 +119,32 @@ records_corr_add as (
 	WHERE field = 'add'
 ),
 consolidated_add_filter as (
-    SELECT distinct dcp_name FROM (SELECT dcp_name FROM resid_units_filter) a
+	/*
+	Add if a record satisfies:
+	1) flagged as add in corrections_zap.csv
+	2) flag_year = 1
+	3) flag_status = 1
+	*/
+    SELECT distinct dcp_name FROM zap_translated a
     WHERE dcp_name IN (SELECT dcp_name FROM status_filter)
     AND dcp_name IN (SELECT dcp_name FROM year_filter)
     UNION SELECT dcp_name FROM records_corr_add 
 ),
 consolidated_remove_filter as (
-    SELECT dcp_name as dcp_name FROM records_corr_remove
+	/*
+	Remove if a record satisfies:
+	1) flagged as remove in corrections_zap.csv
+	2) not in consolidated_add_filter
+	*/
+	SELECT dcp_name FROM records_corr_remove UNION
+    SELECT dcp_name as dcp_name FROM zap_translated
     WHERE dcp_name NOT IN (SELECT dcp_name FROM consolidated_add_filter)
 ),
 relevant_projects as (
-    SELECT DISTINCT dcp_name 
-    FROM consolidated_add_filter
-    WHERE dcp_name not in (SELECT dcp_name FROM consolidated_remove_filter)
+    SELECT DISTINCT dcp_name
+    FROM zap_translated
+    WHERE dcp_name IN (SELECT dcp_name FROM consolidated_add_filter)
+	AND dcp_name NOT IN (SELECT dcp_name FROM consolidated_remove_filter)
 ),
 _dcp_application as (
     SELECT distinct 
