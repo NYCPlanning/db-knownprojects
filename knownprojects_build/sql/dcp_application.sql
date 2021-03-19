@@ -110,13 +110,13 @@ records_last_kpdb as (
 ),
 records_corr_remove as (
 	SELECT record_id as dcp_name
-	FROM corrections_main
-	WHERE field = 'remove'
+	FROM corrections_zap
+	WHERE lower(action) = 'remove'
 ),
 records_corr_add as (
 	SELECT record_id as dcp_name
-	FROM corrections_main
-	WHERE field = 'add'
+	FROM corrections_zap
+	WHERE lower(action) = 'add'
 ),
 consolidated_add_filter as (
 	/*
