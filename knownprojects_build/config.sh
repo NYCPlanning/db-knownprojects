@@ -68,10 +68,16 @@ function SHP_export {
     ogr2ogr -progress -f "ESRI Shapefile" $name.shp \
         PG:"host=$BUILD_HOST user=$BUILD_USER port=$BUILD_PORT dbname=$BUILD_DB password=$BUILD_PWD" \
         $table -nlt $geomtype
-      rm -f $name.zip
-      zip -9 $name.zip *
-      ls | grep -v $name.zip | xargs rm
+      rm -f $name.shp.zip
+      zip -9 $name.shp.zip *
+      ls | grep -v $name.shp.zip | xargs rm
   )
-  mv $name/$name.zip $name.zip
+  mv $name/$name.shp.zip $name.shp.zip
   rm -rf $name
+}
+
+function Compress {
+  filename=$1
+  zip -9 $filename.zip $filename
+  rm $filename
 }

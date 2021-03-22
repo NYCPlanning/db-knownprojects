@@ -15,27 +15,30 @@ mkdir -p output
     (
         cd review
         
-        CSV_export combined
-        zip -9 combined.csv.zip combined.csv
-        rm combined.csv
+        CSV_export combined &
 
-        CSV_export review_project
-        CSV_export review_dob
-        CSV_export corrections_applied
-        CSV_export corrections_not_applied
-        CSV_export corrections_dob_match
-        CSV_export corrections_project
-        CSV_export corrections_main
+        CSV_export review_project &
+        CSV_export review_dob &
 
-        SHP_export combined MULTIPOLYGON
-        SHP_export review_project MULTIPOLYGON
-        SHP_export review_dob MULTIPOLYGON
-    )
+        CSV_export corrections_applied &
+        CSV_export corrections_not_applied &
+        CSV_export corrections_dob_match &
+        CSV_export corrections_project &
+        CSV_export corrections_main &
+
+        SHP_export combined MULTIPOLYGON &
+        SHP_export review_project MULTIPOLYGON &
+        SHP_export review_dob MULTIPOLYGON 
+
+        wait
+        Compress combined.csv
+        Compress review_dob.csv
+        Compress review_project.csv
+    ) 
 
     echo "Exporting output tables"
     CSV_export kpdb
-    zip -9 kpdb.csv.zip kpdb.csv
-    rm kpdb.csv
+    Compress kpdb.csv
     SHP_export kpdb MULTIPOLYGON
 )
 
