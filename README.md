@@ -4,6 +4,7 @@ This repo contains code for creating the Known Projects Database (KPDB). The bui
 
 ## Instructions: 
 ### Build:
+- Navigate to the bash scripts: `cd knownprojects_build`
 - Load data: `./01_dataloading.sh`
 - Build database: `./02_build.sh`
 - Export: `./03_export.sh`
