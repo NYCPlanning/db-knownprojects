@@ -32,3 +32,15 @@ CREATE TABLE corrections_main(
 );
 
 \COPY corrections_main FROM 'data/corrections/corrections_main.csv' DELIMITER ',' CSV HEADER;
+
+-- corrections zap table -> indicating if each record should be added / removed from kpdb
+DROP TABLE IF EXISTS corrections_zap;
+CREATE TABLE corrections_zap(
+    record_id text,
+    action text,
+    editor text,
+    date text,
+    notes text
+);
+
+\COPY corrections_zap FROM 'data/corrections/corrections_zap.csv' DELIMITER ',' CSV HEADER;
