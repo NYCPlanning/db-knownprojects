@@ -16,7 +16,7 @@ mkdir -p output
         cd review
         
         CSV_export combined
-        zip -9 combined.zip combined.csv
+        zip -9 combined.csv.zip combined.csv
         rm combined.csv
 
         CSV_export review_project
@@ -34,6 +34,8 @@ mkdir -p output
 
     echo "Exporting output tables"
     CSV_export kpdb
+    zip -9 kpdb.csv.zip kpdb.csv
+    rm kpdb.csv
     SHP_export kpdb MULTIPOLYGON
 )
 
