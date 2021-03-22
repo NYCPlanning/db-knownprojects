@@ -9,8 +9,8 @@ psql $BUILD_ENGINE -1 -f sql/_procedures.sql
 psql $BUILD_ENGINE -1 -f sql/dcp_application.sql
 psql $BUILD_ENGINE -1 -f sql/dcp_housing.sql
 psql $BUILD_ENGINE -1 -f sql/combine.sql
-psql $BUILD_ENGINE -1 -c "CALL apply_correction('_combined', 'corrections_main');"
-psql $BUILD_ENGINE -c "VACUUM ANALYZE _combined;"
+psql $BUILD_ENGINE -c "CALL apply_correction('combined', 'corrections_main');"
+psql $BUILD_ENGINE -c "VACUUM ANALYZE combined;"
 
 # Find and matches between non-DOB sources
 psql $BUILD_ENGINE -1 -f sql/_project_record_ids.sql
