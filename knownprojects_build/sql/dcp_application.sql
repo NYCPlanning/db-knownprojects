@@ -122,8 +122,7 @@ consolidated_add_filter as (
 	/*
 	Add if a record satisfies:
 	1) flagged as add in corrections_zap.csv
-	2) flag_year = 1
-	3) flag_status = 1
+	2) or ( flag_year = 1 and flag_status = 1 ) 
 	*/
     SELECT distinct dcp_name FROM zap_translated a
     WHERE dcp_name IN (SELECT dcp_name FROM status_filter)
@@ -134,7 +133,7 @@ consolidated_remove_filter as (
 	/*
 	Remove if a record satisfies:
 	1) flagged as remove in corrections_zap.csv
-	2) not in consolidated_add_filter
+	2) or not in consolidated_add_filter
 	*/
 	SELECT dcp_name FROM records_corr_remove UNION
     SELECT dcp_name as dcp_name FROM zap_translated
