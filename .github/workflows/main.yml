@@ -2,18 +2,12 @@ name: Build
 on:
   push:
   workflow_dispatch:
-    inputs:
-      database:
-        description: 'which database?'
-        required: true
-        default: 'github'
+
 jobs: 
-  build_github:
+  build:
     if: >- 
-      github.event.inputs.database == 'github' && (
-        contains(github.event.head_commit.message, '[build]') ||
-        github.event_name == 'workflow_dispatch'
-      )
+      contains(github.event.head_commit.message, '[build]') ||
+      github.event_name == 'workflow_dispatch'
     name: Building in Github database
     runs-on: ubuntu-20.04
     services:
@@ -65,70 +59,3 @@ jobs:
       - name: 3. export ...
         working-directory: knownprojects_build
         run: ./03_export.sh
-
-  build_edm:
-    if: >- 
-      github.event.inputs.database == 'edm' && (
-        contains(github.event.head_commit.message, '[build]') ||
-        github.event_name == 'workflow_dispatch'
-      )
-    name: Building in EDM database
-    runs-on: ubuntu-20.04
-    env:
-      BUILD_ENGINE: ${{ secrets.BUILD_ENGINE }}
-      AWS_S3_ENDPOINT: ${{ secrets.DO_S3_ENDPOINT }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
-      GH_PAT: ${{ secrets.GH_PAT }}
-    steps:
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DO_PAT }}
-
-      - name: Compute info and add to firewall
-        id: firewall
-        run: |
-          IP=$(curl https://api.ipify.org)
-          FIREWALL=$(doctl compute firewall ls -o json | jq -r '.[] | select(.name == "edm-firewall") | .id')
-          RULE="protocol:tcp,ports:all,address:$IP"
-          doctl compute firewall add-rules $FIREWALL --inbound-rules $RULE
-          
-          echo "FIREWALL=$FIREWALL">> $GITHUB_ENV          
-          echo "RULE=$RULE">> $GITHUB_ENV
-
-      - uses: actions/checkout@v2
-        with: 
-            submodules: true
-            ssh-key: ${{ secrets.SSH_KEY }}
-            persist-credentials: true
-
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-
-      - name: install dependencies ...
-        run: |
-          sudo apt install -y gdal-bin
-          curl -O https://dl.min.io/client/mc/release/linux-amd64/mc
-          chmod +x mc
-          sudo mv ./mc /usr/bin
-          mc config host add spaces $AWS_S3_ENDPOINT $AWS_ACCESS_KEY_ID $AWS_SECRET_ACCESS_KEY --api S3v4
-          python3 -m pip install -r knownprojects_build/requirements.txt
-
-      - name: 1. dataloading ..
-        working-directory: knownprojects_build
-        run: ./01_dataloading.sh
-
-      - name: 2. build ...
-        working-directory: knownprojects_build
-        run: ./02_build.sh
-
-      - name: 3. export ...
-        working-directory: knownprojects_build
-        run: ./03_export.sh
-        
-      - name: Remove IP from firewall
-        if: always()
-        run: doctl compute firewall remove-rules $FIREWALL --inbound-rules $RULE
-        
