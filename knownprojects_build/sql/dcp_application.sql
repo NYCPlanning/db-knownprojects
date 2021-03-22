@@ -5,11 +5,10 @@ DESCRIPTION:
 INPUTS:
 	dcp_projects
 	dcp_projectactions
-    dcp_project_bbls
-    dcp_mappluto_wi
-    dcp_knownprojects
-    corrections_main
-    DEPRECATING: kpdb_<last_version>.dcp_project
+    	dcp_project_bbls
+    	dcp_mappluto_wi
+    	dcp_knownprojects
+    	corrections_main
 OUTPUTS: 
 	dcp_application
 */
@@ -173,17 +172,15 @@ _dcp_application as (
         select dcp_name from records_last_kpdb)
     	THEN 1 ELSE 0 END) as flag_in_last_kpdb,
 
-	(CASE WHEN dcp_name not in (
+    (CASE WHEN dcp_name not in (
         select dcp_name from records_last_kpdb) 
 		THEN 1 ELSE 0 END) as flag_not_in_last_kpdb,
 
-	(CASE 
-		WHEN dcp_name in (select dcp_name from records_corr_remove) THEN 'remove' 
-		WHEN dcp_name in (select dcp_name from records_corr_add) THEN 'add' 
-	END) as flag_corrected,
+    (CASE 
+	WHEN dcp_name in (select dcp_name from records_corr_remove) THEN 'remove' 
+	WHEN dcp_name in (select dcp_name from records_corr_add) THEN 'add' 
+     END) as flag_corrected,
 
-	-- (CASE WHEN dcp_name not in (select record_id from records_last_dcp_project) 
-	-- 	THEN 1 ELSE 0 END) as flag_new_in_zap,
     dcp_name as record_id,
     dcp_projectname as record_name,
     dcp_projectbrief, 
@@ -191,11 +188,11 @@ _dcp_application as (
     dcp_borough as borough,
     statuscode,
     (case
-		when dcp_projectphase ~* 'project completed' then 'DCP 4: Zoning Implemented'
-		when dcp_projectphase ~* 'pre-pas|pre-cert' then 'DCP 2: Application in progress'
-		when dcp_projectphase ~* 'initiation' then 'DCP 1: Expression of interest'
-		when dcp_projectphase ~* 'public review' then 'DCP 3: Certified/Referred'
-	end) as status,
+	when dcp_projectphase ~* 'project completed' then 'DCP 4: Zoning Implemented'
+	when dcp_projectphase ~* 'pre-pas|pre-cert' then 'DCP 2: Application in progress'
+	when dcp_projectphase ~* 'initiation' then 'DCP 1: Expression of interest'
+	when dcp_projectphase ~* 'public review' then 'DCP 3: Certified/Referred'
+    end) as status,
     dcp_publicstatus as publicstatus,
     dcp_certifiedreferred,
     dcp_applicanttype as applicanttype,
