@@ -39,5 +39,5 @@ mkdir -p output
     SHP_export kpdb MULTIPOLYGON
 )
 
-zip -r output/output.zip output
+# Upload
 python3 -m python.upload
