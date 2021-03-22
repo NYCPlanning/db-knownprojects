@@ -12,7 +12,7 @@ INPUTS:
 OUTPUTS: 
 	dcp_application
 */
-DROP TABLE IF EXISTS dcp_application;
+DROP TABLE IF EXISTS _dcp_application;
 WITH 
 zap_translated as (
 	SELECT
@@ -143,93 +143,95 @@ relevant_projects as (
     FROM zap_translated
     WHERE dcp_name IN (SELECT dcp_name FROM consolidated_add_filter)
 	AND dcp_name NOT IN (SELECT dcp_name FROM consolidated_remove_filter)
-),
-_dcp_application as (
-    SELECT distinct 
-	--descriptor fields
-    'DCP Application' as source,
-    (CASE WHEN dcp_name in (
-    	select distinct dcp_name 
-    	from relevant_projects) then 1
-    	else 0 end) as flag_relevant,
+)
+SELECT distinct 
+--descriptor fields
+'DCP Application' as source,
+(CASE WHEN dcp_name in (
+	select distinct dcp_name 
+	from relevant_projects) then 1
+	else 0 end) as flag_relevant,
 
-    (CASE WHEN dcp_name in (
-    	select distinct dcp_name 
-    	from year_filter) then 1
-    	else 0 end) as flag_year,
+(CASE WHEN dcp_name in (
+	select distinct dcp_name 
+	from year_filter) then 1
+	else 0 end) as flag_year,
 
-    (CASE WHEN dcp_name in (
-    	select distinct dcp_name 
-    	from status_filter) then 1
-    	else 0 end) as flag_status,
-    
-    (CASE WHEN dcp_name in (
-    	select distinct dcp_name 
-    	from resid_units_filter) then 1
-    	else 0 end) as flag_resid_units,
+(CASE WHEN dcp_name in (
+	select distinct dcp_name 
+	from status_filter) then 1
+	else 0 end) as flag_status,
 
-    (CASE WHEN dcp_name in (
-        select dcp_name from records_last_kpdb)
-    	THEN 1 ELSE 0 END) as flag_in_last_kpdb,
+(CASE WHEN dcp_name in (
+	select distinct dcp_name 
+	from resid_units_filter) then 1
+	else 0 end) as flag_resid_units,
 
-    (CASE WHEN dcp_name not in (
-        select dcp_name from records_last_kpdb) 
-		THEN 1 ELSE 0 END) as flag_not_in_last_kpdb,
+(CASE WHEN dcp_name in (
+	select dcp_name from records_last_kpdb)
+	THEN 1 ELSE 0 END) as flag_in_last_kpdb,
 
-    (CASE 
-	WHEN dcp_name in (select dcp_name from records_corr_remove) THEN 'remove' 
-	WHEN dcp_name in (select dcp_name from records_corr_add) THEN 'add' 
-     END) as flag_corrected,
+(CASE WHEN dcp_name not in (
+	select dcp_name from records_last_kpdb) 
+	THEN 1 ELSE 0 END) as flag_not_in_last_kpdb,
 
-    dcp_name as record_id,
-    dcp_projectname as record_name,
-    dcp_projectbrief, 
-    dcp_projectdescription,
-    dcp_borough as borough,
-    statuscode,
-    (case
-	when dcp_projectphase ~* 'project completed' then 'DCP 4: Zoning Implemented'
-	when dcp_projectphase ~* 'pre-pas|pre-cert' then 'DCP 2: Application in progress'
-	when dcp_projectphase ~* 'initiation' then 'DCP 1: Expression of interest'
-	when dcp_projectphase ~* 'public review' then 'DCP 3: Certified/Referred'
-    end) as status,
-    dcp_publicstatus as publicstatus,
-    dcp_certifiedreferred,
-    dcp_applicanttype as applicanttype,
-    dcp_visibility as visibility,
-    
-	--units fields
-    dcp_numberofnewdwellingunits,
-    dcp_totalnoofdusinprojecd,
-    dcp_mihdushighernumber,
-    dcp_mihduslowernumber,
-    dcp_noofvoluntaryaffordabledus,
-    dcp_residentialsqft, 
-    
-	--calculate units_gross
-    COALESCE(
-        nullif(dcp_numberofnewdwellingunits,0),
-        nullif(dcp_totalnoofdusinprojecd,0),
-        nullif(dcp_mihdushighernumber+ 
-            dcp_noofvoluntaryaffordabledus,0),
-        nullif(dcp_mihduslowernumber+ 
-            dcp_noofvoluntaryaffordabledus,0)
-    )::numeric as units_gross,
-    
-	--identify unit source
-    COALESCE(
-        (case when nullif(dcp_numberofnewdwellingunits,0) is not NULL 
-            then 'dcp_numberofnewdwellingunits' end),
-        (case when nullif(dcp_totalnoofdusinprojecd,0) is not NULL 
-            then 'dcp_totalnoofdusinprojecd' end),
-        (case when nullif(dcp_mihdushighernumber+dcp_noofvoluntaryaffordabledus,0) is not NULL 
-            then 'dcp_mihdushighernumber + dcp_noofvoluntaryaffordabledus' end),
-        (case when nullif(dcp_mihduslowernumber+ dcp_noofvoluntaryaffordabledus,0) is not NULL 
-            then 'dcp_mihduslowernumber + dcp_noofvoluntaryaffordabledus' end)
-        ) 
-    AS units_gross_source
-    FROM zap_translated
-), 
+(CASE 
+WHEN dcp_name in (select dcp_name from records_corr_remove) THEN 'remove' 
+WHEN dcp_name in (select dcp_name from records_corr_add) THEN 'add' 
+	END) as flag_corrected,
+
+dcp_name as record_id,
+dcp_projectname as record_name,
+dcp_projectbrief, 
+dcp_projectdescription,
+dcp_borough as borough,
+statuscode,
+(case
+when dcp_projectphase ~* 'project completed' then 'DCP 4: Zoning Implemented'
+when dcp_projectphase ~* 'pre-pas|pre-cert' then 'DCP 2: Application in progress'
+when dcp_projectphase ~* 'initiation' then 'DCP 1: Expression of interest'
+when dcp_projectphase ~* 'public review' then 'DCP 3: Certified/Referred'
+end) as status,
+dcp_publicstatus as publicstatus,
+dcp_certifiedreferred,
+dcp_applicanttype as applicanttype,
+dcp_visibility as visibility,
+
+--units fields
+dcp_numberofnewdwellingunits,
+dcp_totalnoofdusinprojecd,
+dcp_mihdushighernumber,
+dcp_mihduslowernumber,
+dcp_noofvoluntaryaffordabledus,
+dcp_residentialsqft, 
+
+--calculate units_gross
+COALESCE(
+	nullif(dcp_numberofnewdwellingunits,0),
+	nullif(dcp_totalnoofdusinprojecd,0),
+	nullif(dcp_mihdushighernumber+ 
+		dcp_noofvoluntaryaffordabledus,0),
+	nullif(dcp_mihduslowernumber+ 
+		dcp_noofvoluntaryaffordabledus,0)
+)::numeric as units_gross,
+
+--identify unit source
+COALESCE(
+	(case when nullif(dcp_numberofnewdwellingunits,0) is not NULL 
+		then 'dcp_numberofnewdwellingunits' end),
+	(case when nullif(dcp_totalnoofdusinprojecd,0) is not NULL 
+		then 'dcp_totalnoofdusinprojecd' end),
+	(case when nullif(dcp_mihdushighernumber+dcp_noofvoluntaryaffordabledus,0) is not NULL 
+		then 'dcp_mihdushighernumber + dcp_noofvoluntaryaffordabledus' end),
+	(case when nullif(dcp_mihduslowernumber+ dcp_noofvoluntaryaffordabledus,0) is not NULL 
+		then 'dcp_mihduslowernumber + dcp_noofvoluntaryaffordabledus' end)
+	) 
+AS units_gross_source
+INTO _dcp_application
+FROM zap_translated;
+
+DROP TABLE IF EXISTS dcp_application;
+WITH
 -- Assigning Geometry Using BBL
 geom_pluto as (
 	SELECT
