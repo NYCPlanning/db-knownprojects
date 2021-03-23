@@ -45,7 +45,7 @@ matches AS (
             	WHEN b.date IS NOT NULL 
                 	THEN extract(year from b.date::timestamp) >= 
                     split_part(split_part(a.date, '/', 1), '-', 1)::numeric - 2
-            	ELSE extract(year from b.date::timestamp) >= 2020 -2
+            	ELSE extract(year from b.date::timestamp) >= extract(year from CURRENT_DATE) - 2
             END)
         END)
     WHERE b.source = 'DOB'
