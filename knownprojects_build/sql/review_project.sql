@@ -17,7 +17,7 @@ SELECT
     a.senior_housing,
     b.project_record_ids,
     (cardinality(b.project_record_ids) > 1)::integer as multirecord_project,
-    b.project_id,
+    b.dummy_id,
     a.geom
 INTO review_project
 FROM combined a
@@ -25,7 +25,7 @@ LEFT JOIN (
         SELECT 
             project_record_ids,
             unnest(project_record_ids) as record_id, 
-            ROW_NUMBER() OVER(ORDER BY project_record_ids) as project_id
+            ROW_NUMBER() OVER(ORDER BY project_record_ids) as dummy_id
         FROM _project_record_ids
     ) b 
 ON a.record_id = b.record_id
