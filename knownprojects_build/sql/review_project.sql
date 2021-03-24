@@ -15,7 +15,7 @@ SELECT
     a.nycha,
     a.classb,
     a.senior_housing,
-    b.project_record_ids,
+    array_to_string(b.project_record_ids, ',') as project_record_ids,
     (cardinality(b.project_record_ids) > 1)::integer as multirecord_project,
     b.dummy_id,
     a.geom
