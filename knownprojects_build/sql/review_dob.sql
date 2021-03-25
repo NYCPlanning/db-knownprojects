@@ -122,6 +122,9 @@ SELECT
 	b.date_complete,
 	(a.record_id IN (SELECT record_id FROM multimatch) AND a.source='DOB')::integer as dob_multimatch,
 	(a.project_id IN (SELECT project_id FROM multimatchproject))::integer as project_has_dob_multi,
+	(CASE
+		WHEN a.geom IS NULL THEN 1 ELSE 0
+	END) as no_geom,
 	a.geom
 INTO review_dob
 FROM combined_dob a
