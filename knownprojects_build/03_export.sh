@@ -14,21 +14,29 @@ mkdir -p output
 
     (
         cd review
+        SHP_export combined MULTIPOLYGON &
+        SHP_export review_project MULTIPOLYGON &
+        SHP_export review_dob MULTIPOLYGON &
         
         CSV_export combined &
 
+        psql $BUILD_ENGINE  -c "
+            ALTER TABLE review_project 
+            DROP COLUMN geom;"
+        wait
         CSV_export review_project &
+
+        psql $BUILD_ENGINE  -c "
+            ALTER TABLE review_dob 
+            DROP COLUMN geom;"
+        wait
         CSV_export review_dob &
 
         CSV_export corrections_applied &
         CSV_export corrections_not_applied &
         CSV_export corrections_dob_match &
         CSV_export corrections_project &
-        CSV_export corrections_main &
-
-        SHP_export combined MULTIPOLYGON &
-        SHP_export review_project MULTIPOLYGON &
-        SHP_export review_dob MULTIPOLYGON 
+        CSV_export corrections_main & 
 
         wait
         Compress combined.csv
