@@ -18,9 +18,7 @@ SELECT
     array_to_string(b.project_record_ids, ',') as project_record_ids,
     (cardinality(b.project_record_ids) > 1)::integer as multirecord_project,
     b.dummy_id,
-    (CASE
-		WHEN a.geom IS NULL THEN 1 ELSE 0
-	END) as no_geom,
+    (a.geom IS NULL)::integer as no_geom,
     a.geom
 INTO review_project
 FROM combined a
