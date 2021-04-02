@@ -43,4 +43,4 @@ mkdir -p output
 )
 
 # Upload
-python3 -m python.upload
+python3 -m python.upload $AUTHOR
