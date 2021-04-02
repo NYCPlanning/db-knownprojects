@@ -11,7 +11,7 @@ DESCRIPTION:
 	two stages of identifying spatial overlaps.
 
 INPUTS: 
-    review_dob
+    _review_dob
 	corrections_dob_match (POST-REVIEW)
     _project_record_ids
 	dcp_housing_poly
@@ -32,7 +32,7 @@ dob_matches AS(
 	SELECT DISTINCT
 		record_id, 
 		project_record_ids
-	FROM review_dob
+	FROM _review_dob
 	WHERE source = 'DOB'
 	AND no_classa = '0'
 ),
