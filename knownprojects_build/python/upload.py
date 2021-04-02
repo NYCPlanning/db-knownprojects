@@ -2,6 +2,7 @@ from github import Github
 from datetime import datetime as dt
 import os
 import glob
+import sys
 
 # Initialize github and repo
 g = Github(os.environ.get("GH_PAT"), timeout=60, retry=10)
