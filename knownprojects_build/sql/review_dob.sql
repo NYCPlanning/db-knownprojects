@@ -134,4 +134,4 @@ WHERE a.record_id IN (
 	SELECT record_id FROM matches 
 	UNION SELECT UNNEST(project_record_ids) FROM matches
 )
-ORDER BY project_record_ids;
+ORDER BY array_to_string(project_record_ids, ',');
