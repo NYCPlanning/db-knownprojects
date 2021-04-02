@@ -71,6 +71,7 @@ jobs:
         if: success()
         uses: peter-evans/create-or-update-comment@v1
         with:
+          issue-number: ${{ github.event.issue.number }}
           comment-id: ${{ github.event.comment.id }}
           body: |
             ## Build complete!
