@@ -6,9 +6,9 @@ INPUTS:
     combined
     dcp_housing_poly
 OUTPUTS: 
-    review_dob
+    _review_dob
 */
-DROP TABLE IF EXISTS review_dob;
+DROP TABLE IF EXISTS _review_dob;
 WITH 
 projects AS (
 	SELECT
@@ -112,7 +112,7 @@ SELECT
 	a.date_type,
 	a.inactive,
 	a.no_classa,
-	array_to_string(a.project_record_ids, ',') as project_record_ids,
+	a.project_record_ids,
 	b.classa_init,
 	b.classa_prop,
 	b.otherb_init,
@@ -124,7 +124,7 @@ SELECT
 	(a.project_id IN (SELECT project_id FROM multimatchproject))::integer as project_has_dob_multi,
 	(a.geom IS NULL)::integer as no_geom,
 	a.geom
-INTO review_dob
+INTO _review_dob
 FROM combined_dob a
 LEFT JOIN dcp_housing_poly b
 ON a.record_id = b.record_id
@@ -133,4 +133,4 @@ WHERE a.record_id IN (
 	SELECT record_id FROM matches 
 	UNION SELECT UNNEST(project_record_ids) FROM matches
 )
-ORDER BY project_record_ids;
+ORDER BY array_to_string(project_record_ids, ',');
