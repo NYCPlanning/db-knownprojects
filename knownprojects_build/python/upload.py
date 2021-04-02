@@ -57,10 +57,10 @@ if __name__ == "__main__":
 
     # Create a PR after upload
     md_file_list = "\n".join([f" - `{f.replace(basepath+'/', '')}`" for f in file_list])
-    body = f"Built by: {github_actor}\n## Files Commited:\n{md_file_list}\n"
+    body = f"## Built by: {github_actor}\n## Files Commited:\n{md_file_list}\n"
 
     pr = create_pull_request(
-        title=f'Output: {timestamp.strftime("%Y-%m-%d %H:%M")}',
+        title=f'Build by {github_actor}: {timestamp.strftime("%Y-%m-%d %H:%M")}',
         body=body,
         head=target_branch,
     )

@@ -71,9 +71,10 @@ jobs:
         if: success()
         uses: peter-evans/create-or-update-comment@v1
         with:
+          issue-number: ${{ github.event.issue.number }}
           comment-id: ${{ github.event.comment.id }}
           body: |
             ## Build complete!
-            Built by: @${{ github.actor }}*
+            Built by: @${{ github.actor }}
             For more details, check https://github.com/NYCPlanning/ceqr-app-data/actions/runs/${{ github.run_id }}
           reactions: hooray
