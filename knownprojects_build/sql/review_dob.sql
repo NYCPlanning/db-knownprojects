@@ -113,7 +113,6 @@ SELECT
 	a.inactive,
 	a.no_classa,
 	a.project_record_ids,
-	array_to_string(a.project_record_ids, ',') as project_record_ids,
 	b.classa_init,
 	b.classa_prop,
 	b.otherb_init,
