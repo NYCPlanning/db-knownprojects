@@ -46,6 +46,7 @@ if __name__ == "__main__":
     title = timestamp.strftime("%Y-%m-%d %H:%M")
     target_branch = timestamp.strftime("output-%Y%m%d-%H%M")
     create_new_branch(target_branch)
+    github_actor = sys.argv[1]
 
     # Upload files one by one
     for _file in file_list:
@@ -55,7 +56,7 @@ if __name__ == "__main__":
 
     # Create a PR after upload
     md_file_list = "\n".join([f" - `{f.replace(basepath+'/', '')}`" for f in file_list])
-    body = f"## Files Commited:\n{md_file_list}\n"
+    body = f"Built by: {github_actor}\n## Files Commited:\n{md_file_list}\n"
 
     pr = create_pull_request(
         title=f'Output: {timestamp.strftime("%Y-%m-%d %H:%M")}',
