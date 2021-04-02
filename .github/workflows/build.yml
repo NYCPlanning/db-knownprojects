@@ -1,13 +1,19 @@
 name: Build
 on:
-  push:
-  workflow_dispatch:
+  issues:
+    types: [opened, edited]
 
-jobs: 
-  build:
+jobs:
+  push:
     if: >- 
-      contains(github.event.head_commit.message, '[build]') ||
-      github.event_name == 'workflow_dispatch'
+      contains(github.event.issue.title, '[build]') && 
+      (
+        github.event.issue.user.login == 'levysamu'||
+        github.event.issue.user.login == 'td928'||
+        github.event.issue.user.login == 'kschmidtDCP'||
+        github.event.issue.user.login == 'mgraber'||
+        github.event.issue.user.login == 'SPTKL'
+      )
     name: Building in Github database
     runs-on: ubuntu-20.04
     services:
@@ -28,7 +34,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
       GH_PAT: ${{ secrets.GH_PAT }}
-      AUTHOR: Data Engineering
+      AUTHOR: ${{ github.actor }}
     steps:
       - uses: actions/checkout@v2
         with: 
@@ -60,3 +66,14 @@ jobs:
       - name: 3. export ...
         working-directory: knownprojects_build
         run: ./03_export.sh
+
+      - name: Success Message
+        if: success()
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          body: |
+            ## Build complete!
+            Built by: @${{ github.actor }}*
+            For more details, check https://github.com/NYCPlanning/ceqr-app-data/actions/runs/${{ github.run_id }}
+          reactions: hooray
