@@ -75,5 +75,5 @@ jobs:
         working-directory: knownprojects_build
         env:
           SENDER: ${{ github.event.sender.login }}
-          NOTES: ${{ github.event.inputs.update_submodule }}
+          NOTES: ${{ github.event.inputs.run_notes }}
         run: ./03_export.sh $SENDER $NOTES

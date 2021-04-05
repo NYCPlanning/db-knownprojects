@@ -44,4 +44,5 @@ mkdir -p output
 
 # Upload
 SENDER=${1:-unknown}
-python3 -m python.upload $SENDER
+NOTES=${2:-}
+python3 -m python.upload $SENDER $NOTES
