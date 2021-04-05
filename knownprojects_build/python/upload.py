@@ -38,6 +38,7 @@ def create_pull_request(title: str, body: str, head: str, base: str = "main"):
 
 if __name__ == "__main__":
     # List all files under output
+    SENDER = sys.argv[1]
     basepath = os.getcwd()
     file_list = glob.glob(basepath + "/output/**", recursive=True)
     file_list = [f for f in file_list if os.path.isfile(f)]
@@ -47,7 +48,6 @@ if __name__ == "__main__":
     title = timestamp.strftime("%Y-%m-%d %H:%M")
     target_branch = timestamp.strftime("output-%Y%m%d-%H%M")
     create_new_branch(target_branch)
-    github_actor = sys.argv[1]
 
     # Upload files one by one
     for _file in file_list:
@@ -57,10 +57,10 @@ if __name__ == "__main__":
 
     # Create a PR after upload
     md_file_list = "\n".join([f" - `{f.replace(basepath+'/', '')}`" for f in file_list])
-    body = f"## Built by: {github_actor}\n## Files Commited:\n{md_file_list}\n"
+    body = f"## Files Commited:\n{md_file_list}\n"
 
     pr = create_pull_request(
-        title=f'Build by {github_actor}: {timestamp.strftime("%Y-%m-%d %H:%M")}',
+        title=f'output: {timestamp.strftime("%Y-%m-%d %H:%M")}, created by: {SENDER}',
         body=body,
         head=target_branch,
     )
