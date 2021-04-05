@@ -39,7 +39,6 @@ def create_pull_request(title: str, body: str, head: str, base: str = "main"):
 if __name__ == "__main__":
     # List all files under output
     SENDER = sys.argv[1]
-    NOTES = sys.argv[2]
     basepath = os.getcwd()
     file_list = glob.glob(basepath + "/output/**", recursive=True)
     file_list = [f for f in file_list if os.path.isfile(f)]
@@ -58,7 +57,7 @@ if __name__ == "__main__":
 
     # Create a PR after upload
     md_file_list = "\n".join([f" - `{f.replace(basepath+'/', '')}`" for f in file_list])
-    body = f"## Notes\n {NOTES}\n## Files Commited:\n{md_file_list}\n"
+    body = f"## Files Commited:\n{md_file_list}\n"
 
     pr = create_pull_request(
         title=f'output: {timestamp.strftime("%Y-%m-%d %H:%M")}, created by: {SENDER}',

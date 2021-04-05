@@ -76,4 +76,6 @@ jobs:
         env:
           SENDER: ${{ github.event.sender.login }}
           NOTES: ${{ github.event.inputs.run_notes }}
-        run: ./03_export.sh $SENDER $NOTES
+        run: | 
+          echo $NOTES > run_notes.txt
+          ./03_export.sh $SENDER

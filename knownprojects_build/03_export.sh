@@ -42,7 +42,8 @@ mkdir -p output
     SHP_export kpdb MULTIPOLYGON
 )
 
+mv run_notes.txt output/run_notes.txt
+
 # Upload
 SENDER=${1:-unknown}
-NOTES=${2:-}
-python3 -m python.upload $SENDER $NOTES
+python3 -m python.upload $SENDER
