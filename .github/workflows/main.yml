@@ -85,6 +85,6 @@ jobs:
               issue_number: ${{ steps.export.outputs.issue_number }},
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: ${{ github.event.inputs.comments }}
+              body: `${{ github.event.inputs.comments }}`
             })
 
