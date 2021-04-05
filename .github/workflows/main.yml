@@ -7,10 +7,10 @@ on:
         description: 'Would you like to use the latest db-knownprojects-data? (yes/no)'
         required: false
         default: 'no'
-      run_notes:
-        description: 'Why are you rebuilding KPDB?'
+      comments:
+        description: 'Provide any additional comments below'
         required: false
-        default: ''        
+        default: ''
 
 jobs: 
   build:
@@ -72,10 +72,19 @@ jobs:
         run: ./02_build.sh
 
       - name: 3. export ...
+        id: export
         working-directory: knownprojects_build
-        env:
-          SENDER: ${{ github.event.sender.login }}
-          NOTES: ${{ github.event.inputs.run_notes }}
-        run: | 
-          echo $NOTES > run_notes.txt
-          ./03_export.sh $SENDER
+        run: ./03_export.sh ${{ github.event.sender.login }}
+      
+      - name: 4. comment on PR
+        uses: actions/github-script@v3
+        with: 
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: ${{ steps.export.outputs.issue_number }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: ${{ github.event.inputs.comments }}
+            })
+
