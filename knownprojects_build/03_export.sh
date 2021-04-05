@@ -43,4 +43,5 @@ mkdir -p output
 )
 
 # Upload
-python3 -m python.upload $AUTHOR
+SENDER=${1:-unknown}
+python3 -m python.upload $SENDER

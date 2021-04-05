@@ -69,4 +69,6 @@ jobs:
 
       - name: 3. export ...
         working-directory: knownprojects_build
-        run: ./03_export.sh
+        env:
+          SENDER: ${{ github.event.sender.login }}
+        run: ./03_export.sh $SENDER
