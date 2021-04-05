@@ -7,6 +7,10 @@ on:
         description: 'Would you like to use the latest db-knownprojects-data? (yes/no)'
         required: false
         default: 'no'
+      run_notes:
+        description: 'Why are you rebuilding KPDB?'
+        required: false
+        default: ''        
 
 jobs: 
   build:
@@ -71,4 +75,5 @@ jobs:
         working-directory: knownprojects_build
         env:
           SENDER: ${{ github.event.sender.login }}
-        run: ./03_export.sh $SENDER
+          NOTES: ${{ github.event.inputs.update_submodule }}
+        run: ./03_export.sh $SENDER $NOTES
