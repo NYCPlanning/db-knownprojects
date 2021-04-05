@@ -2,6 +2,11 @@ name: Build
 on:
   push:
   workflow_dispatch:
+    inputs:
+      update_submodule:
+        description: 'Would you like to use the latest db-knownprojects-data? (yes/no)'
+        required: false
+        default: 'no'
 
 jobs: 
   build:
@@ -36,6 +41,11 @@ jobs:
             ssh-key: ${{ secrets.SSH_KEY }}
             persist-credentials: true
 
+      - name: Update Submodule
+        if: github.event.inputs.update_submodule == 'yes'
+        run: |
+          git submodule update --remote
+         
       - uses: actions/setup-python@v2
         with:
           python-version: '3.9'
