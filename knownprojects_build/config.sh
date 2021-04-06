@@ -54,7 +54,7 @@ function import_public {
 
 function CSV_export {
   psql $BUILD_ENGINE  -c "\COPY (
-    SELECT * FROM $@
+    SELECT *, NOW() as v FROM $@
   ) TO STDOUT DELIMITER ',' CSV HEADER;" > $@.csv
 }
 
