@@ -34,7 +34,8 @@ def upload_file(path_local: str, path_repo: str, target_branch: str, message: st
 
 def create_pull_request(title: str, body: str, head: str, base: str = "main"):
     pr = repo.create_pull(title=title, body=body, head=head, base=base)
-
+    print(pr.number)
+    os.system(f'echo "::set-output name=issue_number::{pr.number}"')
 
 if __name__ == "__main__":
     # List all files under output
