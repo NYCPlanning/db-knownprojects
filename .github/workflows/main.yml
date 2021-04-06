@@ -83,8 +83,8 @@ jobs:
           script: |
             github.issues.createComment({
               issue_number: ${{ steps.export.outputs.issue_number }},
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+              owner: 'NYCPlanning',
+              repo: 'db-knownprojects-data',
               body: `${{ github.event.inputs.comments }}`
             })
 
