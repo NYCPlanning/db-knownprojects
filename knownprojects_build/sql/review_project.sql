@@ -19,7 +19,8 @@ SELECT
     (cardinality(b.project_record_ids) > 1)::integer as multirecord_project,
     b.dummy_id,
     (a.geom IS NULL)::integer as no_geom,
-    a.geom
+    a.geom,
+    NOW() as v
 INTO review_project
 FROM combined a
 LEFT JOIN (
