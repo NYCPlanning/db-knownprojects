@@ -105,6 +105,7 @@ SELECT
 	a.source,
 	a.record_id,
 	a.record_name,
+	b.job_desc,
 	a.status,
 	a.type,
 	a.units_gross,
