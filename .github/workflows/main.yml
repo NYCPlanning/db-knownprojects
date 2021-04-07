@@ -7,6 +7,10 @@ on:
         description: 'Would you like to use the latest db-knownprojects-data? (yes/no)'
         required: false
         default: 'no'
+      export:
+        description: 'Would you like to export outputs to db-knownprojects-data? (yes/no)'
+        required: false
+        default: 'yes'
       comments:
         description: 'Provide any additional comments below'
         required: false
@@ -73,11 +77,13 @@ jobs:
 
       - name: 3. export ...
         id: export
+        if: github.event.inputs.export == 'yes'
         working-directory: knownprojects_build
         run: ./03_export.sh ${{ github.event.sender.login }}
       
       - name: 4. comment on PR
         uses: actions/github-script@v3
+        if: github.event.inputs.export == 'yes'
         with: 
           github-token: ${{ secrets.GH_PAT }}
           script: |
