@@ -244,6 +244,7 @@ geom_pluto as (
 		from _dcp_application a
 		LEFT JOIN dcp_projectbbls b
 		ON a.record_id = trim(split_part(b.dcp_name, '-', 1))
+		WHERE b.statuscode != '2'
 	) a LEFT JOIN dcp_mappluto_wi b
 	ON a.bbl::numeric = b.bbl::numeric
 	GROUP BY a.record_id
