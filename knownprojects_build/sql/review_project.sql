@@ -23,7 +23,6 @@ _review_project AS (
         (a.geom IS NULL)::integer as no_geom,
         a.geom,
         NOW() as v
-    --INTO review_project
     FROM combined a
     LEFT JOIN (
             SELECT 
@@ -45,6 +44,7 @@ project_extent AS (
 SELECT
     a.*,
     b.bbox_area
+INTO review_project
 FROM _review_project a
 JOIN project_extent b
 ON a.dummy_id = b.dummy_id;
