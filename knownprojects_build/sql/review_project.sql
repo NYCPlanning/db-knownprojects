@@ -18,6 +18,7 @@ _review_project AS (
         a.classb,
         a.senior_housing,
         array_to_string(b.project_record_ids, ',') as project_record_ids,
+        cardinality(b.project_record_ids) as records_in_project,
         (cardinality(b.project_record_ids) > 1)::integer as multirecord_project,
         b.dummy_id,
         (a.geom IS NULL)::integer as no_geom,
