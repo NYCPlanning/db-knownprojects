@@ -86,6 +86,7 @@ SELECT
 	a.job_number::text as record_id,
 	NULL as record_id_input,
 	a.address as record_name,
+	a.job_desc,
 	'DOB '||a.job_status as status,
 	a.job_type as type,
 	a.classa_net as units_gross,
