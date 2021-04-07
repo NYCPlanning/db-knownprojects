@@ -19,6 +19,7 @@ SELECT
     cardinality(b.project_record_ids) as records_in_project,
     (cardinality(b.project_record_ids) > 1)::integer as multirecord_project,
     b.dummy_id,
+    ROUND((ST_Area(ST_OrientedEnvelope(a.geom)::geography))::numeric/(1609.34^2), 5) as bbox_area,
     (a.geom IS NULL)::integer as no_geom,
     a.geom,
     NOW() as v
