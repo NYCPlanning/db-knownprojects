@@ -3,6 +3,7 @@ SELECT
     a.source,
     a.record_id,
     a.record_name,
+    a.dcb_projectdescription,
     a.status,
     a.type,
     a.units_gross,
