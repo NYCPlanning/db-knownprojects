@@ -3,6 +3,7 @@ SELECT
     a.source,
     a.record_id,
     a.record_name,
+    (SELECT dcp_projectdescription FROM dcp_application WHERE record_id = a.record_id) as dcp_projectdescription,
     a.status,
     a.type,
     a.units_gross,
