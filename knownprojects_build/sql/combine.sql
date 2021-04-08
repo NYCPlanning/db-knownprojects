@@ -8,10 +8,8 @@ DESCRIPTION:
     each project a single record in the a given source data table), the record_id_input
     array only contains the record_id. In cases where there is no unique project-level
     ID, the record_id gets assigned from a hash of the uids in record_id_input.
-
     This script also includes standardization of statuses, initial phasing assumptions,
     and calls to various string parsing functions to set flags.
-
 INPUTS: 
     dcp_mappluto_wi
     dcp_application
@@ -52,8 +50,7 @@ _dcp_application as (
         geom,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
-        flag_senior_housing(a::text) as senior_housing,
-        dcp_projectdescription::text
+        flag_senior_housing(a::text) as senior_housing
     FROM dcp_application a
     WHERE flag_relevant=1
 ),
@@ -353,12 +350,10 @@ _dcp_housing AS (
         nycha,
         classb,
         senior_housing,
-        NULL::text as dcp_projectdescription,
         inactive,
         no_classa
     FROM dcp_housing_poly
 )
-
 SELECT
     *,
     NULL::text as phasing_rationale
@@ -368,21 +363,16 @@ FROM(
         *, 
         NULL::numeric as inactive,
         NULL::text as no_classa
-    FROM(
-        SELECT 
-            *, 
-            NULL::text as dcp_projectdescription
-        FROM (
-            SELECT * FROM _edc_projects UNION
-            SELECT * FROM _dcp_planneradded UNION
-            SELECT * FROM _dcp_n_study UNION
-            SELECT * FROM _dcp_n_study_future UNION
-            SELECT * FROM _dcp_n_study_projected UNION
-            SELECT * FROM _esd_projects UNION
-            SELECT * FROM _hpd_pc UNION
-            SELECT * FROM _hpd_rfp
-        ) a
-        UNION SELECT * FROM _dcp_application
+    FROM (
+        SELECT * FROM _dcp_application UNION
+        SELECT * FROM _edc_projects UNION
+        SELECT * FROM _dcp_planneradded UNION
+        SELECT * FROM _dcp_n_study UNION
+        SELECT * FROM _dcp_n_study_future UNION
+        SELECT * FROM _dcp_n_study_projected UNION
+        SELECT * FROM _esd_projects UNION
+        SELECT * FROM _hpd_pc UNION
+        SELECT * FROM _hpd_rfp
     ) a
     UNION SELECT * FROM _dcp_housing
 ) a;
