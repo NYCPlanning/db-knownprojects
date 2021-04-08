@@ -8,10 +8,8 @@ DESCRIPTION:
     each project a single record in the a given source data table), the record_id_input
     array only contains the record_id. In cases where there is no unique project-level
     ID, the record_id gets assigned from a hash of the uids in record_id_input.
-
     This script also includes standardization of statuses, initial phasing assumptions,
     and calls to various string parsing functions to set flags.
-
 INPUTS: 
     dcp_mappluto_wi
     dcp_application
