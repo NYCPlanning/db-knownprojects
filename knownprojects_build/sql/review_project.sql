@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS review_project;
 SELECT
+    NOW() as v,
     a.source,
     a.record_id,
     a.record_name,
@@ -22,8 +23,7 @@ SELECT
     b.dummy_id,
     ROUND((ST_Area(ST_OrientedEnvelope(a.geom)::geography))::numeric/(1609.34^2), 5) as bbox_area,
     (a.geom IS NULL)::integer as no_geom,
-    a.geom,
-    NOW() as v
+    a.geom
 INTO review_project
 FROM combined a
 LEFT JOIN (
