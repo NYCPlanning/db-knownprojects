@@ -102,6 +102,7 @@ multimatchproject as (
 )
 -- Assign flags for review and append contextual DOB date and unit information
 SELECT 
+	NOW() as v,
 	a.source,
 	a.record_id,
 	a.record_name,
@@ -124,8 +125,7 @@ SELECT
 	(a.record_id IN (SELECT record_id FROM multimatch) AND a.source='DOB')::integer as dob_multimatch,
 	(a.project_id IN (SELECT project_id FROM multimatchproject))::integer as project_has_dob_multi,
 	(a.geom IS NULL)::integer as no_geom,
-	a.geom,
-	NOW() as v
+	a.geom
 INTO _review_dob
 FROM combined_dob a
 LEFT JOIN dcp_housing_poly b
