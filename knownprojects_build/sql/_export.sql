@@ -42,6 +42,7 @@ FROM _kpdb;
 
 DROP TABLE IF EXISTS review_dob;
 SELECT 
+    v,
 	source,
 	record_id,
 	record_name,
