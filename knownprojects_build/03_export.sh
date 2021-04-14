@@ -19,8 +19,9 @@ mkdir -p output
         SHP_export review_dob MULTIPOLYGON 
         wait
 
-        psql $BUILD_ENGINE  -c "ALTER TABLE review_project DROP COLUMN geom, DROP COLUMN v;" &
-        psql $BUILD_ENGINE  -c "ALTER TABLE review_dob DROP COLUMN geom, DROP COLUMN v;"
+        psql $BUILD_ENGINE  -c "ALTER TABLE review_project DROP COLUMN geom;" &
+        psql $BUILD_ENGINE  -c "ALTER TABLE review_dob DROP COLUMN geom;" &
+        psql $BUILD_ENGINE  -c "ALTER TABLE combined DROP COLUMN geom;"
         wait 
         
         CSV_export combined &
