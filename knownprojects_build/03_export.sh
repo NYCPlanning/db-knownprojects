@@ -28,6 +28,13 @@ mkdir -p output
         CSV_export review_dob &
         CSV_export corrections_applied &
         CSV_export corrections_not_applied &
+
+        psql $BUILD_ENGINE  -c "ALTER TABLE corrections_zap DROP COLUMN v;" &
+        psql $BUILD_ENGINE  -c "ALTER TABLE corrections_dob_match DROP COLUMN v;" &
+        psql $BUILD_ENGINE  -c "ALTER TABLE corrections_project DROP COLUMN v;" &
+        psql $BUILD_ENGINE  -c "ALTER TABLE corrections_main DROP COLUMN v;"
+        wait 
+
         CSV_export corrections_zap &
         CSV_export corrections_dob_match &
         CSV_export corrections_project &
