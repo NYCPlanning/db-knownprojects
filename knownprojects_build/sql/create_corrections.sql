@@ -18,6 +18,15 @@ CREATE TABLE corrections_dob_match(
 
 \COPY corrections_dob_match FROM 'data/corrections/corrections_dob.csv' DELIMITER ',' CSV HEADER;
 
+-- spatial corrections -> geometries overwriting source data- or bbl-based geoms
+DROP TABLE IF EXISTS corrections_spatial;
+CREATE TABLE corrections_spatial(
+    record_id text,
+    geom geometry
+);
+
+\COPY corrections_spatial FROM 'data/corrections/corrections_spatial.csv' DELIMITER ',' CSV HEADER;
+
 -- main corrections table -> all other fields
 DROP TABLE IF EXISTS corrections_main;
 CREATE TABLE corrections_main(

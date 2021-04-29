@@ -355,7 +355,25 @@ _dcp_housing AS (
     FROM dcp_housing_poly
 )
 SELECT
-    *,
+    a.source,
+    a.record_id,
+    a.record_id_input,
+    a.record_name,
+    a.status,
+    a.type,
+    a.units_gross,
+    a.date,
+    a.date_type,
+    a.prop_within_5_years,
+    a.prop_5_to_10_years,
+    a.prop_after_10_years,
+    a.phasing_known,
+    COALESCE(b.geom, a.geom) as geom,
+    a.nycha,
+    a.classb,
+    a.senior_housing,
+    a.inactive,
+    a.no_classa,
     NULL::text as phasing_rationale
 INTO combined
 FROM(
@@ -375,4 +393,6 @@ FROM(
         SELECT * FROM _hpd_rfp
     ) a
     UNION SELECT * FROM _dcp_housing
-) a;
+) a
+LEFT JOIN corrections_spatial b
+ON a.record_id = b.record_id;
