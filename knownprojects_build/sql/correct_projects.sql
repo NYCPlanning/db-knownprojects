@@ -28,7 +28,7 @@ BEGIN
 	
 	-- Remove record_id from its existing project
 	UPDATE _project_record_ids
-	SET project_record_ids = array_remove(project_record_ids, record_id)
+	SET project_record_ids = array_remove(project_record_ids::text[], record_id::text)
 	WHERE record_id=any(project_record_ids);
 		
 	IF NOT new_project THEN
