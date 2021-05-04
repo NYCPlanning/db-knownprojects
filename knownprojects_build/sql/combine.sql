@@ -375,4 +375,9 @@ FROM(
         SELECT * FROM _hpd_rfp
     ) a
     UNION SELECT * FROM _dcp_housing
-) a;
+) a
+WHERE record_id NOT IN (
+    SELECT record_id FROM corrections_main
+    WHERE field = 'remove'
+)
+;
