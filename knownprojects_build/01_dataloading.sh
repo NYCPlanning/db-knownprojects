@@ -10,8 +10,8 @@ done
 
 # Load ZAP tables
 import_private dcp_projects 20210415 &
-import_private dcp_projectactions &
-import_private dcp_projectbbls &
+import_private dcp_projectactions 20210415 &
+import_private dcp_projectbbls 20210415 &
 
 # Load other tables
 import_public dcp_mappluto_wi &
