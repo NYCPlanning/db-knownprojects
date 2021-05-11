@@ -27,8 +27,7 @@ projects AS (
 matches AS (
 	/* 
 	Identify records that intersect with DOB jobs. This excludes records from EDC 
-	Projected Projects, and has a time constraint. Need to review how this
-	constraint gets updated this year.
+	Projected Projects, and has a time constraint. 
 	*/
     SELECT 
     	b.*,
@@ -38,7 +37,8 @@ matches AS (
 		a.project_id
     FROM projects a
     INNER JOIN combined b
-    ON st_intersects(a.geom, b.geom)
+    ON ST_Intersects(a.geom, b.geom)
+	AND ST_GeometryType(ST_Intersection(a.geom, b.geom)) = 'ST_Polygon'
     AND (CASE 
     		WHEN b.source = 'EDC Projected Projects' THEN TRUE 
         	ELSE (CASE
