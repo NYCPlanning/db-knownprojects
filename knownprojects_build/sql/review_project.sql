@@ -4,8 +4,8 @@ SELECT
     a.source,
     a.record_id,
     a.record_name,
-    dcp_application.dcp_projectbrief,
-    dcp_planner.planner_names,
+    dcp_projects.dcp_projectbrief,
+    dcp_planner.dcp_plannernames,
     dcp_projects.dcp_communitydistricts,
     a.status,
     a.type,
@@ -36,9 +36,8 @@ LEFT JOIN (
         FROM _project_record_ids
     ) b 
 ON a.record_id = b.record_id
-LEFT JOIN dcp_application ON dcp_application.record_id = a.record_id
 LEFT JOIN (
-    SELECT dcp_name, array_to_string(array_agg(distinct(planner)), ' ,') as planner_names
+    SELECT dcp_name, array_to_string(array_agg(distinct(planner)), ' ,') as dcp_plannernames
     from (
         SELECT a.dcp_name AS planner, b.dcp_name
         FROM dcp_dcpprojectteams a LEFT JOIN dcp_projects b
