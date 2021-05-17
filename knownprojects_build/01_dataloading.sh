@@ -12,6 +12,7 @@ done
 import_private dcp_projects 20210415 &
 import_private dcp_projectactions 20210415 &
 import_private dcp_projectbbls 20210415 &
+import_private dcp_dcpprojectteams 20210517 &
 
 # Load other tables
 import_public dcp_mappluto_wi &
