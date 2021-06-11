@@ -32,10 +32,7 @@ mkdir -p output
         CSV_export corrections_zap &
         CSV_export corrections_dob_match &
         CSV_export corrections_project &
-        CSV_export corrections_main &
-        CSV_export _project_record_ids &
-        CSV_export project_record_ids &
-        CSV_export deduped_units
+        CSV_export corrections_main
         wait
         
         Compress combined.csv
