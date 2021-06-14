@@ -11,4 +11,4 @@ INTO _kpdb
 FROM combined a
 LEFT JOIN deduped_units b
 ON a.record_id = b.record_id
-WHERE a.no_classa <> '1';
+WHERE a.no_classa = '0' OR a.no_classa IS NULL;
