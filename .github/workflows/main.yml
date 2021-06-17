@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-20.04
     services:
       postgres:
-        image: postgis/postgis:12-3.0-alpine
+        image: postgis/postgis:11-3.0-alpine
         env:
           POSTGRES_PASSWORD: postgres
         options: >-
