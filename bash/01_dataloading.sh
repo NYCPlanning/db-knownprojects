@@ -1,5 +1,5 @@
 #!/bin/bash
-source config.sh
+source bash/config.sh
 max_bg_procs 5
 
 # Load source data

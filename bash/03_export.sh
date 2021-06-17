@@ -1,5 +1,5 @@
 #!/bin/bash
-source config.sh
+source bash/config.sh
 
 echo "Generate output tables"
 psql $BUILD_ENGINE -f sql/_export.sql

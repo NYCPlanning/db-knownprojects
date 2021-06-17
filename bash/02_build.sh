@@ -1,5 +1,5 @@
 #!/bin/bash
-source config.sh
+source bash/config.sh
 
 # Create functions and procedures
 psql $BUILD_ENGINE -1 -f sql/_functions.sql

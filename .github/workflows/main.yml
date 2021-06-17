@@ -69,23 +69,19 @@ jobs:
           python3 -m pip install -r knownprojects_build/requirements.txt
 
       - name: 1. dataloading ..
-        working-directory: knownprojects_build
-        run: ./01_dataloading.sh
+        run: ./kpdb.sh dataloading
 
       - name: 2. build ...
-        working-directory: knownprojects_build
-        run: ./02_build.sh
+        run: ./kpdb.sh build
 
       - name: 3. export ...
         id: export
         if: github.event.inputs.export == 'yes'
-        working-directory: knownprojects_build
-        run: ./03_export.sh ${{ github.event.sender.login }}
+        run: ./kpdb.sh export ${{ github.event.sender.login }}
       
       - name: 4. archive ...
         if: github.ref == 'refs/heads/dev'
-        working-directory: knownprojects_build
-        run: ./04_archive.sh
+        run: ./kpdb.sh archive
 
       - name: 4. comment on PR
         uses: actions/github-script@v3
@@ -99,4 +95,3 @@ jobs:
               repo: 'db-knownprojects-data',
               body: `${{ github.event.inputs.comments }}`
             })
-
