@@ -44,3 +44,10 @@ CREATE TABLE corrections_zap(
 );
 
 \COPY corrections_zap FROM 'data/corrections/corrections_zap.csv' DELIMITER ',' CSV HEADER;
+
+DROP TABLE IF EXISTS zap_record_ids;
+CREATE TABLE zap_record_ids(
+    record_id text
+);
+
+\COPY zap_record_ids FROM 'data/corrections/zap_record_ids.csv' DELIMITER ',' CSV HEADER;

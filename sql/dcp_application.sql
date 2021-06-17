@@ -9,6 +9,7 @@ INPUTS:
     	dcp_mappluto_wi
     	dcp_knownprojects
     	corrections_main
+		zap_record_ids
 OUTPUTS: 
 	dcp_application
 */
@@ -107,15 +108,25 @@ records_last_kpdb as (
 	FROM dcp_knownprojects
 	WHERE source = 'DCP Application'
 ),
-records_corr_remove as (
-	SELECT record_id as dcp_name
-	FROM corrections_zap
-	WHERE lower(action) = 'remove'
-),
 records_corr_add as (
+	-- SELECT record_id as dcp_name
+	-- FROM corrections_zap
+	-- WHERE lower(action) = 'add'
+
+	-- Everything in zap_record_ids -> add
 	SELECT record_id as dcp_name
-	FROM corrections_zap
-	WHERE lower(action) = 'add'
+	FROM zap_record_ids
+),
+records_corr_remove as (
+	-- SELECT record_id as dcp_name
+	-- FROM corrections_zap
+	-- WHERE lower(action) = 'remove'
+
+	-- Everything not in zap_record_ids -> remove
+	SELECT dcp_name FROM zap_translated
+	WHERE dcp_name NOT IN (
+		SELECT dcp_name FROM records_corr_add
+	)
 ),
 consolidated_add_filter as (
 	/*
