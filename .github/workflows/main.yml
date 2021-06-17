@@ -81,6 +81,11 @@ jobs:
         working-directory: knownprojects_build
         run: ./03_export.sh ${{ github.event.sender.login }}
       
+      - name: 4. archive ...
+        if: github.ref == 'refs/heads/dev'
+        working-directory: knownprojects_build
+        run: ./04_archive.sh
+
       - name: 4. comment on PR
         uses: actions/github-script@v3
         if: github.event.inputs.export == 'yes' && github.event.inputs.comments != ''
