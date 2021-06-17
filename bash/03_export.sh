@@ -4,6 +4,19 @@ source bash/config.sh
 echo "Generate output tables"
 psql $BUILD_ENGINE -f sql/_export.sql
 
+echo "Archive tables"
+archive public.kpdb kpdb.kpdb &
+archive public.combined kpdb.combined &
+archive public.review_dob kpdb.review_dob &
+archive public.review_project kpdb.review_project
+archive public.corrections_applied kpdb.corrections_applied &
+archive public.corrections_not_applied kpdb.corrections_not_applied &
+archive public.corrections_zap kpdb.corrections_zap &
+archive public.corrections_dob_match kpdb.corrections_dob_match &
+archive public.corrections_project kpdb.corrections_project &
+archive public.corrections_main kpdb.corrections_main &
+wait
+
 rm -rf output
 mkdir -p output
 (
