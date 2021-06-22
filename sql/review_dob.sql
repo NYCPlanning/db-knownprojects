@@ -41,7 +41,7 @@ matches AS (
 	AND ST_GeometryType(ST_Intersection(a.geom, b.geom)) = 'ST_Polygon'
     AND (CASE 
 			-- EDC Projected Projects match with DOB records of any date
-    		WHEN b.source = 'EDC Projected Projects' THEN TRUE 
+    		WHEN a.source = 'EDC Projected Projects' THEN TRUE 
 			-- Only include DOB jobs permitted after, or within 2 years prior, to non-DOB date 
         	ELSE 
 				(CASE 
