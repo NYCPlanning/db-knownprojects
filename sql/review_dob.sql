@@ -40,13 +40,21 @@ matches AS (
     ON ST_Intersects(a.geom, b.geom)
 	AND ST_GeometryType(ST_Intersection(a.geom, b.geom)) = 'ST_Polygon'
     AND (CASE 
+			-- EDC Projected Projects match with DOB records of any date
     		WHEN b.source = 'EDC Projected Projects' THEN TRUE 
-        	ELSE (CASE
-            	WHEN b.date IS NOT NULL 
-                	THEN extract(year from b.date::timestamp) >= 
-                    split_part(split_part(a.date, '/', 1), '-', 1)::numeric - 2
-            	ELSE extract(year from b.date::timestamp) >= extract(year from CURRENT_DATE) - 2
-            END)
+			-- Only include DOB jobs permitted after, or within 2 years prior, to non-DOB date 
+        	ELSE 
+				(CASE 
+					-- Include non-permitted DOB records
+					WHEN b.date IS NULL THEN TRUE
+					-- Compare permitted DOB records to non-DOB date, where available, or current date
+					ELSE (CASE
+							WHEN a.date IS NOT NULL 
+							THEN extract(year from b.date::timestamp) >= 
+							split_part(split_part(a.date, '/', 1), '-', 1)::numeric - 2
+							ELSE extract(year from b.date::timestamp) >= extract(year from CURRENT_DATE) - 2
+						END)
+				END)
         END)
     WHERE b.source = 'DOB'
     AND a.geom IS NOT NULL 
