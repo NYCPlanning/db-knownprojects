@@ -10,6 +10,27 @@ OUTPUTS:
 */
 DROP TABLE IF EXISTS _review_dob;
 WITH 
+overlap_projects AS (
+	-- Projects that contain overlaps
+	SELECT 
+		unnest(project_record_ids) as record_id,
+		project_record_ids,
+		ROW_NUMBER() OVER(ORDER BY project_record_ids) as project_id
+	FROM _project_record_ids
+),
+stand_alone_projects AS (
+	-- Stand-alone records
+	SELECT 
+ 		record_id as project_record_id,
+		array[]::text[]||record_id as project_record_ids,
+		ROW_NUMBER() OVER(ORDER BY record_id) + (SELECT MAX(project_id) FROM overlap_projects) as project_id
+	FROM (
+		SELECT record_id::text from combined
+		WHERE source NOT IN ('DOB', 'Neighborhood Study Rezoning Commitments', 'Future Neighborhood Studies')
+	) a
+	WHERE record_id NOT IN (SELECT UNNEST(project_record_ids) FROM _project_record_ids)
+
+),
 projects AS (
 	SELECT
 		b.project_record_ids,
@@ -17,11 +38,11 @@ projects AS (
 		a.*
 	FROM combined a
 	INNER JOIN (
-		SELECT 
-			unnest(project_record_ids) as record_id,
-			project_record_ids,
-			ROW_NUMBER() OVER(ORDER BY project_record_ids) as project_id
-		FROM _project_record_ids
+		SELECT *
+		FROM overlap_projects
+		UNION
+		SELECT *
+		FROM stand_alone_projects
 	) b ON a.record_id=b.record_id
 ),
 matches AS (
