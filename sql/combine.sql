@@ -140,10 +140,10 @@ _dcp_planneradded as (
         NULL as date,
         NULL as date_type,
         portion_bu::numeric as prop_within_5_years,
-        portion__1::numeric as prop_5_to_10_years,
-        portion__2::numeric as prop_after_10_years,
+        portion_1::numeric as prop_5_to_10_years,
+        portion_2::numeric as prop_after_10_years,
         1 as phasing_known,
-        wkb_geometry::geometry as geom,
+        the_geom::geometry as geom,
         flag_nycha(a::text) as nycha,
         flag_classb(a::text) as classb,
         flag_senior_housing(a::text) as senior_housing
