@@ -67,9 +67,9 @@ zap_translated as (
 	    (CASE WHEN dcp_projectcompleted IS NULL THEN NULL
 	        ELSE TO_CHAR(dcp_projectcompleted::timestamp, 'YYYY/MM/DD') 
 	    END)  as dcp_projectcompleted,
-	    (CASE WHEN dcp_certifiedreferred IS NULL THEN NULL
-	        ELSE TO_CHAR(dcp_certifiedreferred::timestamp, 'YYYY/MM/DD') 
-	    END) as dcp_certifiedreferred,
+	    (CASE WHEN coalesce(dcp_certifiedreferred, dcp_dcptargetcertificationdate) IS NULL THEN NULL
+            ELSE TO_CHAR(coalesce(dcp_certifiedreferred, dcp_dcptargetcertificationdate)::timestamp, 'YYYY/MM/DD') 
+        END) as dcp_certifiedreferred,
 	    COALESCE(dcp_totalnoofdusinprojecd::numeric, 0) as dcp_totalnoofdusinprojecd,
 	    COALESCE(dcp_mihdushighernumber::numeric, 0) as dcp_mihdushighernumber,
 	    COALESCE(dcp_mihduslowernumber::numeric, 0) as dcp_mihduslowernumber,
