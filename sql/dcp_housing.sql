@@ -94,8 +94,13 @@ SELECT
 	a.classa_prop,
 	a.otherb_init,
 	a.otherb_prop,
-	TO_CHAR(TO_DATE(a.date_permittd, 'YYYY-MM-DD'), 'YYYY/MM/DD') as date,
-	'Date Permitted' as date_type,
+	COALESCE(TO_CHAR(TO_DATE(a.date_permittd, 'YYYY-MM-DD'), 'YYYY/MM/DD'),
+		TO_CHAR(TO_DATE(a.date_filed, 'YYYY-MM-DD'), 'YYYY/MM/DD')) as date,
+	(CASE
+		WHEN a.date_permittd IS NOT NULL THEN 'Date Permitted'
+		WHEN a.date_filed IS NOT NULL THEN 'Date Filed'
+	END) as date_type,
+	TO_CHAR(TO_DATE(a.date_permittd, 'YYYY-MM-DD'), 'YYYY/MM/DD') as date_permittd,
 	TO_CHAR(TO_DATE(a.date_filed, 'YYYY-MM-DD'), 'YYYY/MM/DD') as date_filed,
 	TO_CHAR(TO_DATE(a.date_lastupdt, 'YYYY-MM-DD'), 'YYYY/MM/DD') as date_lastupdt,
 	TO_CHAR(TO_DATE(a.date_complete, 'YYYY-MM-DD'), 'YYYY/MM/DD') as date_complete,
