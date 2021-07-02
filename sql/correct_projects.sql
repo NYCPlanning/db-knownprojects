@@ -34,7 +34,7 @@ BEGIN
 	IF NOT new_project THEN
 		-- Add record_id to the project containing record_id_match
 		UPDATE _project_record_ids
-		SET project_record_ids = array_append(project_record_ids, record_id) 
+		SET project_record_ids = array_append(project_record_ids::text[], record_id) 
 		WHERE record_id_match=any(project_record_ids);
 		
 	ELSE
