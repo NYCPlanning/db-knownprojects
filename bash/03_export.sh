@@ -29,7 +29,9 @@ mkdir -p output
         cd review
         SHP_export combined MULTIPOLYGON &
         SHP_export review_project MULTIPOLYGON &
-        SHP_export review_dob MULTIPOLYGON 
+        SHP_export review_dob MULTIPOLYGON &
+        SHP_export dbscan MULTIPOLYGON &
+        SHP_export _project_record_ids MULTIPOLYGON
         wait
 
         psql $BUILD_ENGINE  -c "ALTER TABLE review_project DROP COLUMN geom;" &
@@ -45,10 +47,7 @@ mkdir -p output
         CSV_export corrections_zap &
         CSV_export corrections_dob_match &
         CSV_export corrections_project &
-        CSV_export corrections_main &
-        CSV_export dbscan &
-        CSV_export project_record_ids &
-        CSV_export all_intersections 
+        CSV_export corrections_main 
         wait
         
         Compress combined.csv
