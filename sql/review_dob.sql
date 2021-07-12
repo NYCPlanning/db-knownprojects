@@ -26,7 +26,7 @@ stand_alone_projects AS (
 		ROW_NUMBER() OVER(ORDER BY record_id) + (SELECT MAX(project_id) FROM overlap_projects) as project_id
 	FROM (
 		SELECT record_id::text from combined
-		WHERE source NOT IN ('DOB', 'Neighborhood Study Rezoning Commitments', 'Future Neighborhood Studies')
+		WHERE source NOT IN ('DOB', 'Neighborhood Study Rezoning Commitments', 'Future Neighborhood Studies', 'Neighborhood Study Projected Development Sites')
 	) a
 	WHERE record_id NOT IN (SELECT UNNEST(project_record_ids) FROM _project_record_ids)
 

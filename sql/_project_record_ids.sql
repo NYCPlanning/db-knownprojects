@@ -22,7 +22,7 @@ dbscan AS (
         geom,
         ST_ClusterDBSCAN(geom, 0, 1) OVER() AS id
     FROM  combined
-    WHERE source NOT IN ('DOB', 'Neighborhood Study Rezoning Commitments', 'Future Neighborhood Studies')
+    WHERE source NOT IN ('DOB', 'Neighborhood Study Rezoning Commitments', 'Future Neighborhood Studies', 'Neighborhood Study Projected Development Sites')
 ),
 project_record_join AS (
 	SELECT 

@@ -45,4 +45,4 @@ LEFT JOIN (
     ) a group by dcp_name
 ) dcp_planner ON a.record_id = dcp_planner.dcp_name
 LEFT JOIN dcp_projects ON a.record_id = dcp_projects.dcp_name
-WHERE a.source NOT IN ('DOB', 'Neighborhood Study Rezoning Commitments', 'Future Neighborhood Studies');
+WHERE a.source NOT IN ('DOB', 'Neighborhood Study Rezoning Commitments', 'Future Neighborhood Studies', 'Neighborhood Study Projected Development Sites');
