@@ -15,34 +15,37 @@ OUTPUTS:
 
 -- Identify spatially overlapping non-DOB records
 DROP TABLE IF EXISTS _project_record_ids;
-WITH
-dbscan AS (
-    SELECT 
-        record_id, 
-        geom,
-        ST_ClusterDBSCAN(geom, 0, 1) OVER() AS id
-    FROM  combined
-    WHERE source NOT IN ('DOB', 'Neighborhood Study Rezoning Commitments', 'Future Neighborhood Studies', 'Neighborhood Study Projected Development Sites')
-),
-project_record_join AS (
-	SELECT 
-	    a.record_id,
-	    COUNT(record_id) OVER(PARTITION BY id) as records_in_project,
-	    a.id,
-	    (a.geom IS NULL)::integer as no_geom,
-	    a.geom
-	FROM dbscan a
-),
-all_intersections AS (
-	SELECT 
-		ST_UNION(ST_INTERSECTION(a.geom, b.geom)) as intersect_geom
-	FROM  project_record_join a, project_record_join b
-	WHERE a.record_id < b.record_id
-	AND a.records_in_project > 1
-	AND b.records_in_project > 1
-	AND a.no_geom = 0
-	AND b.no_geom = 0
-)
+DROP TABLE IF EXISTS dbscan;
+DROP TABLE IF EXISTS project_record_join;
+DROP TABLE IF EXISTS all_intersections;
+
+SELECT 
+	record_id, 
+	geom,
+	ST_ClusterDBSCAN(geom, 0, 1) OVER() AS id
+INTO dbscan
+FROM  combined
+WHERE source NOT IN ('DOB', 'Neighborhood Study Rezoning Commitments', 'Future Neighborhood Studies', 'Neighborhood Study Projected Development Sites');
+
+SELECT 
+	a.record_id,
+	COUNT(record_id) OVER(PARTITION BY id) as records_in_project,
+	a.id,
+	(a.geom IS NULL)::integer as no_geom,
+	a.geom
+INTO project_record_join
+FROM dbscan a;
+
+SELECT 
+	ST_UNION(ST_INTERSECTION(a.geom, b.geom)) as intersect_geom
+INTO all_intersections
+FROM  project_record_join a, project_record_join b
+WHERE a.record_id < b.record_id
+AND a.records_in_project > 1
+AND b.records_in_project > 1
+AND a.no_geom = 0
+AND b.no_geom = 0;
+
 SELECT
 	array_agg(a.record_id) as project_record_ids
 INTO _project_record_ids

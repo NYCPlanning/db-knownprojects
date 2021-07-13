@@ -67,3 +67,12 @@ SELECT
 	geom
 INTO review_dob
 FROM _review_dob;
+
+/*debugging codes*/
+DROP TABLE IF EXISTS unnested_project_ids;
+SELECT 
+    project_record_ids,
+    unnest(project_record_ids) as record_id, 
+    ROW_NUMBER() OVER(ORDER BY project_record_ids) as dummy_id
+INTO unnested_project_ids
+FROM _project_record_ids;
