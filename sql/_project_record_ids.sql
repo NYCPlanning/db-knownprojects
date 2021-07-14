@@ -51,7 +51,7 @@ INTO project_record_join
 FROM dbscan a;
 
 SELECT 
-	ST_AsText(ST_PolygonalIntersection(a.geom, b.geom)) as intersect_geom
+	ST_AsText(PolygonalIntersection(a.geom, b.geom)) as intersect_geom
 INTO all_intersections
 FROM  project_record_join a, project_record_join b
 WHERE a.record_id < b.record_id
