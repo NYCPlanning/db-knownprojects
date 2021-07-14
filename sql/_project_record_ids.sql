@@ -13,6 +13,20 @@ OUTPUTS:
     _project_record_ids
 */
 
+-- define a new function for the intersection join based on this answer https://gis.stackexchange.com/a/89387
+CREATE OR REPLACE FUNCTION PolygonalIntersection(a geometry, b geometry)
+RETURNS geometry AS $$
+SELECT ST_Collect(geom)
+FROM 
+(SELECT (ST_Dump(ST_Intersection(a, b))).geom 
+UNION ALL
+-- union in an empty polygon so we get an 
+-- empty geometry instead of NULL if there
+-- is are no polygons in the intersection
+SELECT ST_GeomFromText('POLYGON EMPTY')) SQ
+WHERE ST_GeometryType(geom) = 'ST_Polygon';
+$$ LANGUAGE SQL;
+
 -- Identify spatially overlapping non-DOB records
 DROP TABLE IF EXISTS _project_record_ids;
 DROP TABLE IF EXISTS dbscan;
@@ -37,7 +51,7 @@ INTO project_record_join
 FROM dbscan a;
 
 SELECT 
-	ST_Dump(ST_INTERSECTION(a.geom, b.geom)) as intersect_geom
+	ST_AsText(ST_PolygonalIntersection(a.geom, b.geom)) as intersect_geom
 INTO all_intersections
 FROM  project_record_join a, project_record_join b
 WHERE a.record_id < b.record_id
