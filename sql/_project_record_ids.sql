@@ -16,7 +16,8 @@ OUTPUTS:
 -- define a new function for the intersection join based on this answer https://gis.stackexchange.com/a/89387
 CREATE OR REPLACE FUNCTION PolygonalIntersection(a geometry, b geometry)
 RETURNS geometry AS $$
-SELECT ST_Collect(geom)
+-- add the cast to geography so that default SRID is set as 4326 for all geometries according to this https://gis.stackexchange.com/a/68756
+SELECT ST_Collect(geom::geography::geometry)
 FROM 
 (SELECT (ST_Dump(ST_Intersection(a, b))).geom 
 UNION ALL
