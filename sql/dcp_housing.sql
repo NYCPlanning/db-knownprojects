@@ -104,7 +104,7 @@ SELECT
 	TO_CHAR(TO_DATE(a.date_filed, 'YYYY-MM-DD'), 'YYYY/MM/DD') as date_filed,
 	TO_CHAR(TO_DATE(a.date_lastupdt, 'YYYY-MM-DD'), 'YYYY/MM/DD') as date_lastupdt,
 	TO_CHAR(TO_DATE(a.date_complete, 'YYYY-MM-DD'), 'YYYY/MM/DD') as date_complete,
-	(CASE WHEN a.job_inactive = 'Inactive' THEN 1 ELSE 0 END) as inactive,
+	(CASE WHEN a.job_inactive ~* 'Inactive' THEN 1 ELSE 0 END) as inactive,
 
     -- Phasing
     (CASE 
@@ -113,7 +113,7 @@ SELECT
         ELSE NULL
     END) as prop_within_5_years,
     (CASE 
-        WHEN a.job_inactive = 'Inactive' THEN 1 
+        WHEN a.job_inactive ~* 'Inactive' THEN 1 
         ELSE NULL
     END) as prop_5_to_10_years,
     NULL::numeric as prop_after_10_years,
