@@ -109,7 +109,7 @@ SELECT
     -- Phasing
     (CASE 
         WHEN a.job_status ~* '1. Filed Application|2. Approved Application|3. Permitted for Construction' 
-            AND a.job_inactive IS NULL THEN 1 
+            AND a.job_inactive = 0 THEN 1 
         ELSE NULL
     END) as prop_within_5_years,
     (CASE 
