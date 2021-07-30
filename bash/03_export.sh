@@ -31,6 +31,19 @@ mkdir -p output
         SHP_export review_project MULTIPOLYGON &
         SHP_export review_dob MULTIPOLYGON 
         wait
+        psql $BUILD_ENGINE  -c "SELECT
+                a.source,
+                a.record_id,
+                a.units_gross::double precision as units_gross,
+                a.units_gross::double precision as units_net,
+                b.project_id
+            FROM combined a LEFT JOIN (
+                SELECT unnest(project_record_ids) as record_id, 
+                ROW_NUMBER() OVER(ORDER BY project_record_ids) as project_id
+                FROM project_record_ids
+            ) b 
+            ON a.record_id = b.record_id
+            INTO dedup_inputs;"
 
         psql $BUILD_ENGINE  -c "ALTER TABLE review_project DROP COLUMN geom;" &
         psql $BUILD_ENGINE  -c "ALTER TABLE review_dob DROP COLUMN geom;" &
@@ -45,7 +58,10 @@ mkdir -p output
         CSV_export corrections_zap &
         CSV_export corrections_dob_match &
         CSV_export corrections_project &
-        CSV_export corrections_main
+        CSV_export corrections_main &
+        CSV_export dedup_inputs &
+        CSV_export deduped_units &
+        CSV_export project_record_ids
         wait
         
         Compress combined.csv
