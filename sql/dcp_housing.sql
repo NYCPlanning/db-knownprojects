@@ -112,10 +112,7 @@ SELECT
             AND a.job_inactive IS NULL THEN 1 
         ELSE NULL
     END) as prop_within_5_years,
-    (CASE 
-        WHEN a.job_inactive ~* 'Inactive' THEN 1 
-        ELSE NULL
-    END) as prop_5_to_10_years,
+    NULL::numeric as prop_5_to_10_years, -- remove phasing assumption with inactive dob 
     NULL::numeric as prop_after_10_years,
     0 as phasing_known,
     flag_nycha(a::text) as nycha,
