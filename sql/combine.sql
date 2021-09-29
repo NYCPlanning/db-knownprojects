@@ -239,7 +239,7 @@ _esd_projects as (
         NULL as date_type,
         NULL::numeric as prop_within_5_years,
         NULL::numeric as prop_5_to_10_years,
-        1 as as prop_after_10_years, 
+        1 as prop_after_10_years, 
         0 as phasing_known,
         ST_UNION(b.wkb_geometry) as geom,
         flag_nycha(array_agg(row_to_json(a))::text) as nycha,
