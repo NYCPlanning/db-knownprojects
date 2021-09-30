@@ -3,7 +3,7 @@ AUTHOR: Mark Shapiro
 SCRIPT: Adding Subdistrict boundaries to aggregated pipeline
 START DATE: 6/11/2019
 LAST UPDATE: 09/03/21 by Emily Pramik
-Sources: kpdb_2021_08_30_vf - updated project file
+Sources: kpdb - updated project file
 		 doe_schoolsubdistricts
 OUTPUT: longform_subdist_output_cp_assumptions_2021
 
@@ -30,7 +30,7 @@ from
 	with aggregated_boundaries_subdist as
 (
 	SELECT
-		a.cartodb_id,
+		
 		a.the_geom,
 		a.the_geom_webmercator,
 		a.project_id,
@@ -61,7 +61,7 @@ from
 		b.a_dist_zone_name,
 		st_distance(st_makevalid(a.the_geom)::geography,st_makevalid(b.the_geom)::geography) as subdist_Distance
 	from
-		capitalplanning.kpdb_2021_09_10_nonull a
+		kpdb_2021_09_10_nonull a
 	left join
 		dcpadmin.doe_schoolsubdistricts b
 	on 
@@ -353,7 +353,7 @@ into
 	longform_subdist_output_cp_assumptions_2021
 from
 (
-SELECT *  FROM capitalplanning.aggregated_subdist_longform_cp_assumptions_2021 
+SELECT *  FROM aggregated_subdist_longform_cp_assumptions_2021 
 -- where not (source = 'DOB' and status in('DOB 5. Completed Construction'))
 ) x;
 
@@ -364,5 +364,5 @@ into
 	longform_subdist_output_cp_assumptions_incl_complete_2021
 from
 (
-SELECT *  FROM capitalplanning.aggregated_subdist_longform_cp_assumptions_2021
+SELECT *  FROM aggregated_subdist_longform_cp_assumptions_2021
 ) x;

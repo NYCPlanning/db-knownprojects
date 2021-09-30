@@ -3,7 +3,7 @@ AUTHOR: Mark Shapiro
 SCRIPT: Adding elementary school zone boundaries to aggregated pipeline
 START DATE: 6/11/2019
 LAST UPDATE: 09/03/21 by Emily Pramik
-Sources: kpdb_2021_08_30_vF - updated project file
+Sources: kpdb - updated project file
 		 doe_school_zones_es_2019
 
 OUTPUT: longform_es_zone_output
@@ -32,7 +32,7 @@ from
 	with aggregated_boundaries_es_zone as
 (
 	SELECT
-		a.cartodb_id,
+		
 		a.the_geom,
 		a.the_geom_webmercator,
 		a.project_id,
@@ -63,9 +63,9 @@ from
 		b.remarks as es_remarks,
 		st_distance(ST_MakeValid(a.the_geom)::geography,ST_MakeValid(b.the_geom)::geography) as es_zone_Distance
 	from
-		capitalplanning.kpdb_2021_09_10_nonull  a
+		kpdb_2021_09_10_nonull  a
 	left join
-		capitalplanning.doe_school_zones_es_2019 b
+		doe_school_zones_es_2019 b
 	on 
 	case
 		/*Treating large developments as polygons*/
@@ -199,7 +199,7 @@ from
 	from
 		aggregated_es_zone a 
 	left join
-		capitalplanning.doe_school_zones_es_2019 b
+		doe_school_zones_es_2019 b
 	on 
 		a.es_zone_distance is null and
 		case
@@ -362,7 +362,7 @@ into
 	longform_es_zone_output
 	from
 (
-SELECT *  FROM capitalplanning.aggregated_es_zone_longform 
+SELECT *  FROM aggregated_es_zone_longform 
 --where not (source = 'DOB' and status in('DOB 5. Completed Construction'))
 	order by 
 		source asc,

@@ -3,7 +3,7 @@ AUTHOR: Mark Shapiro
 SCRIPT: Adding CSD boundaries to aggregated KPDB pipeline - updated for KPDB 2021
 DATE CREATED: 6/10/2019
 LAST UPDATE: 08/31/2021 by Emily Pramik
-Sources: kpdb_2021_08_30_vf - updated project file
+Sources: kpdb - updated project file
          nyc_school_districts
 OUTPUT: longform_csd_output
 
@@ -32,7 +32,7 @@ from
 	with aggregated_boundaries_CSD as
 (
 	SELECT
-		a.cartodb_id,
+		
 		a.the_geom,
 		a.the_geom_webmercator,
 		a.project_id,
@@ -62,10 +62,10 @@ from
 		b.SCHOOLDIST AS CSD,
 		st_distance(ST_MakeValid(a.the_geom)::geography,ST_MakeValid(b.the_geom)::geography) as CSD_Distance
 	from
-		-- capitalplanning.kpdb_2021_09_10_nonull a
-		capitalplanning.kpdb_2021_08_30_vf a
+		-- kpdb_2021_09_10_nonull a
+		kpdb a
 	left join
-		capitalplanning.nyc_school_districts b
+		nyc_school_districts b
 	on 
 	case
 		/*Treating large developments as polygons*/
@@ -194,7 +194,7 @@ from
 	from
 		aggregated_CSD a 
 	left join
-		capitalplanning.nyc_school_districts b
+		nyc_school_districts b
 	on 
 		a.CSD_distance is null and
 		case
@@ -246,8 +246,8 @@ from
 		b.proportion_in_CSD_1 as proportion_in_CSD,
 		round(a.units_net * b.proportion_in_CSD_1) as units_net_in_CSD 
 	from 
-		-- capitalplanning.kpdb_2021_09_10_nonull a 
-		capitalplanning.kpdb_2021_08_30_vf a
+		-- kpdb_2021_09_10_nonull a 
+		kpdb a
 	left join 
 		all_PROJECTs_CSD b 
 	on 
@@ -352,7 +352,7 @@ into
 	longform_csd_output
 from
 (
-SELECT *  FROM capitalplanning.aggregated_csd_longform 
+SELECT *  FROM aggregated_csd_longform 
 -- where not (source = 'DOB' and status in('DOB 5. Completed Construction'))
 	order by 
 		source asc,
