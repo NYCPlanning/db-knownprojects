@@ -52,6 +52,18 @@ mkdir -p output
         Compress review_dob.csv
         Compress review_project.csv
     )
+
+    echo "Exporting school districts allocation tables"
+    mkdir -p school-districts-allocation
+
+    (
+        cd school-districts-allocation
+        CSV_export longform_es_zone_output
+        CSV_export longform_csd_output
+        CSV_export longform_subdist_output_cp_assumptions_2021
+        wait
+    )
+
     echo "Exporting output tables"
     CSV_export kpdb
     Compress kpdb.csv

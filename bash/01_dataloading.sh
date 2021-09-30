@@ -19,11 +19,20 @@ import_public dcp_mappluto_wi &
 import_public dcp_boroboundaries_wi &
 import_public dcp_housing &
 import_public dcp_zoningmapamendments &
+# load school districts tables
+import_public nyc_school_districts &
+import_public doe_schoolsubdistricts &
+import_public doe_school_zones_es_2019 &
 wait
 
 # Load corrections tables
 psql $BUILD_ENGINE -f sql/create_corrections.sql
 
+
+
 echo
 echo "data loading complate"
 echo
+
+
+
