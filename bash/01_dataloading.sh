@@ -17,7 +17,7 @@ import_private dcp_dcpprojectteams &
 # Load other tables
 import_public dcp_mappluto_wi &
 import_public dcp_boroboundaries_wi &
-import_public dcp_housing &  
+import_public dcp_housing & 
 import_public dcp_zoningmapamendments &
 # load school districts tables
 import_public nyc_school_districts &

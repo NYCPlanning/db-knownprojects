@@ -69,38 +69,37 @@ from
 	on 
 	case
 		/*Treating large developments as polygons*/
-		when (st_area(ST_makevalid(a.the_geom)::geography)>10000 or units_gross > 500) and a.source in('EDC Projected Projects','DCP Application','DCP Planner-Added Projects')	then
+		when (st_area(ST_makevalid(a.the_geom)::geography) > 10000 or units_gross > 500) and a.source in('EDC Projected Projects','DCP Application','DCP Planner-Added Projects')	then
 		/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
-			st_INTERSECTs(ST_makevalid(a.the_geom),ST_makevalid(b.the_geom)) and CAST(ST_Area(ST_INTERSECTion(ST_makevalid(a.the_geom),ST_makevalid(b.the_geom)))/ST_Area(ST_makevalid(a.the_geom)) AS DECIMAL) >= .1
+			st_INTERSECTs(ST_makevalid(a.the_geom), ST_makevalid(b.the_geom)) and CAST(ST_Area(ST_INTERSECTion(ST_makevalid(a.the_geom),ST_makevalid(b.the_geom))) / ST_Area(ST_makevalid(a.the_geom)) AS DECIMAL) >= .1
 
 		/*Treating subdivisions in SI across many lots as polygons*/
-		when a.record_id in(SELECT record_id from zap_PROJECTs_many_bbls) and a.record_name like '%SD %' then
+		when a.record_id in (SELECT record_id from zap_PROJECTs_many_bbls) and a.record_name like '%SD %' then
 		/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
-			st_INTERSECTs(ST_makevalid(a.the_geom),ST_makevalid(b.the_geom)) and CAST(ST_Area(ST_INTERSECTion(ST_makevalid(a.the_geom),ST_makevalid(b.the_geom)))/ST_Area(ST_makevalid(a.the_geom)) AS DECIMAL) >= .1
+			st_INTERSECTs(ST_makevalid(a.the_geom), ST_makevalid(b.the_geom)) and CAST(ST_Area(ST_INTERSECTion(ST_makevalid(a.the_geom),ST_makevalid(b.the_geom))) / ST_Area(ST_makevalid(a.the_geom)) AS DECIMAL) >= .1
 
 		/*Treating Resilient Housing Sandy Recovery PROJECTs, across many DISTINCT lots as polygons. These are three PROJECTs*/ 
-		when a.record_name like '%Resilient Housing%' and a.source in('DCP Application','DCP Planner-Added PROJECTs') then
+		when a.record_name like '%Resilient Housing%' and a.source in ('DCP Application','DCP Planner-Added PROJECTs') then
 		/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
-			st_INTERSECTs(ST_makevalid(a.the_geom),ST_makevalid(b.the_geom)) and CAST(ST_Area(ST_INTERSECTion(ST_makevalid(a.the_geom),ST_makevalid(b.the_geom)))/ST_Area(ST_makevalid(a.the_geom)) AS DECIMAL) >= .1
+			st_INTERSECTs(ST_makevalid(a.the_geom), ST_makevalid(b.the_geom)) and CAST(ST_Area(ST_INTERSECTion(ST_makevalid(a.the_geom),ST_makevalid(b.the_geom))) / ST_Area(ST_makevalid(a.the_geom)) AS DECIMAL) >= .1
 
 		/*Treating NCP and NIHOP projects, which are usually noncontiguous clusters, as polygons*/ 
-		when (a.record_name like '%NIHOP%' or a.record_name like '%NCP%' )and a.source in('DCP Application','DCP Planner-Added PROJECTs') then
+		when (a.record_name like '%NIHOP%' or a.record_name like '%NCP%' )and a.source in ('DCP Application','DCP Planner-Added PROJECTs') then
 		/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
-			st_INTERSECTs(ST_makevalid(a.the_geom),ST_makevalid(b.the_geom)) and CAST(ST_Area(ST_INTERSECTion(ST_makevalid(a.the_geom),ST_makevalid(b.the_geom)))/ST_Area(ST_makevalid(a.the_geom)) AS DECIMAL) >= .1
+			st_INTERSECTs(ST_makevalid(a.the_geom), ST_makevalid(b.the_geom)) and CAST(ST_Area(ST_INTERSECTion(ST_makevalid(a.the_geom), ST_makevalid(b.the_geom))) / ST_Area(ST_makevalid(a.the_geom)) AS DECIMAL) >= .1
 
 		/*Treating neighborhood study projected sites, and future neighborhood studies as polygons*/
-		when a.source in('Future Neighborhood Studies','Neighborhood Study Projected Development Sites') then
+		when a.source in ('Future Neighborhood Studies','Neighborhood Study Projected Development Sites') then
 		/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
-			st_INTERSECTs(ST_makevalid(a.the_geom),ST_makevalid(b.the_geom)) and CAST(ST_Area(ST_INTERSECTion(ST_makevalid(a.the_geom),ST_makevalid(b.the_geom)))/ST_Area(ST_makevalid(a.the_geom)) AS DECIMAL) >= .1
-
+			st_INTERSECTs(ST_makevalid(a.the_geom), ST_makevalid(b.the_geom)) and CAST(ST_Area(ST_INTERSECTion(ST_makevalid(a.the_geom), ST_makevalid(b.the_geom))) / ST_Area(ST_makevalid(a.the_geom)) AS DECIMAL) >= .1
 
 		/*Treating other polygons as points, using their centroid*/
 		when st_area(ST_makevalid(a.the_geom)) > 0 	then
-			st_INTERSECTs(st_centroid(ST_makevalid(a.the_geom)),ST_makevalid(b.the_geom)) 
+			st_INTERSECTs(st_centroid(ST_makevalid(a.the_geom)), ST_makevalid(b.the_geom)) 
 
 		/*Treating points as points*/
 		else
-			st_INTERSECTs(ST_makevalid(a.the_geom),ST_makevalid(b.the_geom)) end
+			st_INTERSECTs(ST_makevalid(a.the_geom), ST_makevalid(b.the_geom)) end
 		/*Only matching if at least 10% of the polygon is in the boundary. Otherwise, the polygon will be apportioned to its other boundaries only*/
 ),
 
@@ -116,7 +115,7 @@ from
 		source,
 		record_id
 	having
-		count(*)>1
+		count(*) > 1
 ),
 
 	/*Calculate the proportion of each project in each CSD that it overlaps with*/
@@ -124,8 +123,8 @@ from
 (
 	SELECT
 		a.*,
-		case when 	concat(a.source,a.record_id) in(SELECT concat(source,record_id) from multi_geocoded_PROJECTs) and st_area(st_makevalid(a.the_geom)) > 0	then 
-					CAST(ST_Area(ST_INTERSECTion(st_makevalid(a.the_geom),a.CSD_geom))/ST_Area(st_makevalid(a.the_geom)) AS DECIMAL) else
+		case when 	concat(a.source,a.record_id) in (SELECT concat(source,record_id) from multi_geocoded_PROJECTs) and st_area(st_makevalid(a.the_geom)) > 0 then 
+					CAST(ST_Area(ST_INTERSECTion(st_makevalid(a.the_geom),a.CSD_geom)) / ST_Area(st_makevalid(a.the_geom)) AS DECIMAL) else
 					1 end	as proportion_in_CSD
 	from
 		aggregated_boundaries_CSD a
@@ -159,8 +158,10 @@ from
 			 else a.units_net end as counted_units_1
 	from
 		aggregated_boundaries_CSD_2 a
+
 	left join
 		aggregated_boundaries_CSD_3 b
+
 	on
 		a.record_id = b.record_id and a.source = b.source
 )
