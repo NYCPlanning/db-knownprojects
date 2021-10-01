@@ -68,6 +68,9 @@ UPDATE project_record_ids a
 	FROM verified_matches b
 	WHERE b.record_id_match=any(a.project_record_ids);
 
+SELECT * INTO _verified_matches
+FROM verified_matches;
+
 /* Add stand-alone projects. This includes unmatched residential DOB projects, 
 as well as projects from sources that were excluded 
 from the non-DOB match process. */

@@ -45,14 +45,17 @@ mkdir -p output
         CSV_export corrections_zap &
         CSV_export corrections_dob_match &
         CSV_export corrections_project &
-        CSV_export corrections_main&
-        CSV_export project_record_ids&
-        CSV_export verified_matches
+        CSV_export corrections_main &
+        CSV_export project_record_ids &
+        CSV_export _verified_matches
         wait
         
         Compress combined.csv
         Compress review_dob.csv
         Compress review_project.csv
+        Compress project_record_ids.csv
+        Compress _verified_matches.csv
+
     )
     echo "Exporting output tables"
     CSV_export kpdb
