@@ -56,7 +56,8 @@ matches_to_add AS(
 verified_matches AS (
 	SELECT 
 		record_id, 
-		project_record_ids[1] as record_id_match
+		project_record_ids[1] as record_id_match,
+		project_record_ids
 	FROM dob_matches
 	WHERE project_record_ids::text
 		NOT IN (SELECT project_record_ids::text FROM matches_to_remove)
