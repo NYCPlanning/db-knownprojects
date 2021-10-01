@@ -53,17 +53,8 @@ matches_to_add AS(
 		record_id as record_id_match
 	FROM corrections_dob_match
 	WHERE action = 'add'
-)---,
-SELECT 
-	record_id, 
-	project_record_ids[1] as record_id_match
-FROM dob_matches
-WHERE project_record_ids::text
-	NOT IN (SELECT project_record_ids::text FROM matches_to_remove)
-UNION
-SELECT * FROM matches_to_add
-INTO verified_matches;
-/*verified_matches AS (
+),
+_verified_matches AS (
 	SELECT 
 		record_id, 
 		project_record_ids[1] as record_id_match
@@ -72,14 +63,16 @@ INTO verified_matches;
 		NOT IN (SELECT project_record_ids::text FROM matches_to_remove)
 	UNION
 	SELECT * FROM matches_to_add
-)*/
+)
+SELECT * INTO verified_matches
+FROM _verified_matches;
+
 UPDATE project_record_ids a
 	SET project_record_ids = a.project_record_ids||b.record_id
 	FROM verified_matches b
 	WHERE b.record_id_match=any(a.project_record_ids);
 
-SELECT * INTO _verified_matches
-FROM verified_matches;
+
 
 /* Add stand-alone projects. This includes unmatched residential DOB projects, 
 as well as projects from sources that were excluded 
