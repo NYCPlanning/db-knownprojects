@@ -22,7 +22,7 @@ OUTPUTS:
 
 -- Copy pre-DOB match _project_record_ids into project_record_ids;
 DROP TABLE IF EXISTS project_record_ids;
-DROP TABLE IF EXISTS _verified_matches;
+DROP TABLE IF EXISTS verified_matches;
 SELECT * INTO project_record_ids 
 FROM _project_record_ids;
 
@@ -53,8 +53,17 @@ matches_to_add AS(
 		record_id as record_id_match
 	FROM corrections_dob_match
 	WHERE action = 'add'
-),
-verified_matches AS (
+)---,
+SELECT 
+	record_id, 
+	project_record_ids[1] as record_id_match
+FROM dob_matches
+WHERE project_record_ids::text
+	NOT IN (SELECT project_record_ids::text FROM matches_to_remove)
+UNION
+SELECT * FROM matches_to_add
+INTO verified_matches;
+/*verified_matches AS (
 	SELECT 
 		record_id, 
 		project_record_ids[1] as record_id_match
@@ -63,7 +72,7 @@ verified_matches AS (
 		NOT IN (SELECT project_record_ids::text FROM matches_to_remove)
 	UNION
 	SELECT * FROM matches_to_add
-)
+)*/
 UPDATE project_record_ids a
 	SET project_record_ids = a.project_record_ids||b.record_id
 	FROM verified_matches b
