@@ -56,14 +56,15 @@ matches_to_add AS(
 verified_matches AS (
 	SELECT 
 		record_id, 
-		project_record_ids[1] as record_id_match,
+		project_record_ids[1] as record_id_match
 	FROM dob_matches
 	WHERE project_record_ids::text
 		NOT IN (SELECT project_record_ids::text FROM matches_to_remove)
 	UNION
-	SELECT * FROM matches_to_add)
+	SELECT * FROM matches_to_add
+)
 UPDATE project_record_ids a
-	SET project_record_ids = a.project_record_ids || b.record_id
+	SET project_record_ids = a.project_record_ids||b.record_id
 	FROM verified_matches b
 	WHERE b.record_id_match=any(a.project_record_ids);
 
