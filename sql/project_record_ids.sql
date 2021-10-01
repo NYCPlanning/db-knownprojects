@@ -41,7 +41,7 @@ matches_to_remove AS(
 		a.record_id, 
 		a.project_record_ids
 	FROM dob_matches a
-	JOIN corrections_dob_match b
+	INNER JOIN corrections_dob_match b
 	ON a.record_id = b.record_id_dob
 	AND b.record_id = any(a.project_record_ids)
 	AND b.action = 'remove'
@@ -58,12 +58,12 @@ verified_matches AS (
 		record_id, 
 		project_record_ids[1] as record_id_match
 	FROM dob_matches
-	WHERE record_id||project_record_ids::text
-		NOT IN (SELECT record_id||project_record_ids::text FROM matches_to_remove)
+	WHERE project_record_ids::text
+		NOT IN (SELECT project_record_ids::text FROM matches_to_remove)
 	UNION
 	SELECT * FROM matches_to_add)
 UPDATE project_record_ids a
-	SET project_record_ids = a.project_record_ids||b.record_id
+	SET project_record_ids = b.project_record_ids
 	FROM verified_matches b
 	WHERE b.record_id_match=any(a.project_record_ids);
 
