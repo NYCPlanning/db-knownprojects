@@ -67,15 +67,6 @@ _verified_matches AS (
 SELECT * INTO verified_matches
 FROM _verified_matches;
 
---- the key dubugging this might be knowing what is the state of project_record_ids before vs. after the update query
---- also this query definitely has  
-UPDATE project_record_ids a
-	SET project_record_ids = array_append(a.project_record_ids, b.record_id)  --- try the array append function to see if it joins
-	FROM verified_matches b
-	WHERE b.record_id_match = ANY(a.project_record_ids);
-
-
-
 /* Add stand-alone projects. This includes unmatched residential DOB projects, 
 as well as projects from sources that were excluded 
 from the non-DOB match process. */
@@ -86,3 +77,13 @@ FROM (
 	WHERE no_classa = '0' OR no_classa IS NULL
 ) a
 WHERE record_id NOT IN (SELECT UNNEST(project_record_ids) FROM project_record_ids);
+
+--- the key dubugging this might be knowing what is the state of project_record_ids before vs. after the update query
+--- also this query definitely has  
+UPDATE project_record_ids a
+	SET project_record_ids = array_append(a.project_record_ids, b.record_id)  --- try the array append function to see if it joins
+	FROM verified_matches b
+	WHERE b.record_id_match = ANY(a.project_record_ids);
+
+
+
