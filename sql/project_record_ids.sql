@@ -67,10 +67,12 @@ _verified_matches AS (
 SELECT * INTO verified_matches
 FROM _verified_matches;
 
+--- the key dubugging this might be knowing what is the state of project_record_ids before vs. after the update query
+--- also this query definitely has  
 UPDATE project_record_ids a
-	SET project_record_ids = a.project_record_ids||b.record_id
+	SET project_record_ids = array_append(a.project_record_ids, b.record_id)  --- try the array append function to see if it joins
 	FROM verified_matches b
-	WHERE b.record_id_match=any(a.project_record_ids);
+	WHERE b.record_id_match = ANY(a.project_record_ids);
 
 
 
