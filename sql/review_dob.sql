@@ -81,6 +81,40 @@ matches AS (
     AND a.geom IS NOT NULL 
     AND b.geom IS NOT NULL
 ),
+combined_dob as (
+	-- Combine matched DOB records with records from project table 
+	SELECT
+		source,
+		record_id,
+		record_name,
+		status,
+		type,
+		units_gross,
+		date,
+		date_type,
+		inactive,
+		no_classa,
+		project_record_ids,
+		project_id,
+		geom
+	FROM matches
+    UNION
+    SELECT 
+    	source,
+		record_id,
+		record_name,
+		status,
+		type,
+		units_gross,
+		date,
+		date_type,
+		inactive,
+		no_classa,
+		project_record_ids,
+		project_id,
+		geom
+	FROM projects
+),
 -- Find cases where a DOB job matched with more than one project
 multimatch AS (
 	SELECT record_id FROM matches GROUP BY record_id
@@ -122,7 +156,7 @@ SELECT
 	(a.geom IS NULL)::integer as no_geom,
 	a.geom
 INTO _review_dob
-FROM matches a
+FROM combined_dob a
 LEFT JOIN dcp_housing_poly b
 ON a.record_id = b.record_id
 -- Only output matched DOB jobs and the records associated with them for review
