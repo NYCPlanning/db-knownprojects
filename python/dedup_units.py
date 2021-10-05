@@ -42,6 +42,10 @@ def resolve_all_projects(df):
     resolved = df.groupby(["project_id"], as_index=False).apply(resolve_project)
     resolved = resolved[["project_id", "source", "units_gross", "units_net", "record_id"]]
     print(resolved.head())
+
+    # removing duplicate record after 
+    resolved.drop_duplicate(inplace=True)
+
     return resolved
 
 
