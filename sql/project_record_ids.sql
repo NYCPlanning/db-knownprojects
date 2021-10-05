@@ -86,15 +86,15 @@ verified_matches AS (
 		NOT IN (SELECT project_record_ids::text FROM matches_to_remove)
 	UNION
 	SELECT * FROM matches_to_add
-),
-dob_record_ids AS (
+)
 SELECT 
 	array_agg(record_id) as dob_record_ids, 
-	record_id_match 
-FROM verified_matches GROUP BY record_id_match
-)
+	record_id_match
+INSERT INTO dob_record_ids
+FROM verified_matches GROUP BY record_id_match;
+
 UPDATE project_record_ids a
-	SET project_record_ids = a.project_record_ids, b.dob_record_ids  
+	SET project_record_ids = a.project_record_ids||b.dob_record_ids  
 	FROM dob_record_ids b
 	WHERE b.record_id_match = ANY(a.project_record_ids);
 
