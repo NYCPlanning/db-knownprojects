@@ -23,8 +23,11 @@ OUTPUTS:
 -- Copy pre-DOB match _project_record_ids into project_record_ids;
 DROP TABLE IF EXISTS project_record_ids;
 DROP TABLE IF EXISTS verified_matches;
+DROP TABLE IF EXISTS dob_record_ids;
 SELECT * INTO project_record_ids 
 FROM _project_record_ids;
+
+
 
 /* Add stand-alone projects. This includes unmatched residential DOB projects, 
 as well as projects from sources that were excluded 
@@ -36,6 +39,8 @@ FROM (
 	WHERE no_classa = '0' OR no_classa IS NULL
 ) a
 WHERE record_id NOT IN (SELECT UNNEST(project_record_ids) FROM project_record_ids);
+
+
 
 /* Use correction_dob_match to identify which DOB record_ids need
 to get added to projects in the project_record_ids table. 
@@ -81,13 +86,13 @@ verified_matches AS (
 		NOT IN (SELECT project_record_ids::text FROM matches_to_remove)
 	UNION
 	SELECT * FROM matches_to_add
-)
+),
+dob_record_ids AS (
 SELECT 
 	array_agg(record_id) as dob_record_ids, 
 	record_id_match 
-INTO dob_record_ids
-FROM verified_matches GROUP BY record_id_match;
-
+FROM verified_matches GROUP BY record_id_match
+)
 UPDATE project_record_ids a
 	SET project_record_ids = a.project_record_ids, b.dob_record_ids  
 	FROM dob_record_ids b
