@@ -48,7 +48,8 @@ mkdir -p output
         CSV_export corrections_main &
         CSV_export project_record_ids &
         CSV_export _project_record_ids &
-        CSV_export dob_record_ids
+        CSV_export dob_record_ids &
+        CSV_export deduped_units
         wait
         
         Compress combined.csv
@@ -57,6 +58,7 @@ mkdir -p output
         Compress project_record_ids.csv
         Compress _project_record_ids.csv
         Compress dob_record_ids.csv
+        CSV_export deduped_units.csv
 
     )
     echo "Exporting output tables"
