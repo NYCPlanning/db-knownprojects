@@ -90,7 +90,7 @@ verified_matches AS (
 SELECT 
 	array_agg(record_id) as dob_record_ids, 
 	record_id_match
-INSERT INTO dob_record_ids
+INTO dob_record_ids
 FROM verified_matches GROUP BY record_id_match;
 
 UPDATE project_record_ids a
