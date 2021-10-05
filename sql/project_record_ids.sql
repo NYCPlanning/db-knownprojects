@@ -26,8 +26,26 @@ DROP TABLE IF EXISTS verified_matches;
 SELECT * INTO project_record_ids 
 FROM _project_record_ids;
 
+/* Add stand-alone projects. This includes unmatched residential DOB projects, 
+as well as projects from sources that were excluded 
+from the non-DOB match process. */
+INSERT INTO project_record_ids
+SELECT array[]::text[]||record_id as project_record_ids
+FROM (
+	SELECT record_id::text from combined
+	WHERE no_classa = '0' OR no_classa IS NULL
+) a
+WHERE record_id NOT IN (SELECT UNNEST(project_record_ids) FROM project_record_ids);
+
 /* Use correction_dob_match to identify which DOB record_ids need
-to get added to projects in the project_record_ids table. */	
+to get added to projects in the project_record_ids table. 
+
+combine the dob record_id by grouping them by the record_id_match before updating 
+the final cluster ids in project_record_ids
+
+NOTE: this still not fully solves the edge cases that two sets of dob_ids who belong to the same larger cluster
+but are joined together by different record_id_match*/	
+
 WITH 
 dob_matches AS(
 	SELECT DISTINCT
@@ -54,7 +72,7 @@ matches_to_add AS(
 	FROM corrections_dob_match
 	WHERE action = 'add'
 ),
-_verified_matches AS (
+verified_matches AS (
 	SELECT 
 		record_id, 
 		project_record_ids[1] as record_id_match
@@ -64,25 +82,15 @@ _verified_matches AS (
 	UNION
 	SELECT * FROM matches_to_add
 )
-SELECT * INTO verified_matches
-FROM _verified_matches;
+SELECT 
+	array_agg(record_id) as dob_record_ids, 
+	record_id_match 
+INTO dob_record_ids
+FROM verified_matches GROUP BY record_id_match;
 
-/* Add stand-alone projects. This includes unmatched residential DOB projects, 
-as well as projects from sources that were excluded 
-from the non-DOB match process. */
-INSERT INTO project_record_ids
-SELECT array[]::text[]||record_id as project_record_ids
-FROM (
-	SELECT record_id::text from combined
-	WHERE no_classa = '0' OR no_classa IS NULL
-) a
-WHERE record_id NOT IN (SELECT UNNEST(project_record_ids) FROM project_record_ids);
-
---- the key dubugging this might be knowing what is the state of project_record_ids before vs. after the update query
---- also this query definitely has  
 UPDATE project_record_ids a
-	SET project_record_ids = array_append(a.project_record_ids, b.record_id)  --- try the array append function to see if it joins
-	FROM verified_matches b
+	SET project_record_ids = a.project_record_ids, b.dob_record_ids  
+	FROM dob_record_ids b
 	WHERE b.record_id_match = ANY(a.project_record_ids);
 
 
