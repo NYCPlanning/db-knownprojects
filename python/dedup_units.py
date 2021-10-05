@@ -44,7 +44,7 @@ def resolve_all_projects(df):
     print(resolved.head())
 
     # removing duplicate record after 
-    resolved.drop_duplicate(inplace=True)
+    resolved.drop_duplicates(inplace=True)
 
     return resolved
 
