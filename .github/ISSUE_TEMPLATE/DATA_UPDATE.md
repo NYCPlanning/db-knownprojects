@@ -3,19 +3,18 @@
 - [x] #352 needs to be picked up and fixed 
 
 ## Update source data
-
 ### Partner Agency Data
-- [x] `esd_projects`
-- [x] `edc_projects`
-- [x] `dcp_n_study`
-- [x] `dcp_n_study_future`
-- [x] `dcp_n_study_projected`
-- [x] `hpd_rfp`
-- [x] `hpd_pc`
-- [x] `dcp_planneradded`
-- [x] `edc_dcp_inputs`
-- [x] `dcp_rezoning`
+- [x] all parterner agency source data updated #tag the issue template from data repo here
+
+**Geographies**
+- [x] dcp_boroboundaries_wi 
 
 **DCP data**
 - [x]  `dcp_housing` -> check which version is latest and need to be updated before KPDB can be run
-- [x]  `dcp_knownprojects`
+- [x]  `dcp_projects`
+- [x]  `dcp_projectactions`
+- [x]  `dcp_projectbbls`
+- [x]  `dcp_dcpprojecteams`
+- [x]  `dcp_mappluto_wi`
+- [x]  `dcp_boroboundaries_wi`
+- [x]  `dcp_zoningmapamendments`
