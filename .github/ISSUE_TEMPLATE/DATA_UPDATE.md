@@ -1,6 +1,6 @@
 ## Outstanding Issue Tickets
-- [x] #360 PR opened #361 to be reviewed and approved
-- [x] #352 needs to be picked up and fixed 
+- [x] #issue that needs to be picked up
+- [x] #PR that needs to be reviewed
 
 ## Update source data
 ### Partner Agency Data
