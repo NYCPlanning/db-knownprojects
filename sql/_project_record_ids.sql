@@ -34,8 +34,12 @@ project_record_join AS (
 	FROM dbscan a
 ),
 all_intersections AS (
-	SELECT 
-		ST_UNION(ST_INTERSECTION(a.geom, b.geom)) as intersect_geom
+	SELECT
+		CASE 
+			WHEN ST_INTERSECTION(a.geom, b.geom) IS NULL 
+				THEN 
+			ELSE ST_UNION(ST_INTERSECTION(a.geom, b.geom))
+		END AS intersect_geom
 	FROM  project_record_join a, project_record_join b
 	WHERE a.record_id < b.record_id
 	AND a.records_in_project > 1
