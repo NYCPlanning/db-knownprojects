@@ -203,22 +203,22 @@ _dcp_n_study_projected as (
 _dcp_n_study as (
     SELECT 
         source,
-        md5(array_to_string(array_agg(uid), '')) as record_id,
-        array_agg(uid) as record_id_input,
+        uid::text as record_id,
+        array_append(array[]::text[], uid::text) as record_id_input,
         project_na as record_name,
         'Potential' as status,
-        NULL as type,
+        NULL::text as type,
         total_unit::numeric as units_gross,
-        NULL as date,
-        NULL as date_type,
+        NULL::text as date,
+        NULL::text as date_type,
         within5::numeric as prop_within_5_years,
         "5to10"::numeric as prop_5_to_10_years,
         after10::numeric as prop_after_10_years, 
         1 as phasing_known,
         geometry as geom,
-        NULL as nycha,
-        NULL as classb,
-        NULL as senior_housing
+        NULL::INTEGER as nycha,
+        NULL::INTEGER as classb,
+        NULL::INTEGER as senior_housing
     FROM dcp_n_study
 ),
 _esd_projects as (
