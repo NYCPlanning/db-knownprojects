@@ -35,7 +35,7 @@ project_record_join AS (
 ),
 all_intersections AS (
 	SELECT
-	ST_UNION(ST_INTERSECTION(a.geom, b.geom)) as intersect_geom
+		ST_UNION(ST_INTERSECTION(a.geom, b.geom)) as intersect_geom
 	FROM  project_record_join a, project_record_join b
 	WHERE a.record_id < b.record_id
 	AND a.records_in_project > 1
@@ -44,10 +44,9 @@ all_intersections AS (
 	AND b.no_geom = 0
 	AND a.id = b.id
 	GROUP BY a.id
-	--AND (a.record_id = '2018K0515' or a.record_id = 'P2014K0438')
 )
 SELECT
-array_agg(a.record_id) as project_record_ids
+	array_agg(a.record_id) as project_record_ids
 FROM project_record_join a, all_intersections b
 WHERE (ST_Overlaps(a.geom, b.intersect_geom) or ST_Contains(a.geom, b.intersect_geom))
 AND a.id IS NOT NULL
