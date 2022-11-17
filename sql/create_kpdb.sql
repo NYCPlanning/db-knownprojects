@@ -9,6 +9,6 @@ SELECT
     ROUND(COALESCE(a.prop_after_10_years::decimal,0) * b.units_net::decimal) as after_10_years
 INTO _kpdb
 FROM combined a
-LEFT JOIN deduped_units b --- is this where multiple dob records might be introduced?
+LEFT JOIN deduped_units b
 ON a.record_id = b.record_id
 WHERE a.no_classa = '0' OR a.no_classa IS NULL;
