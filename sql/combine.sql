@@ -83,7 +83,7 @@ _edc_projects as (
             b.geometry as geom 
         FROM edc_projects a
         LEFT JOIN edc_dcp_inputs b
-        ON a.edc_id::numeric = b.project_id::numeric
+        ON a.edc_id::numeric = b.edc_id::numeric
     ),
     geom_consolidated as (
         SELECT a.uid,coalesce(a.geom, b.geom) as geom
@@ -165,9 +165,9 @@ _dcp_n_study_future as (
        	after10 as prop_after_10_years,
         0 as phasing_known, 
         geometry as geom,
-        NULL as nycha,
-        NULL as classb,
-        NULL as senior_housing
+        NULL::INTEGER as nycha,
+        NULL::INTEGER as classb,
+        NULL::INTEGER as senior_housing
     FROM dcp_n_study_future
 ),
 _dcp_n_study_projected as (
@@ -187,9 +187,9 @@ _dcp_n_study_projected as (
         after10::numeric as prop_after_10_years, 
         1 as phasing_known,
         geometry as geom,
-        NULL as nycha,
-        NULL as classb,
-        NULL as senior_housing
+        NULL::INTEGER as nycha,
+        NULL::INTEGER as classb,
+        NULL::INTEGER as senior_housing
     FROM dcp_n_study_projected a
 ),
 _dcp_n_study as (
