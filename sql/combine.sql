@@ -194,29 +194,24 @@ _dcp_n_study_projected as (
 ),
 _dcp_n_study as (
     SELECT 
-        'Neighborhood Study Rezoning Commitments' as source,
-        md5(array_to_string(array_agg(a.uid), '')) as record_id,
-        array_agg(a.uid) as record_id_input,
-        neighborhood_study||': '||commitment_site as record_name,
+        source,
+        uid::text as record_id,
+        array_append(array[]::text[], uid::text) as record_id_input,
+        project_na as record_name,
         'Potential' as status,
-        NULL as type,
-        (SELECT units_gross FROM dcp_knownprojects 
-        	WHERE record_name = neighborhood_study||': '||commitment_site
-        )::numeric as units_gross,
-        NULL as date,
-        NULL as date_type,
-        NULL::numeric as prop_within_5_years,
-        1 as prop_5_to_10_years,
-        NULL::numeric as prop_after_10_years, 
+        NULL::text as type,
+        total_unit::numeric as units_gross,
+        NULL::text as date,
+        NULL::text as date_type,
+        within5::numeric as prop_within_5_years,
+        "5to10"::numeric as prop_5_to_10_years,
+        after10::numeric as prop_after_10_years, 
         1 as phasing_known,
-        ST_UNION(b.wkb_geometry) as geom,
-        flag_nycha(array_agg(row_to_json(a))::text) as nycha,
-        flag_classb(array_agg(row_to_json(a))::text) as classb,
-        flag_senior_housing(array_agg(row_to_json(a))::text) as senior_housing
-    FROM dcp_n_study a
-    LEFT JOIN  dcp_mappluto_wi b
-    ON a.bbl = b.bbl::bigint::text
-    GROUP BY neighborhood_study, commitment_site
+        geometry as geom,
+        NULL::INTEGER as nycha,
+        NULL::INTEGER as classb,
+        NULL::INTEGER as senior_housing
+    FROM dcp_n_study
 ),
 _esd_projects as (
     SELECT  
