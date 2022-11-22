@@ -22,8 +22,6 @@ OUTPUTS:
 
 -- Copy pre-DOB match _project_record_ids into project_record_ids;
 DROP TABLE IF EXISTS project_record_ids;
-DROP TABLE IF EXISTS verified_matches;
-DROP TABLE IF EXISTS dob_record_ids;
 SELECT * INTO project_record_ids 
 FROM _project_record_ids;
 
