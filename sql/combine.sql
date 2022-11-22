@@ -83,7 +83,7 @@ _edc_projects as (
             b.geometry as geom 
         FROM edc_projects a
         LEFT JOIN edc_dcp_inputs b
-        ON a.edc_id::numeric = b.project_id::numeric
+        ON a.edc_id::numeric = b.edc_id::numeric
     ),
     geom_consolidated as (
         SELECT a.uid,coalesce(a.geom, b.geom) as geom
@@ -152,52 +152,44 @@ _dcp_planneradded as (
 _dcp_n_study_future as (
     SELECT
         'Future Neighborhood Studies' as source, 
-        a.uid as record_id,
-        array_append(array[]::text[], a.uid) as record_id_input,
-        neighborhood||' '||'Future Rezoning Development' as record_name,
+        uid as record_id,
+        array_append(array[]::text[], uid) as record_id_input,
+        project_id||' '||'Future Rezoning Development' as record_name,
         'Potential' as status,
         'Future Rezoning' as type,
-        incremental_units_with_certainty_factor::numeric as units_gross,
-        effective_year as date,
-        'Effective Year' as date_type,
-        0 as prop_within_5_years,
-       	(CASE 
-       		WHEN neighborhood LIKE 'Gowanus%' 
-       		THEN round(1/3::numeric,2) ELSE .5 
-       	END) as prop_5_to_10_years,
-       	(CASE 
-       		WHEN neighborhood LIKE 'Gowanus%' 
-       		THEN round(2/3::numeric,2) ELSE .5 
-       	END) as prop_after_10_years,
+        total_unit::numeric as units_gross,
+        adoption as date,
+        'Effective Date' as date_type,
+        within5::numeric as prop_within_5_years,
+        "5to10"::numeric as prop_5_to_10_years,
+        after10::numeric as prop_after_10_years, 
         0 as phasing_known, 
-        b.geometry as geom,
-        flag_nycha(a::text) as nycha,
-        flag_classb(a::text) as classb,
-        flag_senior_housing(a::text) as senior_housing
-    FROM dcp_n_study_future a
-    LEFT JOIN  dcp_rezoning b
-    ON a.neighborhood = b.study
+        geometry as geom,
+        NULL::INTEGER as nycha,
+        NULL::INTEGER as classb,
+        NULL::INTEGER as senior_housing
+    FROM dcp_n_study_future
 ),
 _dcp_n_study_projected as (
     SELECT 
         'Neighborhood Study Projected Development Sites' as source,
         uid as record_id,
         array_append(array[]::text[], a.uid) as record_id_input,
-        REPLACE(project_id, ' Projected Development Sites', '') as record_name,
+        REPLACE(study, ' Projected Development Sites', '') as record_name,
         'Potential' as status,
-        NULL AS type,
+        'Past Rezoning' AS type,
         total_unit::numeric as units_gross,
         -- TO_CHAR(TO_DATE(effective_date, 'MM/DD/YYYY'), 'YYYY/MM/DD') as date,
-        NULL as date,
+        adoption as date,
         'Effective Date' as date_type,
-        portion_bu::numeric as prop_within_5_years,
-        portion__1::numeric as prop_5_to_10_years,
-        portion__2::numeric as prop_after_10_years, 
+        within5::numeric as prop_within_5_years,
+        "5to10"::numeric as prop_5_to_10_years,
+        after10::numeric as prop_after_10_years, 
         1 as phasing_known,
         geometry as geom,
-        flag_nycha(a::text) as nycha,
-        flag_classb(a::text) as classb,
-        flag_senior_housing(a::text) as senior_housing
+        NULL::INTEGER as nycha,
+        NULL::INTEGER as classb,
+        NULL::INTEGER as senior_housing
     FROM dcp_n_study_projected a
 ),
 _dcp_n_study as (
