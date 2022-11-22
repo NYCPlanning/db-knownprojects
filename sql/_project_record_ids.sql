@@ -27,15 +27,15 @@ dbscan AS (
 project_record_join AS (
 	SELECT 
 	    a.record_id,
-	    COUNT(record_id) OVER(PARTITION BY id) as records_in_project,
+	    COUNT(record_id) OVER(PARTITION BY id) AS records_in_project,
 	    a.id,
-	    (a.geom IS NULL)::integer as no_geom,
+	    (a.geom IS NULL)::integer AS no_geom,
 	    a.geom
 	FROM dbscan a
 ),
 all_intersections AS (
 	SELECT
-		ST_UNION(ST_INTERSECTION(a.geom, b.geom)) as intersect_geom
+		ST_UNION(ST_INTERSECTION(a.geom, b.geom)) AS intersect_geom
 	FROM  project_record_join a, project_record_join b
 	WHERE a.record_id < b.record_id
 	AND a.records_in_project > 1
@@ -46,9 +46,9 @@ all_intersections AS (
 	GROUP BY a.id
 )
 SELECT
-	array_agg(a.record_id) as project_record_ids
+	array_agg(a.record_id) AS project_record_ids
 FROM project_record_join a, all_intersections b
-WHERE (ST_Overlaps(a.geom, b.intersect_geom) or ST_Contains(a.geom, b.intersect_geom))
+WHERE (ST_Overlaps(a.geom, b.intersect_geom) OR ST_Contains(a.geom, b.intersect_geom))
 AND a.id IS NOT NULL
 AND a.id = b.id
 GROUP BY a.id
