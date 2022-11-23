@@ -35,7 +35,8 @@ project_record_join AS (
 ),
 all_intersections AS (
 	SELECT
-		ST_UNION(ST_INTERSECTION(a.geom, b.geom)) AS intersect_geom
+		ST_UNION(ST_INTERSECTION(a.geom, b.geom)) AS intersect_geom,
+		a.id
 	FROM  project_record_join a, project_record_join b
 	WHERE a.record_id < b.record_id
 	AND a.records_in_project > 1
