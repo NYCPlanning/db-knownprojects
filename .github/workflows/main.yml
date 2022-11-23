@@ -53,7 +53,8 @@ jobs:
       - uses: actions/checkout@v2
         with: 
             submodules: true
-            ssh-key: ssh-keyscan github.com
+            #ssh-key: ssh-keyscan github.com
+            token: ${{ secrets.GH_PAT }}
             persist-credentials: true
 
       - name: Update Submodule
