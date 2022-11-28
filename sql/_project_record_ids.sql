@@ -47,6 +47,7 @@ all_intersections AS (
 	GROUP BY a.id
 )
 SELECT
+	a.id,
 	array_agg(a.record_id) AS project_record_ids
 INTO _project_record_ids
 FROM project_record_join a, all_intersections b
