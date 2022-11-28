@@ -53,6 +53,8 @@ mkdir -p output
         Compress combined.csv
         Compress review_dob.csv
         Compress review_project.csv
+        Compress _project_record_ids.csv
+        Compress project_record_ids.csv
     )
     echo "Exporting output tables"
     CSV_export kpdb
