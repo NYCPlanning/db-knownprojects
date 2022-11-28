@@ -48,6 +48,7 @@ all_intersections AS (
 )
 SELECT
 	array_agg(a.record_id) AS project_record_ids
+INTO _project_record_ids
 FROM project_record_join a, all_intersections b
 WHERE (ST_Overlaps(a.geom, b.intersect_geom) OR ST_Contains(a.geom, b.intersect_geom))
 AND a.id IS NOT NULL
