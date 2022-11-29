@@ -46,11 +46,23 @@ all_intersections AS (
 	AND a.id = b.id
 	GROUP BY a.id
 )
+/*
+this last query would determine whether the cluster identified by 
+dbscan would stay together as a cluster or de-clustered by checking
+the intersecting geometries is at least one of these three cases: 
+a) overlapping with record geometry (St_Overlaps)
+b) falling completely within the record geometry (St_Within)
+c) containing the record geometry completely (St_Contains)
+with the geometries of the record geometries. 
+*/
 SELECT
 	array_agg(a.record_id) AS project_record_ids
 INTO _project_record_ids
 FROM project_record_join a, all_intersections b
-WHERE (ST_Overlaps(a.geom, b.intersect_geom) OR ST_Contains(a.geom, b.intersect_geom) OR ST_Within(a.geom, b.intersect_geom))
+WHERE 
+(ST_Overlaps(a.geom, b.intersect_geom)
+OR ST_Within(b.intersect_geom, a.geom)
+OR ST_Contains(b.intersect_geom, a.geom))
 AND a.id IS NOT NULL
 AND a.id = b.id
 GROUP BY a.id
