@@ -38,13 +38,13 @@ jobs:
       AWS_S3_ENDPOINT: ${{ secrets.DO_S3_ENDPOINT }}
       AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
-      GH_PAT: ${{ secrets.GH_PAT }}
+      TD_PAT: ${{ secrets.TD_PAT }}
       AUTHOR: Data Engineering
     steps:
       - uses: actions/checkout@v2
         with: 
             submodules: true
-            ssh-key: ${{ secrets.SSH_KEY }}
+            token: ${{ secrets.TD_PAT }}
             persist-credentials: true
 
       - name: Update Submodule
@@ -79,7 +79,7 @@ jobs:
         uses: actions/github-script@v3
         if: github.event.inputs.export == 'yes' && github.event.inputs.comments != ''
         with: 
-          github-token: ${{ secrets.GH_PAT }}
+          github-token: ${{ secrets.TD_PAT }}
           script: |
             github.issues.createComment({
               issue_number: ${{ steps.export.outputs.issue_number }},
