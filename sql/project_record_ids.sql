@@ -48,6 +48,7 @@ the final cluster ids in project_record_ids
 
 NOTE: this still not fully solves the edge cases that two sets of dob_ids who belong to the same larger cluster
 but are joined together by different record_id_match*/	
+DROP TABLE IF EXISTS dob_record_ids;
 
 WITH 
 dob_matches AS(
