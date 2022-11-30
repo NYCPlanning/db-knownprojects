@@ -34,7 +34,8 @@ INSERT INTO project_record_ids
 SELECT array[]::text[]||record_id as project_record_ids
 FROM (
 	SELECT record_id::text from combined
-	WHERE no_classa = '0' OR no_classa IS NULL
+	WHERE (no_classa = '0' OR no_classa IS NULL) 
+	AND source <> 'DOB'
 ) a
 WHERE record_id NOT IN (SELECT UNNEST(project_record_ids) FROM project_record_ids);
 
