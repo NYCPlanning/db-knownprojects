@@ -1,7 +1,3 @@
-## Update Code
-- [x] #issue that needs to be picked up
-- [x] #PR that needs to be reviewed
-
 ## Update source data
 ### Partner Agency Data
 - [x] all parterner agency source data updated #tag the issue template from data repo here
