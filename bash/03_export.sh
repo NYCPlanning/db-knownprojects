@@ -52,6 +52,8 @@ mkdir -p output
         Compress review_dob.csv
         Compress review_project.csv
     )
+    echo "Compress review folder"
+    Compress review
     echo "Exporting output tables"
     CSV_export kpdb
     Compress kpdb.csv
