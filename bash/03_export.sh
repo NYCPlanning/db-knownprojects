@@ -53,7 +53,7 @@ mkdir -p output
         Compress review_project.csv
     )
     echo "Compress review folder"
-    Compress review
+    zip -r review.zip review/
     echo "Exporting output tables"
     CSV_export kpdb
     Compress kpdb.csv
