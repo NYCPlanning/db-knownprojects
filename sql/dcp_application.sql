@@ -264,7 +264,7 @@ geom_pluto as (
 geom_kpdb as (
 	SELECT 
 		a.record_id,
-		nullif(a.geom, b.the_geom) as geom
+		nullif(a.geom, b.geometry) as geom
 	FROM geom_pluto a
 	LEFT JOIN dcp_knownprojects b
 	ON a.record_id = b.record_id
