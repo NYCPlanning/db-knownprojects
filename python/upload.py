@@ -5,7 +5,7 @@ import glob
 import sys
 
 # Initialize github and repo
-g = Github(os.environ.get("TD_PAT"), timeout=60, retry=10)
+g = Github(os.environ.get("ARD_PAT"), timeout=60, retry=10)
 repo = g.get_repo("NYCPlanning/db-knownprojects-data")
 
 
