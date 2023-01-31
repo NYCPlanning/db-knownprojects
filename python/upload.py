@@ -31,6 +31,10 @@ def upload_file(path_local: str, path_repo: str, target_branch: str, message: st
     with open(path_local, "rb") as f:
         content = f.read()
     print(f"uploading: {path_local} (local) to {path_repo} (repo) ...")
+
+    contents_old = repo.get_contents(path_repo, ref=target_branch)
+    print(f"length of old contents: {len(contents_old)}")
+
     repo.create_file(path_repo, message, content, branch=target_branch)
     print(f"uploaded: {path_repo}")
 
