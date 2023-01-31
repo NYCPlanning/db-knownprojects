@@ -20,24 +20,34 @@ def create_new_branch(target_branch: str, source_branch: str = "main"):
     print(f"created branch: {ref_target_branch}")
 
 
-def upload_file(path_local: str, path_repo: str, target_branch: str, message: str = ""):
+def upload_file(path_local: str, target_branch: str):
     """
     this function will upload a given file to a given target_branch
     path_local: local file path relative to knownprojects_build
-    path_repo: relative file path within in the repo
     target_branch: the branch to commit files to
-    message: commit message that goes along with the file upload
     """
+    # relative file path within the repo
+    path_repo = _file.replace(basepath + "/", "")
+    # commit message that goes along with the file upload
+    message = f"🚀 {target_branch} -> {path_repo}..."
+
     with open(path_local, "rb") as f:
         content = f.read()
-    print(f"uploading: {path_local} (local) to {path_repo} (repo) ...")
+    print(f"uploading: {path_local} (local) to {target_branch}/{path_repo} (repo) ...")
 
-    contents_old = repo.get_contents(path_repo, ref=target_branch)
-    print(f"old contents path: {contents_old.path}")
-    print(f"old contents sha: {contents_old.sha}")
-    print(f"old contents length: {len(contents_old.content)}")
+    # DEV try to get contents of non-existent file
+    path_repo_bad = "output/no_file.zip"
+    contents_existing = repo.get_contents(path_repo_bad, ref=target_branch)
+    print(f"exisiting contents path: {contents_existing.path}")
+    print(f"exisiting contents sha: {contents_existing.sha}")
+    repo.create_file(path_repo_bad, message, content, branch=target_branch)
 
-    repo.create_file(path_repo, message, content, branch=target_branch)
+    contents_existing = repo.get_contents(path_repo, ref=target_branch)
+    print(f"exisiting contents path: {contents_existing.path}")
+    print(f"exisiting contents sha: {contents_existing.sha}")
+    repo.update_file(contents_existing.path, message, content, contents_existing.sha, branch=target_branch)
+
+
     print(f"uploaded: {path_repo}")
 
 
@@ -61,9 +71,7 @@ if __name__ == "__main__":
 
     # Upload files one by one
     for _file in file_list:
-        _file_repo = _file.replace(basepath + "/", "")
-        message = f"🚀 {target_branch} -> {_file_repo}..."
-        upload_file(_file, _file_repo, target_branch, message)
+        upload_file(_file, target_branch)
 
     # Create a PR after upload
     md_file_list = "\n".join([f" - `{f.replace(basepath+'/', '')}`" for f in file_list])
