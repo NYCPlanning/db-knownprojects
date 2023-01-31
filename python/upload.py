@@ -1,4 +1,4 @@
-from github import Github
+from github import Github, UnknownObjectException
 from datetime import datetime as dt
 import os
 import glob
@@ -36,18 +36,15 @@ def upload_file(path_local: str, target_branch: str):
         content = f.read()
     print(f"uploading: {path_local} (local) to {target_branch}/{path_repo} (repo) ...")
 
-    # DEV try to get contents of non-existent file
-    path_repo_bad = "output/no_file.zip"
-    contents_existing = repo.get_contents(path_repo_bad, ref=target_branch)
-    print(f"exisiting contents path: {contents_existing.path}")
-    print(f"exisiting contents sha: {contents_existing.sha}")
-    repo.create_file(path_repo_bad, message, content, branch=target_branch)
-
-    contents_existing = repo.get_contents(path_repo, ref=target_branch)
-    print(f"exisiting contents path: {contents_existing.path}")
-    print(f"exisiting contents sha: {contents_existing.sha}")
-    repo.update_file(contents_existing.path, message, content, contents_existing.sha, branch=target_branch)
-
+    try:
+        # try updating existing file
+        contents_existing = repo.get_contents(path_repo, ref=target_branch)
+        print(f"Updating exisitng file ...")
+        print(f"exisiting contents path: {contents_existing.path}")
+        print(f"exisiting contents sha: {contents_existing.sha}")
+        repo.update_file(contents_existing.path, message, content, contents_existing.sha, branch=target_branch)
+    except UnknownObjectException:
+        repo.create_file(path_repo_bad, message, content, branch=target_branch)
 
     print(f"uploaded: {path_repo}")
 
@@ -69,7 +66,7 @@ if __name__ == "__main__":
     title = timestamp.strftime("%Y-%m-%d %H:%M")
     target_branch = timestamp.strftime("output-%Y%m%d-%H%M")
     create_new_branch(target_branch)
-
+    
     # Upload files one by one
     for _file in file_list:
         upload_file(_file, target_branch)
