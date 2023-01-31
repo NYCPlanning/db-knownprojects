@@ -14,8 +14,10 @@ def create_new_branch(target_branch: str, source_branch: str = "main"):
     This function will create a new branch based on source_branch,
     named after target_branch. source_branch is default to main
     """
+    ref_target_branch = f"refs/heads/{target_branch}"
     src = repo.get_branch(source_branch)
-    repo.create_git_ref(ref=f"refs/heads/{target_branch}", sha=src.commit.sha)
+    repo.create_git_ref(ref=ref_target_branch, sha=src.commit.sha)
+    print(f"created branch: {ref_target_branch}")
 
 
 def upload_file(path_local: str, path_repo: str, target_branch: str, message: str = ""):
@@ -26,9 +28,10 @@ def upload_file(path_local: str, path_repo: str, target_branch: str, message: st
     target_branch: the branch to commit files to
     message: commit message that goes along with the file upload
     """
+    src = repo.get_branch(target_branch)
     with open(path_local, "rb") as f:
         content = f.read()
-    repo.create_file(path_repo, message, content, branch=target_branch)
+    repo.create_file(path_repo, message, content, branch=target_branch, sha=src.commit.sha)
     print(f"uploaded: {path_repo}")
 
 
