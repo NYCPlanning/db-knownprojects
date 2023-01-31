@@ -33,7 +33,9 @@ def upload_file(path_local: str, path_repo: str, target_branch: str, message: st
     print(f"uploading: {path_local} (local) to {path_repo} (repo) ...")
 
     contents_old = repo.get_contents(path_repo, ref=target_branch)
-    print(f"length of old contents: {len(contents_old.content)}")
+    print(f"old contents path: {contents_old.path}")
+    print(f"old contents sha: {contents_old.sha}")
+    print(f"old contents length: {len(contents_old.content)}")
 
     repo.create_file(path_repo, message, content, branch=target_branch)
     print(f"uploaded: {path_repo}")
@@ -59,7 +61,7 @@ if __name__ == "__main__":
 
     # Upload files one by one
     for _file in file_list:
-        _file_repo = _file.replace(basepath, "")
+        _file_repo = _file.replace(basepath + "/", "")
         message = f"🚀 {target_branch} -> {_file_repo}..."
         upload_file(_file, _file_repo, target_branch, message)
 
