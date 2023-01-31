@@ -28,10 +28,10 @@ def upload_file(path_local: str, path_repo: str, target_branch: str, message: st
     target_branch: the branch to commit files to
     message: commit message that goes along with the file upload
     """
-    src = repo.get_branch(target_branch)
     with open(path_local, "rb") as f:
         content = f.read()
-    repo.create_file(path_repo, message, content, branch=target_branch, sha=src.commit.sha)
+    print(f"uploading: {path_repo} ...")
+    repo.create_file(path_repo, message, content, branch=target_branch)
     print(f"uploaded: {path_repo}")
 
 
