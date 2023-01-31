@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
     # Upload files one by one
     for _file in file_list:
-        _file_repo = _file.replace(basepath + "/", "")  # TODO try removing "/" to include it in create_file
+        _file_repo = _file.replace(basepath, "")
         message = f"🚀 {target_branch} -> {_file_repo}..."
         upload_file(_file, _file_repo, target_branch, message)
 
