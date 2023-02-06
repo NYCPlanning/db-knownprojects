@@ -72,7 +72,7 @@ jobs:
 
       - name: 3. export ...
         id: export
-        if: github.event.inputs.export == 'yes' || github.ref == 'refs/heads/dev'
+        if: github.event.inputs.export == 'yes'
         run: ./kpdb.sh export ${{ github.event.sender.login }}
 
       - name: 4. comment on PR
