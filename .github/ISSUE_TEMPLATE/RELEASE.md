@@ -15,11 +15,11 @@
 
 **Make sure the following are up-to-date in edm-recipes:**
 
-- [x]  `dcp_housing` -> check which version is latest and need to be updated before KPDB can be run
-- [x]  `dcp_projects`
-- [x]  `dcp_projectactions`
-- [x]  `dcp_projectbbls`
-- [x]  `dcp_dcpprojecteams`
-- [x]  `dcp_mappluto_wi`
-- [x]  `dcp_boroboundaries_wi`
-- [x]  `dcp_zoningmapamendments`
+- [ ]  `dcp_housing` -> check which version is latest and need to be updated before KPDB can be run
+- [ ]  `dcp_projects`
+- [ ]  `dcp_projectactions`
+- [ ]  `dcp_projectbbls`
+- [ ]  `dcp_dcpprojecteams`
+- [ ]  `dcp_mappluto_wi`
+- [ ]  `dcp_boroboundaries_wi`
+- [ ]  `dcp_zoningmapamendments`
