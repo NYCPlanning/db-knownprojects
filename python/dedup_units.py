@@ -39,15 +39,18 @@ def resolve_all_projects(df):
 
     # Subtract units within cluster based on hierarchy
     print("Subtracting units within projcts based on source hierarchy...")
-    resolved = df.groupby(["project_id"], as_index=False).apply(resolve_project)
-    resolved = resolved[["project_id", "source", "units_gross", "units_net", "record_id"]]
+    resolved = df.groupby(
+        ["project_id"], as_index=False).apply(resolve_project)
+    resolved = resolved[["project_id", "source",
+                         "units_gross", "units_net", "record_id"]]
     print(resolved.head())
+
     return resolved
 
 
 def import_table() -> pd.DataFrame:
     return pd.read_sql(
-    """
+        """
     SELECT
         a.source,
         a.record_id,
@@ -61,7 +64,7 @@ def import_table() -> pd.DataFrame:
     ) b 
     ON a.record_id = b.record_id
     """,
-    con=engine,
+        con=engine,
     )
 
 

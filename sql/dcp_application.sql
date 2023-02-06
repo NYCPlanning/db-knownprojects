@@ -264,7 +264,11 @@ geom_pluto as (
 geom_kpdb as (
 	SELECT 
 		a.record_id,
-		nullif(a.geom, b.the_geom) as geom
+		case 
+                 when b.geometry::geometry is NULL 
+		then a.geom
+                 else b.geometry::geometry
+                end as geom
 	FROM geom_pluto a
 	LEFT JOIN dcp_knownprojects b
 	ON a.record_id = b.record_id
@@ -273,7 +277,11 @@ geom_kpdb as (
 geom_ulurp as (
 SELECT 
 	a.record_id,
-	nullif(a.geom, st_union(b.wkb_geometry)) as geom
+        case
+        when st_union(b.wkb_geometry) is  NULL
+	then a.geom
+        else null
+        end as geom
 FROM(
 	select 
 		a.record_id,
@@ -293,9 +301,10 @@ FROM(
 ON a.dcp_ulurpnumber = b.ulurpno
 GROUP BY a.record_id, a.geom
 )
--- ain table with the geometry lookup
+-- Main table with the geometry lookup
 SELECT a.*, b.geom
 INTO dcp_application
 FROM _dcp_application a
 LEFT JOIN geom_ulurp b 
 ON a.record_id = b.record_id;
+

@@ -54,7 +54,7 @@ matches AS (
     	b.*,
     	a.record_id as match_record_id,
     	a.record_id_input as match_record_id_input,
-    	a.project_record_ids,
+    	a.project_record_ids || b.record_id as project_record_ids,
 		a.project_id
     FROM projects a
     INNER JOIN combined b
