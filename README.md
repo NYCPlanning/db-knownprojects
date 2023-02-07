@@ -15,12 +15,12 @@ This repo contains code for creating the Known Projects Database (KPDB). The bui
 
 1. Pulling repo for the first time and pull files from submodule
 
-```
-git submodule update --init --recursive
-```
+    ```bash
+    git submodule update --init --recursive
+    ```
 
 2. Updating submodule
 
-```
-git submodule update --remote
-```
+    ```bash
+    git submodule update --remote
+    ```
