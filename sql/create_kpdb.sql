@@ -3,8 +3,8 @@ SELECT
     a.*,
     b.project_id,
     get_boro(a.geom) as borough,
-    b.units_net,
-    ROUND(COALESCE(a.prop_within_5_years::decimal,0) * b.units_net::decimal) as within_5_years,
+    COALESCE(b.units_net,a.units_gross) as units_net,
+    ROUND(COALESCE(a.prop_within_5_years::decimal,0) * COALESCE(b.units_net,a.units_gross)::decimal) as within_5_years,
     ROUND(COALESCE(a.prop_5_to_10_years::decimal,0) * b.units_net::decimal) as from_5_to_10_years,
     ROUND(COALESCE(a.prop_after_10_years::decimal,0) * b.units_net::decimal) as after_10_years
 INTO _kpdb
