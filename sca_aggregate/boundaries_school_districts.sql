@@ -61,7 +61,7 @@ from (
 			st_distance(a.geometry::geography,b.geometry::geography) as CSD_Distance
 		from
 			-- capitalplanning.kpdb_2021_09_10_nonull a
-			kpdb a
+			_kpdb a
 		left join
 			dcp_school_districts b
 		on st_INTERSECTs(a.geometry,b.geometry)
@@ -73,7 +73,7 @@ from (
 				CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
 			/*Treating subdivisions in SI across many lots as polygons*/
-			when a.record_id in(SELECT record_id from zap_PROJECTs_many_bbls) and a.record_name like '%SD %' then
+			when a.record_id in(SELECT record_id from zap_project_many_bbls) and a.record_name like '%SD %' then
 			/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
 				CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
@@ -236,7 +236,7 @@ from (
 		round(a.units_net * b.proportion_in_CSD_1) as units_net_in_CSD 
 	from 
 		-- capitalplanning.kpdb_2021_09_10_nonull a 
-		kpdb a
+		_kpdb a
 	left join 
 		all_PROJECTs_CSD b 
 	on 

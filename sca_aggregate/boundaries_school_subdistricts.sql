@@ -59,7 +59,7 @@ from (
 			b.name as a_dist_zone_name,
 			st_distance(a.geometry::geography,b.geometry::geography) as subdist_Distance
 		from
-			kpdb a
+			_kpdb a
 		left join
 			doe_school_subdistricts b
 		on 
@@ -69,7 +69,7 @@ from (
 				st_INTERSECTs(a.geometry,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
 			/*Treating subdivisions in SI across many lots as polygons*/
-			when a.record_id in(SELECT record_id FROM zap_projects_many_bbls) and a.record_name like '%SD %'								then
+			when a.record_id in(SELECT record_id FROM zap_project_many_bbls) and a.record_name like '%SD %'								then
 				st_INTERSECTs(a.geometry,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
 			/*Treating Resilient Housing Sandy Recovery PROJECTs, across many DISTINCT lots as polygons. These are three PROJECTs*/ 
@@ -228,7 +228,7 @@ from (
 		b.proportion_in_subdist_1 as proportion_in_subdist,
 		round(a.units_net * b.proportion_in_subdist_1) as units_net_in_subdist
 	from 
-		kpdb a 
+		_kpdb a 
 	left join 
 		all_PROJECTs_subdist b 
 	on 
