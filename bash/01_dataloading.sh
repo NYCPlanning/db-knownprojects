@@ -16,7 +16,7 @@ import_private dcp_dcpprojectteams &
 
 # Load other tables
 import_public dcp_mappluto_wi &
-import_public dcp_boroboundaries_wi &
+import_public dcp_boroboundaries & #Don't pull the _wi boundaries 
 import_public dcp_housing &
 import_public dcp_zoningmapamendments &
 

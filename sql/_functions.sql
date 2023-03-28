@@ -23,6 +23,6 @@ $$ LANGUAGE sql;
 CREATE OR REPLACE FUNCTION get_boro(_geom geometry) 
 RETURNS varchar AS $$
     SELECT b.borocode::varchar
-    FROM dcp_boroboundaries_wi b
+    FROM dcp_boroboundaries b
     WHERE ST_Intersects(_geom, b.wkb_geometry)
 $$ LANGUAGE sql;
