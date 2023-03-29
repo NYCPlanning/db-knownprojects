@@ -1,19 +1,8 @@
 /*******************************************************************************************************************************************
-AUTHOR: Mark Shapiro
-SCRIPT: Adding elementary school zone boundaries to aggregated pipeline
-START DATE: 6/11/2019
-LAST UPDATE: 09/03/21 by Emily Pramik
-Sources: kpdb_2021_08_30_vF - updated project file
-		 doe_school_zones_es_2019
+Sources: _kpdb - Finalized version of KPDB build 
+		 doe_eszones
 
 OUTPUT: longform_es_zone_output
-
-EP notes:
--- Update 09/03/21: updated all references to 2021 file
--- Removed references to columns gq, assisted_living
--- Added variable classb
--- Removed status drop reference in final output to status = "DOB 5. Completed Construction"
-
 *******************************************************************************************************************************************/
 
 drop table if exists aggregated_es_zone;

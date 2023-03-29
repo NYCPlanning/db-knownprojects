@@ -1,19 +1,7 @@
 /**********************************************************************************************************************************************************************************
-AUTHOR: Mark Shapiro
-SCRIPT: Adding CSD boundaries to aggregated KPDB pipeline - updated for KPDB 2021
-DATE CREATED: 6/10/2019
-LAST UPDATE: 08/31/2021 by Emily Pramik
-Sources: kpdb_2021_08_30_vf - updated project file
-         nyc_school_districts
+Sources: _kpdb - finalized version of KPDB build 
+         dcp_school_districts
 OUTPUT: longform_csd_output
-
-EP notes:
--- Update 08/30/21: updated all references to 2021 file
--- Removed references to columns gq, assisted_living
--- Added variable classb
--- issue with Cartodb ID for export out of API - carto db ID error. But final output comes later so leaving aside issue for now.
--- Removed status drop reference in final output to status = "DOB 5. Completed Construction" - no longer doing this
-
 *************************************************************************************************************************************************************************************/
 
 drop table if exists aggregated_csd;

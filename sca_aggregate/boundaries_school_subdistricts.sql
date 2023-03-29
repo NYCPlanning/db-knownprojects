@@ -1,17 +1,7 @@
 /**********************************************************************************************************************************************************************************
-AUTHOR: Mark Shapiro
-SCRIPT: Adding Subdistrict boundaries to aggregated pipeline
-START DATE: 6/11/2019
-LAST UPDATE: 09/03/21 by Emily Pramik
-Sources: kpdb_2021_08_30_vf - updated project file
+Sources: _kpdb - finalized version of KPDB build 
 		 doe_schoolsubdistricts
-OUTPUT: longform_subdist_output_cp_assumptions_2021
-
-EP notes:
--- Update 09/03/21: updated all references to 2021 file
--- Removed references to columns gq, assisted_living
--- Added variable classb
--- Removed status drop reference in final output to status = "DOB 5. Completed Construction"
+OUTPUT: longform_subdist_output_cp_assumptions
 
 *******************************************************************************************************************************************/
 
