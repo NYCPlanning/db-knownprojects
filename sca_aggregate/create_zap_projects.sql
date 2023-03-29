@@ -1,6 +1,6 @@
 --- Get dcp_bblnumber and dcp_name from dcp_projectbbls
-DROP TABLE IF EXISTS dcp_projectbbl_tmp;
-CREATE TABLE dcp_projectbbl_tmp AS
+DROP TABLE IF EXISTS dcp_projectbbl_subset;
+CREATE TABLE dcp_projectbbl_subset AS
 SELECT 
      -- Extract the first 9 characters of the "dcp_name" column and rename it as "dcp_name" to match 
      SUBSTRING(dcp_name FROM 1 FOR 9) AS dcp_name,
@@ -15,7 +15,7 @@ CREATE TABLE  dcp_projectbbl_sca AS (
     SELECT dcp_name, COUNT(*) 
     FROM (
       SELECT DISTINCT dcp_name, bbl 
-      FROM dcp_projectbbl_tmp
+      FROM dcp_projectbbl_subset
     ) a
     GROUP BY dcp_name
   )
