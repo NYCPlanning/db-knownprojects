@@ -11,7 +11,7 @@ LEFT JOIN deduped_units b
 ON a.record_id = b.record_id
 WHERE a.no_classa = '0' OR a.no_classa IS NULL;
 
-UPDATE _kpdb 
+UPDATE _kpdb a
     SET borough = 
         CASE 
             WHEN a.borough IS NOT NULL THEN a.borough
