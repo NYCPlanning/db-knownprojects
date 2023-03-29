@@ -46,6 +46,7 @@ from (
 			a.inactive,
 			b.geometry as subdist_geom,
 			b.district as distzone,
+			b.subdistrict as subdistzone,
 			b.name as a_dist_zone_name,
 			st_distance(a.geometry::geography,b.geometry::geography) as subdist_Distance
 		from
@@ -214,6 +215,7 @@ from (
 	SELECT 
 		a.*, 
 		b.distzone_1 as distzone,
+		b.subdistzone as subdistzone,
 		b.a_dist_zone_name_1 as a_dist_zone_name,
 		b.proportion_in_subdist_1 as proportion_in_subdist,
 		round(a.units_net * b.proportion_in_subdist_1) as units_net_in_subdist
