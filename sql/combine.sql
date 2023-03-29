@@ -343,6 +343,7 @@ _dcp_housing AS (
 )
 SELECT
     *,
+    get_boro(a.geom) as borough,
     NULL::text as phasing_rationale
 INTO combined
 FROM(
