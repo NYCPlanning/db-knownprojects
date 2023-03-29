@@ -1,6 +1,25 @@
 DROP TABLE IF EXISTS _kpdb;
 SELECT
-    a.*,
+    a.source,
+    a.record_id,
+    a.record_id_input,
+    a.record_name,
+    a.status,
+    a.type,
+    a.units_gross,
+    a.date,
+    a.date_type,
+    a.prop_within_5_years,
+    a.prop_5_to_10_years,
+    a.prop_after_10_years,
+    a.phasing_known,
+    a.geom,
+    a.nycha,
+    a.classb,
+    a.senior_housing,
+    a.inactive,
+    a.no_classa,
+    a.phasing_rationale,
     b.project_id,
     CASE 
         WHEN a.borough IS NOT NULL THEN a.borough
