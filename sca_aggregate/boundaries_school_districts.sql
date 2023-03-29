@@ -314,7 +314,7 @@ from (
 
 -- this is a bit fragile - if remaining unassigned projects overlapped with multiple, this would have undesired behavior
 -- quick fix on 3/29/23 to fix 43 records not matching. Verified via manual querying that this has desired outcome
-UPDATE aggregated_CSD_PROJECT_level a 
+UPDATE aggregated_CSD_longform a 
     SET
         CSD = b.schooldist,
         proportion_in_csd = 1,

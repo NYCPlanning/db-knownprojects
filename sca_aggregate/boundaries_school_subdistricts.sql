@@ -327,20 +327,29 @@ from (
 
 */
 
+-- this is a bit fragile - if remaining unassigned projects overlapped with multiple, this would have undesired behavior
+-- quick fix on 3/29/23 to fix 43 records not matching. Verified via manual querying that this has desired outcome
+-- currently not fixing any records, so commenting out
+/*
+UPDATE aggregated_subdist_longform_cp_assumptions a 
+    SET
+        distzone = b.district,
+		subdistzone = b.subdistrict,
+		a_dist_zone_name = b.name,
+        proportion_in_csd = 1,
+        units_net_in_csd = a.units_net,
+FROM dcp_school_districts b 
+WHERE a.distzone IS NULL 
+    AND a.subdistzone IS NULL
+    AND NOT st_isempty(a.geometry)
+    AND st_intersects(a.geometry, b.geometry);
+*/
+
 SELECT
-	*, row_number() over() as cartodb_id_replacement
+	*
 into
 	longform_subdist_output_cp_assumptions
 from (
 	SELECT * FROM aggregated_subdist_longform_cp_assumptions 
 	-- where not (source = 'DOB' and status in('DOB 5. Completed Construction'))
-) x;
-
-drop table if exists longform_subdist_output_cp_assumptions_incl_complete;
-SELECT
-	*, row_number() over() as cartodb_id_replacement
-into
-	longform_subdist_output_cp_assumptions_incl_complete
-from (
-	SELECT * FROM aggregated_subdist_longform_cp_assumptions
 ) x;
