@@ -52,8 +52,7 @@ from (
 			_kpdb a
 		left join
 			dcp_school_districts b
-		on st_INTERSECTs(a.geometry,b.geometry)
-		where 
+		on 
 		case
 			/*Treating large developments as polygons*/
 			when (st_area(a.geometry::geography)>10000 or units_gross > 500) and a.source in('EDC Projected Projects','DCP Application','DCP Planner-Added Projects')	then
@@ -80,13 +79,14 @@ from (
 			/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
 				CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 			/*Treating other polygons as points, using their centroid*/
+			
+			/*Treating other polygons as points, using their centroid*/
 			when st_area(a.geometry) > 0 	then
 				st_INTERSECTs(st_centroid(a.geometry),b.geometry) 
 
 			/*Treating points as points*/
 			else
-				true
-			end
+				st_INTERSECTs(a.geometry,b.geometry) end
 			/*Only matching if at least 10% of the polygon is in the boundary. Otherwise, the polygon will be apportioned to its other boundaries only*/
 	),
 
