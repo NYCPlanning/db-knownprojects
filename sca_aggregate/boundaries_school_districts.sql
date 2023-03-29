@@ -312,6 +312,18 @@ from (
 ) x
 ;
 
+-- this is a bit fragile - if remaining unassigned projects overlapped with multiple, this would have undesired behavior
+-- quick fix on 3/29/23 to fix 43 records not matching. Verified via manual querying that this has desired outcome
+UPDATE aggregated_CSD_PROJECT_level a 
+    SET
+        CSD = b.schooldist,
+        proportion_in_csd = 1,
+        units_net_in_csd = a.units_net
+FROM dcp_school_districts b 
+WHERE a.CSD IS NULL
+    AND NOT st_isempty(a.geometry)
+    AND st_intersects(a.geometry, b.geometry);
+
 /*
 	Output final CSD-based KPDB. This is not at the project-level, but rather the project & CSD-level. It also omits Complete DOB jobs,
   	as these jobs should not be included in the forward-looking KPDB pipeline.
