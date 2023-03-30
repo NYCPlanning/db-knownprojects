@@ -366,5 +366,6 @@ FROM(
 WHERE record_id NOT IN (
     SELECT record_id FROM corrections_main
     WHERE field = 'remove'
-)
-;
+);
+
+CREATE INDEX combined_geom_idx ON combined USING GIST(geom);
