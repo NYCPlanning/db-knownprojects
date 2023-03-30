@@ -36,6 +36,7 @@ psql $BUILD_ENGINE -c "VACUUM ANALYZE deduped_units;"
 
 # Join to boro, clean duplicates
 psql $BUILD_ENGINE -1 -f sql/join_boroughs.sql
+psql $BUILD_ENGINE -1 -c "CALL apply_correction('combined', 'corrections_borough');"
 
 # Create KPDB
 psql $BUILD_ENGINE -1 -f sql/create_kpdb.sql
