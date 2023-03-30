@@ -8,7 +8,6 @@ LEFT JOIN dcp_boroboundaries b ON ST_intersects(a.geom, b.wkb_geometry);
 DROP TABLE combined;
 SELECT * INTO combined FROM _combined;
 DROP TABLE _combined;
-VACUUM ANALYZE combined;
 
 WITH straddling_records AS (
     SELECT record_id
