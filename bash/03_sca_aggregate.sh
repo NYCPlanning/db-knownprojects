@@ -23,4 +23,6 @@ echo "Build School Subdistricts aggregate tables"
 # Aggregate KPDB projects to School Subdistrict Zones
 psql $BUILD_ENGINE -1 -f sca_aggregate/boundaries_school_subdistricts.sql
 
+psql $BUILD_ENGINE -c "ALTER TABLE _kpdb RENAME COLUMN geometry TO geom;"
+
 echo "SCA Longform Aggregate tables are complete"

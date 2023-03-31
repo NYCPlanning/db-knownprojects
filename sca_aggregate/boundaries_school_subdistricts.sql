@@ -19,8 +19,8 @@ from (
 	with aggregated_boundaries_subdist as (
 		SELECT
 		--	a.cartodb_id,
-			a.geom as geometry,
-		--	a.geom_webmercator,
+			a.geometry,
+		--	a.geometry_webmercator,
 			a.project_id,
 			a.source,
 			a.record_id,
@@ -48,7 +48,7 @@ from (
 			b.district as distzone,
 			b.subdistrict as subdistzone,
 			b.name as a_dist_zone_name,
-			st_distance(a.geom::geography,b.geometry::geography) as subdist_Distance
+			st_distance(a.geometry::geography,b.geometry::geography) as subdist_Distance
 		from
 			_kpdb a
 		left join
@@ -56,33 +56,33 @@ from (
 		on 
 		case
 			/*Treating large developments as polygons*/
-			when (st_area(a.geom::geography)>10000 or units_gross > 500) and a.source in('EDC Projected Projects','DCP Application','DCP Planner-Added Projects')	then
-				st_INTERSECTs(a.geom,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geom,b.geometry))/ST_Area(a.geom) AS DECIMAL) >= .1
+			when (st_area(a.geometry::geography)>10000 or units_gross > 500) and a.source in('EDC Projected Projects','DCP Application','DCP Planner-Added Projects')	then
+				st_INTERSECTs(a.geometry,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
 			/*Treating subdivisions in SI across many lots as polygons*/
 			when a.record_id in(SELECT record_id FROM zap_project_many_bbls) and a.record_name like '%SD %'								then
-				st_INTERSECTs(a.geom,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geom,b.geometry))/ST_Area(a.geom) AS DECIMAL) >= .1
+				st_INTERSECTs(a.geometry,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
 			/*Treating Resilient Housing Sandy Recovery PROJECTs, across many DISTINCT lots as polygons. These are three PROJECTs*/ 
 			when a.record_name like '%Resilient Housing%' and a.source in('DCP Application','DCP Planner-Added Projects')									then
-				st_INTERSECTs(a.geom,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geom,b.geometry))/ST_Area(a.geom) AS DECIMAL) >= .1
+				st_INTERSECTs(a.geometry,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
 			/*Treating NCP and NIHOP projects, which are usually noncontiguous clusters, as polygons*/ 
 			when (a.record_name like '%NIHOP%' or a.record_name like '%NCP%' )and a.source in('DCP Application','DCP Planner-Added Projects')	then
-				st_INTERSECTs(a.geom,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geom,b.geometry))/ST_Area(a.geom) AS DECIMAL) >= .1
+				st_INTERSECTs(a.geometry,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
 			/*Treating neighborhood study projected sites, and future neighborhood studies as polygons*/
 			when a.source in('Future Neighborhood Studies','Neighborhood Study Projected Development Sites') 														then
-				st_INTERSECTs(a.geom,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geom,b.geometry))/ST_Area(a.geom) AS DECIMAL) >= .1
+				st_INTERSECTs(a.geometry,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
 
 			/*Treating other polygons as points, using their centroid*/
-			when st_area(a.geom) > 0 																											then
-				st_INTERSECTs(st_centroid(a.geom),b.geometry) 
+			when st_area(a.geometry) > 0 																											then
+				st_INTERSECTs(st_centroid(a.geometry),b.geometry) 
 
 			/*Treating points as points*/
 			else
-				st_INTERSECTs(a.geom,b.geometry) 																								end
+				st_INTERSECTs(a.geometry,b.geometry) 																								end
 	/*Only matching if at least 10% of the polygon is in the boundary. Otherwise, the polygon will be apportioned to its other boundaries only*/
 	),
 
@@ -342,8 +342,8 @@ UPDATE aggregated_subdist_longform_cp_assumptions a
 FROM dcp_school_districts b 
 WHERE a.distzone IS NULL 
     AND a.subdistzone IS NULL
-    AND NOT st_isempty(a.geom)
-    AND st_intersects(a.geom, b.geometry);
+    AND NOT st_isempty(a.geometry)
+    AND st_intersects(a.geometry, b.geometry);
 */
 
 SELECT

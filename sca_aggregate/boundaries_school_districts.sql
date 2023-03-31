@@ -19,8 +19,8 @@ from (
 	WITH aggregated_boundaries_CSD AS (
 		SELECT
 			--a.cartodb_id,
-			a.geom as geometry,
-			--a.geom_webmercator,
+			a.geometry,
+			--a.geometry_webmercator,
 			a.project_id,
 			a.source,
 			a.record_id,
@@ -46,7 +46,7 @@ from (
 			a.inactive,
 			b.geometry as CSD_geom,
 			b.SCHOOLDIST AS CSD,
-			st_distance(a.geom::geography,b.geometry::geography) as CSD_Distance
+			st_distance(a.geometry::geography,b.geometry::geography) as CSD_Distance
 		from
 			-- capitalplanning.kpdb_2021_09_10_nonull a
 			_kpdb a
@@ -55,38 +55,38 @@ from (
 		on 
 		case
 			/*Treating large developments as polygons*/
-			when (st_area(a.geom::geography)>10000 or units_gross > 500) and a.source in('EDC Projected Projects','DCP Application','DCP Planner-Added Projects')	then
+			when (st_area(a.geometry::geography)>10000 or units_gross > 500) and a.source in('EDC Projected Projects','DCP Application','DCP Planner-Added Projects')	then
 			/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
-				st_INTERSECTs(a.geom,b.geometry) AND CAST(ST_Area(ST_INTERSECTion(a.geom,b.geometry))/ST_Area(a.geom) AS DECIMAL) >= .1
+				st_INTERSECTs(a.geometry,b.geometry) AND CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
 			/*Treating subdivisions in SI across many lots as polygons*/
 			when a.record_id in(SELECT record_id from zap_project_many_bbls) and a.record_name like '%SD %' then
 			/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
-				st_INTERSECTs(a.geom,b.geometry) AND CAST(ST_Area(ST_INTERSECTion(a.geom,b.geometry))/ST_Area(a.geom) AS DECIMAL) >= .1
+				st_INTERSECTs(a.geometry,b.geometry) AND CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
 			/*Treating Resilient Housing Sandy Recovery PROJECTs, across many DISTINCT lots as polygons. These are three PROJECTs*/ 
 			when a.record_name like '%Resilient Housing%' and a.source in('DCP Application','DCP Planner-Added PROJECTs') then
 			/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
-				st_INTERSECTs(a.geom,b.geometry) AND CAST(ST_Area(ST_INTERSECTion(a.geom,b.geometry))/ST_Area(a.geom) AS DECIMAL) >= .1
+				st_INTERSECTs(a.geometry,b.geometry) AND CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
 			/*Treating NCP and NIHOP projects, which are usually noncontiguous clusters, as polygons*/ 
 			when (a.record_name like '%NIHOP%' or a.record_name like '%NCP%' )and a.source in('DCP Application','DCP Planner-Added PROJECTs') then
 			/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
-				st_INTERSECTs(a.geom,b.geometry) AND CAST(ST_Area(ST_INTERSECTion(a.geom,b.geometry))/ST_Area(a.geom) AS DECIMAL) >= .1
+				st_INTERSECTs(a.geometry,b.geometry) AND CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
 			/*Treating neighborhood study projected sites, and future neighborhood studies as polygons*/
 			when a.source in('Future Neighborhood Studies','Neighborhood Study Projected Development Sites') then
 			/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
-				st_INTERSECTs(a.geom,b.geometry) AND CAST(ST_Area(ST_INTERSECTion(a.geom,b.geometry))/ST_Area(a.geom) AS DECIMAL) >= .1
+				st_INTERSECTs(a.geometry,b.geometry) AND CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 			/*Treating other polygons as points, using their centroid*/
 			
 			/*Treating other polygons as points, using their centroid*/
-			when st_area(a.geom) > 0 then
-				st_INTERSECTs(st_centroid(a.geom),b.geometry) 
+			when st_area(a.geometry) > 0 then
+				st_INTERSECTs(st_centroid(a.geometry),b.geometry) 
 
 			/*Treating points as points*/
 			else
-				st_INTERSECTs(a.geom,b.geometry) end
+				st_INTERSECTs(a.geometry,b.geometry) end
 			/*Only matching if at least 10% of the polygon is in the boundary. Otherwise, the polygon will be apportioned to its other boundaries only*/
 	),
 
