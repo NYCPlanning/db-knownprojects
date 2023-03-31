@@ -19,8 +19,8 @@ from (
 	WITH aggregated_boundaries_CSD AS (
 		SELECT
 			--a.cartodb_id,
-			a.geometry,
-			--a.geometry_webmercator,
+			a.geom,
+			--a.geom_webmercator,
 			a.project_id,
 			a.source,
 			a.record_id,
@@ -44,9 +44,9 @@ from (
 			a.classb, 
 			a.senior_housing,
 			a.inactive,
-			b.geometry as CSD_geom,
+			b.geom as CSD_geom,
 			b.SCHOOLDIST AS CSD,
-			st_distance(a.geometry::geography,b.geometry::geography) as CSD_Distance
+			st_distance(a.geom::geography,b.geom::geography) as CSD_Distance
 		from
 			-- capitalplanning.kpdb_2021_09_10_nonull a
 			_kpdb a
@@ -55,38 +55,38 @@ from (
 		on 
 		case
 			/*Treating large developments as polygons*/
-			when (st_area(a.geometry::geography)>10000 or units_gross > 500) and a.source in('EDC Projected Projects','DCP Application','DCP Planner-Added Projects')	then
+			when (st_area(a.geom::geography)>10000 or units_gross > 500) and a.source in('EDC Projected Projects','DCP Application','DCP Planner-Added Projects')	then
 			/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
-				st_INTERSECTs(a.geometry,b.geometry) AND CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
+				st_INTERSECTs(a.geom,b.geom) AND CAST(ST_Area(ST_INTERSECTion(a.geom,b.geom))/ST_Area(a.geom) AS DECIMAL) >= .1
 
 			/*Treating subdivisions in SI across many lots as polygons*/
 			when a.record_id in(SELECT record_id from zap_project_many_bbls) and a.record_name like '%SD %' then
 			/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
-				st_INTERSECTs(a.geometry,b.geometry) AND CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
+				st_INTERSECTs(a.geom,b.geom) AND CAST(ST_Area(ST_INTERSECTion(a.geom,b.geom))/ST_Area(a.geom) AS DECIMAL) >= .1
 
 			/*Treating Resilient Housing Sandy Recovery PROJECTs, across many DISTINCT lots as polygons. These are three PROJECTs*/ 
 			when a.record_name like '%Resilient Housing%' and a.source in('DCP Application','DCP Planner-Added PROJECTs') then
 			/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
-				st_INTERSECTs(a.geometry,b.geometry) AND CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
+				st_INTERSECTs(a.geom,b.geom) AND CAST(ST_Area(ST_INTERSECTion(a.geom,b.geom))/ST_Area(a.geom) AS DECIMAL) >= .1
 
 			/*Treating NCP and NIHOP projects, which are usually noncontiguous clusters, as polygons*/ 
 			when (a.record_name like '%NIHOP%' or a.record_name like '%NCP%' )and a.source in('DCP Application','DCP Planner-Added PROJECTs') then
 			/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
-				st_INTERSECTs(a.geometry,b.geometry) AND CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
+				st_INTERSECTs(a.geom,b.geom) AND CAST(ST_Area(ST_INTERSECTion(a.geom,b.geom))/ST_Area(a.geom) AS DECIMAL) >= .1
 
 			/*Treating neighborhood study projected sites, and future neighborhood studies as polygons*/
 			when a.source in('Future Neighborhood Studies','Neighborhood Study Projected Development Sites') then
 			/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
-				st_INTERSECTs(a.geometry,b.geometry) AND CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
+				st_INTERSECTs(a.geom,b.geom) AND CAST(ST_Area(ST_INTERSECTion(a.geom,b.geom))/ST_Area(a.geom) AS DECIMAL) >= .1
 			/*Treating other polygons as points, using their centroid*/
 			
 			/*Treating other polygons as points, using their centroid*/
-			when st_area(a.geometry) > 0 then
-				st_INTERSECTs(st_centroid(a.geometry),b.geometry) 
+			when st_area(a.geom) > 0 then
+				st_INTERSECTs(st_centroid(a.geom),b.geom) 
 
 			/*Treating points as points*/
 			else
-				st_INTERSECTs(a.geometry,b.geometry) end
+				st_INTERSECTs(a.geom,b.geom) end
 			/*Only matching if at least 10% of the polygon is in the boundary. Otherwise, the polygon will be apportioned to its other boundaries only*/
 	),
 
@@ -108,8 +108,8 @@ from (
 	aggregated_boundaries_CSD_2 as (
 		SELECT
 			a.*,
-			case when 	concat(a.source,a.record_id) in(SELECT concat(source,record_id) from multi_geocoded_PROJECTs) and st_area(a.geometry) > 0	then 
-						CAST(ST_Area(ST_INTERSECTion(a.geometry,a.CSD_geom))/ST_Area(a.geometry) AS DECIMAL) else
+			case when 	concat(a.source,a.record_id) in(SELECT concat(source,record_id) from multi_geocoded_PROJECTs) and st_area(a.geom) > 0	then 
+						CAST(ST_Area(ST_INTERSECTion(a.geom,a.CSD_geom))/ST_Area(a.geom) AS DECIMAL) else
 						1 end	as proportion_in_CSD
 		from
 			aggregated_boundaries_CSD a
@@ -166,9 +166,9 @@ from (
 						st_distance(
 									CSD_geom::geography,
 									case
-										when (st_area(a.geometry::geography)>10000 or units_gross > 500) and a.source in('DCP Application','DCP Planner-Added PROJECTs') 	then a.geometry::geography
-										when st_area(a.geometry) > 0 																										then st_centroid(a.geometry)::geography
-										else a.geometry::geography 																											end
+										when (st_area(a.geom::geography)>10000 or units_gross > 500) and a.source in('DCP Application','DCP Planner-Added PROJECTs') 	then a.geom::geography
+										when st_area(a.geom) > 0 																										then st_centroid(a.geom)::geography
+										else a.geom::geography 																											end
 									)
 					) as CSD_distance1
 		from
@@ -178,12 +178,12 @@ from (
 		on 
 			a.CSD_distance is null and
 			case
-				when (st_area(a.geometry::geography)>10000 or units_gross > 500) and a.source in('DCP Application','DCP Planner-Added PROJECTs') 		then
-					st_dwithin(a.geometry::geography,CSD_geom::geography,500)
-				when st_area(a.geometry) > 0 																											then
-					st_dwithin(st_centroid(a.geometry)::geography,CSD_geom::geography,500)
+				when (st_area(a.geom::geography)>10000 or units_gross > 500) and a.source in('DCP Application','DCP Planner-Added PROJECTs') 		then
+					st_dwithin(a.geom::geography,CSD_geom::geography,500)
+				when st_area(a.geom) > 0 																											then
+					st_dwithin(st_centroid(a.geom)::geography,CSD_geom::geography,500)
 				else
-					st_dwithin(a.geometry::geography,CSD_geom::geography,500)																			end
+					st_dwithin(a.geom::geography,CSD_geom::geography,500)																			end
 	)
 	SELECT * from ungeocoded_PROJECTs_CSD
 ) as _2;
@@ -321,8 +321,8 @@ UPDATE aggregated_CSD_longform a
         units_net_in_csd = a.units_net
 FROM dcp_school_districts b 
 WHERE a.CSD IS NULL
-    AND NOT st_isempty(a.geometry)
-    AND st_intersects(a.geometry, b.geometry);
+    AND NOT st_isempty(a.geom)
+    AND st_intersects(a.geom, b.geom);
 
 /*
 	Output final CSD-based KPDB. This is not at the project-level, but rather the project & CSD-level. It also omits Complete DOB jobs,
