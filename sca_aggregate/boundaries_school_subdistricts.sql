@@ -153,6 +153,7 @@ from (
 		SELECT
 			a.*,
 			coalesce(a.distzone,b.district) as distzone_1,
+			coalesce(a.subdistzone, b.subdistrict) as subdistzone_1,
 			coalesce(a.a_dist_zone_name,b.name) as a_dist_zone_name_1,
 			coalesce(
 						a.subdist_distance,
@@ -215,7 +216,7 @@ from (
 	SELECT 
 		a.*, 
 		b.distzone_1 as distzone,
-		b.subdistzone as subdistzone,
+		b.subdistzone_1 as subdistzone,
 		b.a_dist_zone_name_1 as a_dist_zone_name,
 		b.proportion_in_subdist_1 as proportion_in_subdist,
 		round(a.units_net * b.proportion_in_subdist_1) as units_net_in_subdist
@@ -232,7 +233,7 @@ from (
 		record_name asc,
 		status asc,
 		b.distzone_1 asc,
-		b.a_dist_zone_name_1 asc
+		b.subdistzone_1 asc
 ) as _3
 	order by distzone asc;
 
