@@ -94,5 +94,5 @@ function archive {
     echo "Dumping $src_schema.$src_table to $dst_schema.$dst_table"
     psql $EDM_DATA -c "CREATE SCHEMA IF NOT EXISTS $dst_schema;"
     pg_dump $BUILD_ENGINE -t $src -O -c | sed "s/$src/$dst/g" | psql $EDM_DATA
-    psql $EDM_DATA -c "COMMENT ON TABLE $dst IS '$DATE $commit'"
+    psql $EDM_DATA -c "COMMENT ON TABLE $dst IS '$DATE ${commit//\'/}'"
 }
