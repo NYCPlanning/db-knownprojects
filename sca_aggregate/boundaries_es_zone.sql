@@ -22,7 +22,7 @@ from
 (
 	SELECT
 		--a.cartodb_id,
-		a.geom,
+		a.geom as geometry,
 		--a.geom_webmercator,
 		a.project_id,
 		a.source,
@@ -116,8 +116,8 @@ from
 (
 	SELECT
 		a.*,
-		case when 	concat(a.source,a.record_id) in(SELECT concat(source,record_id) from multi_geocoded_PROJECTs) and st_area(a.geom) > 0	then 
-					CAST(ST_Area(ST_INTERSECTion(a.geom,a.es_zone_geom))/ST_Area(a.geom) AS DECIMAL) 										else
+		case when 	concat(a.source,a.record_id) in(SELECT concat(source,record_id) from multi_geocoded_PROJECTs) and st_area(a.geometry) > 0	then 
+					CAST(ST_Area(ST_INTERSECTion(a.geometry,a.es_zone_geom))/ST_Area(a.geometry) AS DECIMAL) 										else
 					1 end	as proportion_in_es_zone
 	from
 		aggregated_boundaries_es_zone a
@@ -181,9 +181,9 @@ from
 					st_distance(
 								b.geometry::geography,
 								case
-									when (st_area(a.geom::geography)>10000 or units_gross > 500) and a.source in('DCP Application','DCP Planner-Added PROJECTs') 	then a.geom::geography
-									when st_area(a.geom) > 0 																							then st_centroid(a.geom)::geography
-									else a.geom::geography 																							end
+									when (st_area(a.geometry::geography)>10000 or units_gross > 500) and a.source in('DCP Application','DCP Planner-Added PROJECTs') 	then a.geometry::geography
+									when st_area(a.geometry) > 0 																							then st_centroid(a.geometry)::geography
+									else a.geometry::geography 																							end
 								)
 				) as es_zone_distance1
 	from
@@ -193,12 +193,12 @@ from
 	on 
 		a.es_zone_distance is null and
 		case
-			when (st_area(a.geom::geography)>10000 or units_gross > 500) and a.source in('DCP Application','DCP Planner-Added PROJECTs') 	then
-				st_dwithin(a.geom::geography,b.geometry::geography,500)
-			when st_area(a.geom) > 0 																										then
-				st_dwithin(st_centroid(a.geom)::geography,b.geometry::geography,500)
+			when (st_area(a.geometry::geography)>10000 or units_gross > 500) and a.source in('DCP Application','DCP Planner-Added PROJECTs') 	then
+				st_dwithin(a.geometry::geography,b.geometry::geography,500)
+			when st_area(a.geometry) > 0 																										then
+				st_dwithin(st_centroid(a.geometry)::geography,b.geometry::geography,500)
 			else
-				st_dwithin(a.geom::geography,b.geometry::geography,500)														end
+				st_dwithin(a.geometry::geography,b.geometry::geography,500)														end
 )
 	SELECT * from ungeocoded_PROJECTs_es_zone
 ) as _2;

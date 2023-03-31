@@ -19,7 +19,7 @@ from (
 	with aggregated_boundaries_subdist as (
 		SELECT
 		--	a.cartodb_id,
-			a.geom,
+			a.geom as geometry,
 		--	a.geom_webmercator,
 			a.project_id,
 			a.source,
@@ -102,8 +102,8 @@ from (
 	aggregated_boundaries_subdist_2 as (
 		SELECT
 			a.*,
-			case when 	concat(a.source,a.record_id) in(SELECT concat(source,record_id) from multi_geocoded_PROJECTs) and st_area(a.geom) > 0	then 
-						CAST(ST_Area(ST_INTERSECTion(a.geom,a.subdist_geom))/ST_Area(a.geom) AS DECIMAL) 										else
+			case when 	concat(a.source,a.record_id) in(SELECT concat(source,record_id) from multi_geocoded_PROJECTs) and st_area(a.geometry) > 0	then 
+						CAST(ST_Area(ST_INTERSECTion(a.geometry,a.subdist_geom))/ST_Area(a.geometry) AS DECIMAL) 										else
 						1 end																														as proportion_in_subdist
 		from
 			aggregated_boundaries_subdist a
@@ -160,9 +160,9 @@ from (
 						st_distance(
 									b.geometry::geography,
 									case
-										when (st_area(a.geom::geography)>10000 or units_gross > 500) and a.source in('DCP Application','DCP Planner-Added Projects') 	then a.geom::geography
-										when st_area(a.geom) > 0 																										then st_centroid(a.geom)::geography
-										else a.geom::geography 																											end
+										when (st_area(a.geometry::geography)>10000 or units_gross > 500) and a.source in('DCP Application','DCP Planner-Added Projects') 	then a.geometry::geography
+										when st_area(a.geometry) > 0 																										then st_centroid(a.geometry)::geography
+										else a.geometry::geography 																											end
 									)
 					) as subdist_distance1
 		from
@@ -172,12 +172,12 @@ from (
 		on 
 			a.subdist_distance is null and
 			case
-				when (st_area(a.geom::geography)>10000 or units_gross > 500) and a.source in('DCP Application','DCP Planner-Added Projects') 		then
-					st_dwithin(a.geom::geography,b.geometry::geography,500)
-				when st_area(a.geom) > 0 																											then
-					st_dwithin(st_centroid(a.geom)::geography,b.geometry::geography,500)
+				when (st_area(a.geometry::geography)>10000 or units_gross > 500) and a.source in('DCP Application','DCP Planner-Added Projects') 		then
+					st_dwithin(a.geometry::geography,b.geometry::geography,500)
+				when st_area(a.geometry) > 0 																											then
+					st_dwithin(st_centroid(a.geometry)::geography,b.geometry::geography,500)
 				else
-					st_dwithin(a.geom::geography,b.geometry::geography,500)																			end
+					st_dwithin(a.geometry::geography,b.geometry::geography,500)																			end
 	)
 	SELECT * from ungeocoded_PROJECTs_subdist
 ) as _2;
