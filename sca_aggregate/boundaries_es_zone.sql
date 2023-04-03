@@ -1,19 +1,8 @@
 /*******************************************************************************************************************************************
-AUTHOR: Mark Shapiro
-SCRIPT: Adding elementary school zone boundaries to aggregated pipeline
-START DATE: 6/11/2019
-LAST UPDATE: 09/03/21 by Emily Pramik
-Sources: kpdb_2021_08_30_vF - updated project file
-		 doe_school_zones_es_2019
+Sources: _kpdb - Finalized version of KPDB build 
+		 doe_eszones
 
 OUTPUT: longform_es_zone_output
-
-EP notes:
--- Update 09/03/21: updated all references to 2021 file
--- Removed references to columns gq, assisted_living
--- Added variable classb
--- Removed status drop reference in final output to status = "DOB 5. Completed Construction"
-
 *******************************************************************************************************************************************/
 
 drop table if exists aggregated_es_zone;
@@ -63,7 +52,7 @@ from
 		b.remarks as es_remarks,
 		st_distance(a.geometry::geography,b.geometry::geography) as es_zone_Distance
 	from
-		kpdb  a
+		_kpdb a
 	left join
 		doe_eszones b
 	on 
@@ -74,7 +63,7 @@ from
 			st_INTERSECTs(a.geometry,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
 		/*Treating subdivisions in SI across many lots as polygons*/
-		when a.record_id in(SELECT record_id FROM zap_projects_many_bbls) 
+		when a.record_id in(SELECT record_id FROM zap_project_many_bbls) 
 		    and a.record_name like '%SD %' then
 		/*Only distribute units to a geography if at least 10% of the project is within that boundary*/
 			st_INTERSECTs(a.geometry,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
@@ -258,7 +247,7 @@ from
 		b.proportion_in_es_zone_1 							as proportion_in_es_zone,
 		round(a.units_net * b.proportion_in_es_zone_1) 	as units_net_in_es_zone
 	from 
-		kpdb a 
+		_kpdb a 
 	left join 
 		all_PROJECTs_es_zone b 
 	on 

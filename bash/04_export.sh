@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 source bash/config.sh
 
 echo "Generate output tables"
@@ -54,6 +55,20 @@ mkdir -p output
     )
     echo "Compress review folder"
     zip -r review.zip review/
+
+    mkdir -p sca
+    echo "Export SCA aggregate tables"
+    (
+        cd sca
+        CSV_export longform_csd_output &
+        CSV_export longform_es_zone_output &
+        CSV_export longform_subdist_output_cp_assumptions
+        wait
+    )
+    echo "Compress SCA folder"
+    zip -r sca.zip sca/
+    rm -rf sca
+
     echo "Exporting output tables"
     CSV_export kpdb
     Compress kpdb.csv

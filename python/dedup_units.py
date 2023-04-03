@@ -1,5 +1,5 @@
 import pandas as pd
-
+from sqlalchemy import text
 from .utils import engine, psql_insert_copy
 
 
@@ -49,33 +49,35 @@ def resolve_all_projects(df):
 
 
 def import_table() -> pd.DataFrame:
-    return pd.read_sql(
-        """
-    SELECT
-        a.source,
-        a.record_id,
-        a.units_gross::double precision as units_gross,
-        a.units_gross::double precision as units_net,
-        b.project_id
-    FROM combined a LEFT JOIN (
-        SELECT unnest(project_record_ids) as record_id, 
-        ROW_NUMBER() OVER(ORDER BY project_record_ids) as project_id
-        FROM project_record_ids
-    ) b 
-    ON a.record_id = b.record_id
-    """,
-        con=engine,
-    )
+    with engine.begin() as conn:
+        return pd.read_sql(
+            text("""
+        SELECT
+            a.source,
+            a.record_id,
+            a.units_gross::double precision as units_gross,
+            a.units_gross::double precision as units_net,
+            b.project_id
+        FROM combined a LEFT JOIN (
+            SELECT unnest(project_record_ids) as record_id, 
+            ROW_NUMBER() OVER(ORDER BY project_record_ids) as project_id
+            FROM project_record_ids
+        ) b 
+        ON a.record_id = b.record_id
+        """),
+            con=conn,
+        )
 
 
 def export_table() -> bool:
-    resolved.to_sql(
-        "deduped_units",
-        con=engine,
-        if_exists="replace",
-        index=False,
-        method=psql_insert_copy,
-    )
+    with engine.begin() as conn:
+        resolved.to_sql(
+            "deduped_units",
+            con=conn,
+            if_exists="replace",
+            index=False,
+            method=psql_insert_copy,
+        )
     return True
 
 

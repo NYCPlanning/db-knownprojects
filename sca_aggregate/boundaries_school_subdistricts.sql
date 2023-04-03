@@ -1,17 +1,7 @@
 /**********************************************************************************************************************************************************************************
-AUTHOR: Mark Shapiro
-SCRIPT: Adding Subdistrict boundaries to aggregated pipeline
-START DATE: 6/11/2019
-LAST UPDATE: 09/03/21 by Emily Pramik
-Sources: kpdb_2021_08_30_vf - updated project file
+Sources: _kpdb - finalized version of KPDB build 
 		 doe_schoolsubdistricts
-OUTPUT: longform_subdist_output_cp_assumptions_2021
-
-EP notes:
--- Update 09/03/21: updated all references to 2021 file
--- Removed references to columns gq, assisted_living
--- Added variable classb
--- Removed status drop reference in final output to status = "DOB 5. Completed Construction"
+OUTPUT: longform_subdist_output_cp_assumptions
 
 *******************************************************************************************************************************************/
 
@@ -56,10 +46,11 @@ from (
 			a.inactive,
 			b.geometry as subdist_geom,
 			b.district as distzone,
+			b.subdistrict as subdistzone,
 			b.name as a_dist_zone_name,
 			st_distance(a.geometry::geography,b.geometry::geography) as subdist_Distance
 		from
-			kpdb a
+			_kpdb a
 		left join
 			doe_school_subdistricts b
 		on 
@@ -69,7 +60,7 @@ from (
 				st_INTERSECTs(a.geometry,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
 			/*Treating subdivisions in SI across many lots as polygons*/
-			when a.record_id in(SELECT record_id FROM zap_projects_many_bbls) and a.record_name like '%SD %'								then
+			when a.record_id in(SELECT record_id FROM zap_project_many_bbls) and a.record_name like '%SD %'								then
 				st_INTERSECTs(a.geometry,b.geometry) and CAST(ST_Area(ST_INTERSECTion(a.geometry,b.geometry))/ST_Area(a.geometry) AS DECIMAL) >= .1
 
 			/*Treating Resilient Housing Sandy Recovery PROJECTs, across many DISTINCT lots as polygons. These are three PROJECTs*/ 
@@ -162,6 +153,7 @@ from (
 		SELECT
 			a.*,
 			coalesce(a.distzone,b.district) as distzone_1,
+			coalesce(a.subdistzone, b.subdistrict) as subdistzone_1,
 			coalesce(a.a_dist_zone_name,b.name) as a_dist_zone_name_1,
 			coalesce(
 						a.subdist_distance,
@@ -224,11 +216,12 @@ from (
 	SELECT 
 		a.*, 
 		b.distzone_1 as distzone,
+		b.subdistzone_1 as subdistzone,
 		b.a_dist_zone_name_1 as a_dist_zone_name,
 		b.proportion_in_subdist_1 as proportion_in_subdist,
 		round(a.units_net * b.proportion_in_subdist_1) as units_net_in_subdist
 	from 
-		kpdb a 
+		_kpdb a 
 	left join 
 		all_PROJECTs_subdist b 
 	on 
@@ -240,7 +233,7 @@ from (
 		record_name asc,
 		status asc,
 		b.distzone_1 asc,
-		b.a_dist_zone_name_1 asc
+		b.subdistzone_1 asc
 ) as _3
 	order by distzone asc;
 
@@ -335,20 +328,29 @@ from (
 
 */
 
+-- this is a bit fragile - if remaining unassigned projects overlapped with multiple, this would have undesired behavior
+-- quick fix on 3/29/23 to fix 43 records not matching. Verified via manual querying that this has desired outcome
+-- currently not fixing any records, so commenting out
+/*
+UPDATE aggregated_subdist_longform_cp_assumptions a 
+    SET
+        distzone = b.district,
+		subdistzone = b.subdistrict,
+		a_dist_zone_name = b.name,
+        proportion_in_csd = 1,
+        units_net_in_csd = a.units_net,
+FROM dcp_school_districts b 
+WHERE a.distzone IS NULL 
+    AND a.subdistzone IS NULL
+    AND NOT st_isempty(a.geometry)
+    AND st_intersects(a.geometry, b.geometry);
+*/
+
 SELECT
-	*, row_number() over() as cartodb_id_replacement
+	*
 into
 	longform_subdist_output_cp_assumptions
 from (
 	SELECT * FROM aggregated_subdist_longform_cp_assumptions 
 	-- where not (source = 'DOB' and status in('DOB 5. Completed Construction'))
-) x;
-
-drop table if exists longform_subdist_output_cp_assumptions_incl_complete;
-SELECT
-	*, row_number() over() as cartodb_id_replacement
-into
-	longform_subdist_output_cp_assumptions_incl_complete
-from (
-	SELECT * FROM aggregated_subdist_longform_cp_assumptions
 ) x;

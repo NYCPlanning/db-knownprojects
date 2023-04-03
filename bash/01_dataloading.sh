@@ -16,9 +16,14 @@ import_private dcp_dcpprojectteams &
 
 # Load other tables
 import_public dcp_mappluto_wi &
-import_public dcp_boroboundaries_wi &
+import_public dcp_boroboundaries & 
 import_public dcp_housing &
 import_public dcp_zoningmapamendments &
+
+# Add SCA Geometry Aggregate Tables
+import_public doe_eszones &
+import_public doe_school_subdistricts & 
+import_public dcp_school_districts
 wait
 
 # Load corrections tables
